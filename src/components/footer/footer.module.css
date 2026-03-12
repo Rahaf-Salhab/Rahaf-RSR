@@ -1,0 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 24px;
+  border-top: 1px solid #f0f0f0;
+  background: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #888;
+}
+
+.university { font-weight: 500; color: #4A5565; }
+.divider { color: #ccc; }
+.copy { color: #888; }
+
+@media (max-width: 768px) {
+  .footer { flex-direction: column; gap: 4px; text-align: center; padding: 12px 16px; }
+}

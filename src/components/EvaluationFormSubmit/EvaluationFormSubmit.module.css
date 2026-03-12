@@ -1,0 +1,371 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.page { display: flex; flex-direction: column; gap: 24px; font-family: 'Inter', sans-serif; }
+
+.pageHeader { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.pageTitle { font-size: 24px; font-weight: 700; color: #101828; }
+.pageSubtitle { font-size: 14px; color: #4A5565; margin-top: 4px; }
+
+/* Forms List */
+.formsList { display: flex; flex-direction: column; gap: 14px; }
+
+.formCard {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px 24px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
+  border: 1.5px solid transparent;
+  gap: 16px;
+}
+
+.formCard:hover {
+  box-shadow: 0 6px 24px rgba(192,68,26,0.1);
+  transform: translateY(-1px);
+  border-color: #f5c5b8;
+}
+
+.formCardLeft { display: flex; align-items: flex-start; gap: 14px; flex: 1; }
+
+.formIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #fff5f2;
+  color: #C0441A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.formTitle { font-size: 16px; font-weight: 600; color: #101828; margin-bottom: 4px; }
+.formDesc { font-size: 13px; color: #4A5565; margin-bottom: 8px; }
+
+.formMeta { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #888;
+}
+
+.metaItem svg { font-size: 14px !important; }
+
+.formCardRight { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; min-width: 120px; }
+
+.progressWrap { display: flex; align-items: center; gap: 8px; width: 100%; }
+
+.progressBar {
+  flex: 1;
+  height: 6px;
+  background: #f0f0f0;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: #C0441A;
+  border-radius: 99px;
+  transition: width 0.3s;
+}
+
+.progressText { font-size: 12px; font-weight: 600; color: #C0441A; white-space: nowrap; }
+
+.openBtn {
+  padding: 6px 16px;
+  background: #C0441A;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.openBtn:hover { opacity: 0.88; }
+
+/* Empty */
+.emptyBox {
+  background: #fff;
+  border-radius: 12px;
+  padding: 56px 24px;
+  text-align: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  color: #4A5565;
+  font-size: 15px;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  font-size: 16px;
+  color: #4A5565;
+}
+
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  gap: 12px;
+}
+
+.modalTitle { font-size: 18px; font-weight: 700; color: #101828; }
+.modalSubtitle { font-size: 13px; color: #4A5565; margin-top: 4px; }
+
+.closeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #888;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.closeBtn:hover { background: #f0f0f0; }
+
+.modalBody { padding: 20px 24px; }
+
+/* Groups List */
+.groupsLabel { font-size: 13px; color: #888; margin-bottom: 12px; }
+
+.groupsList { display: flex; flex-direction: column; gap: 10px; }
+
+.groupRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1.5px solid #f0f0f0;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #fff;
+}
+
+.groupRow:hover { border-color: #C0441A; background: #fff5f2; }
+.groupSubmitted { background: #f9fafb; }
+
+.groupRowLeft { display: flex; align-items: center; gap: 12px; }
+
+.groupAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #C0441A;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.groupName { font-size: 14px; font-weight: 600; color: #101828; }
+.submittedInfo { font-size: 12px; color: #888; margin-top: 2px; }
+
+.groupRowRight { display: flex; align-items: center; gap: 10px; }
+
+.submittedBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: #f0fdf4;
+  color: #166534;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.pendingBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: #fef3e2;
+  color: #92400e;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.arrowIcon { font-size: 16px; color: #888; }
+
+/* Grade Form */
+.gradeForm { display: flex; flex-direction: column; gap: 16px; }
+
+.backBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #C0441A;
+  font-weight: 500;
+  padding: 0;
+  text-align: left;
+}
+
+.gradeFormHeader { margin-bottom: 4px; }
+.gradeGroupName { font-size: 16px; font-weight: 700; color: #101828; margin-bottom: 4px; }
+.gradeFormHint { font-size: 13px; color: #888; }
+
+.fieldsTable {
+  border: 1.5px solid #f0f0f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.fieldsTableHeader {
+  display: grid;
+  grid-template-columns: 1fr 100px 100px;
+  padding: 10px 16px;
+  background: #f9fafb;
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: 1fr 100px 100px;
+  padding: 12px 16px;
+  border-top: 1px solid #f0f0f0;
+  align-items: center;
+}
+
+.fieldName { font-size: 14px; font-weight: 500; color: #101828; }
+.fieldRange { font-size: 13px; color: #888; }
+
+.gradeInput {
+  width: 80px;
+  padding: 6px 10px;
+  border: 1.5px solid #e4e4e4;
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  text-align: center;
+}
+
+.gradeInput:focus { border-color: #C0441A; outline: none; }
+
+.totalRow {
+  display: grid;
+  grid-template-columns: 1fr 100px 100px;
+  padding: 12px 16px;
+  border-top: 2px solid #f0f0f0;
+  background: #fafafa;
+  font-size: 14px;
+  font-weight: 600;
+  color: #101828;
+  align-items: center;
+}
+
+.totalValue { color: #C0441A; font-size: 16px; }
+
+.gradeFormFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 8px;
+}
+
+.cancelBtn {
+  padding: 9px 18px;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  color: #4A5565;
+}
+
+.cancelBtn:hover { background: #e4e4e4; }
+
+.submitBtn {
+  padding: 9px 22px;
+  background: #C0441A;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.submitBtn:hover { opacity: 0.88; }
+.submitBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Success */
+.successBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px;
+  text-align: center;
+}
+
+.successText { font-size: 16px; font-weight: 600; color: #166534; }
+
+.errorMsg {
+  padding: 10px 14px;
+  background: #fff0ed;
+  border: 1px solid #f5c5b8;
+  border-radius: 8px;
+  color: #C0441A;
+  font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .formCard { flex-direction: column; align-items: flex-start; }
+  .formCardRight { width: 100%; align-items: flex-start; }
+  .fieldsTableHeader, .fieldRow, .totalRow { grid-template-columns: 1fr 80px 80px; }
+}

@@ -1,0 +1,380 @@
+{
+  "users": [
+    {
+      "id": "2",
+      "email": "supervisor@ptuk.edu.ps",
+      "password": "Abc@12345",
+      "role": "supervisor",
+      "name": "Dr. Yazeed Sleet",
+      "accessToken": "fake-access-supervisor",
+      "refreshToken": "fake-refresh-supervisor",
+      "createdAt": "2026-02-01T08:00:00Z"
+    },
+    {
+      "id": "3",
+      "email": "coordinator@ptuk.edu.ps",
+      "password": "Abc@12345",
+      "role": "coordinator",
+      "name": "Dr. Anas Melhem",
+      "accessToken": "fake-access-coordinator",
+      "refreshToken": "fake-refresh-coordinator",
+      "createdAt": "2026-02-01T08:00:00Z"
+    },
+    {
+      "id": "4",
+      "email": "examiner@ptuk.edu.ps",
+      "password": "ABC@1234",
+      "role": "examiner",
+      "name": "Dr. Mohamad Khalil",
+      "accessToken": "fake-access-examiner",
+      "refreshToken": "fake-refresh-examiner",
+      "userId": "40005000",
+      "createdAt": "2026-02-01T09:00:00Z"
+    },
+    {
+      "id": "7",
+      "email": "sara@ptuk.edu.ps",
+      "password": "Abc@12345",
+      "role": "student",
+      "name": "Sarah Jalal",
+      "accessToken": "fake-access-student4",
+      "refreshToken": "fake-refresh-student4",
+      "userId": "202118645",
+      "createdAt": "2026-02-02T10:00:00Z"
+    },
+    {
+      "id": "8",
+      "email": "supervisor2@ptuk.edu.ps",
+      "password": "Abc@12345",
+      "role": "supervisor",
+      "name": "Dr. Lina Jarrar",
+      "accessToken": "fake-access-supervisor2",
+      "refreshToken": "fake-refresh-supervisor2",
+      "createdAt": "2026-02-03T08:00:00Z"
+    },
+    {
+      "id": "9",
+      "email": "examiner2@ptuk.edu.ps",
+      "password": "Abc@12345",
+      "role": "examiner",
+      "name": "Dr. Sami Haddad",
+      "accessToken": "fake-access-examiner2",
+      "refreshToken": "fake-refresh-examiner2",
+      "userId": "20003000",
+      "createdAt": "2026-02-03T09:00:00Z"
+    },
+    {
+      "id": "1772365108464",
+      "name": "Dr. Rami Yosef",
+      "email": "ramiyosef@ptuk.edu.ps",
+      "role": "supervisor",
+      "password": "Abc@12345",
+      "accessToken": "fake-token",
+      "refreshToken": "fake-refresh",
+      "createdAt": "2026-02-10T10:00:00Z"
+    },
+    {
+      "id": "1772365639808",
+      "name": "Rahaf Alawneh",
+      "email": "rahaf@ptuk.edu.ps",
+      "role": "student",
+      "userId": "202118636",
+      "accessToken": "fake-token",
+      "refreshToken": "fake-refresh",
+      "password": "Abc@12345",
+      "createdAt": "2026-02-10T10:30:00Z"
+    },
+    {
+      "id": "1772365854849",
+      "name": "Rahaf Salhab",
+      "email": "rahaf2@ptuk.edu.ps",
+      "role": "student",
+      "userId": "202118635",
+      "accessToken": "fake-token",
+      "refreshToken": "fake-refresh",
+      "password": "Abc@12345",
+      "createdAt": "2026-02-10T11:00:00Z"
+    },
+    {
+      "id": "1772540882428",
+      "name": "Layla Mohamad",
+      "email": "layla@ptuk.edu.ps",
+      "role": "student",
+      "userId": "202117654",
+      "accessToken": "fake-token",
+      "refreshToken": "fake-refresh",
+      "password": "Abc@12345",
+      "createdAt": "2026-02-15T08:00:00Z"
+    },
+    {
+      "id": "1772540928625",
+      "name": "Ali Naser",
+      "email": "ali@ptuk.edu.ps",
+      "role": "student",
+      "userId": "202235465",
+      "accessToken": "fake-token",
+      "refreshToken": "fake-refresh",
+      "password": "Abc@12345",
+      "createdAt": "2026-02-15T08:30:00Z"
+    },
+    {
+      "id": "1772540980803",
+      "name": "Mohamad Mustafa",
+      "email": "mohamad@ptuk.edu.ps",
+      "role": "student",
+      "userId": "202276337",
+      "accessToken": "fake-token",
+      "refreshToken": "fake-refresh",
+      "password": "Abc@12345",
+      "createdAt": "2026-02-15T09:00:00Z"
+    },
+    {
+      "id": "1772541054816",
+      "name": "Dr. Nagham Hamad",
+      "email": "nagham@ptuk.edu.ps",
+      "role": "examiner",
+      "userId": "10002000",
+      "accessToken": "fake-token",
+      "refreshToken": "fake-refresh",
+      "password": "Abc@12345",
+      "createdAt": "2026-02-15T09:30:00Z"
+    },
+    {
+      "id": "1772541128772",
+      "name": "Dr. Yosef Daraghmeh",
+      "email": "yosef@ptuk.edu.ps",
+      "role": "supervisor",
+      "userId": "80009000",
+      "accessToken": "fake-token",
+      "refreshToken": "fake-refresh",
+      "password": "Abc@12345",
+      "createdAt": "2026-02-15T10:00:00Z"
+    }
+  ],
+  "groups": [
+    {
+      "id": "1772889606299",
+      "name": "RSR Platform",
+      "students": [
+        "1772365854849",
+        "1772365639808",
+        "7"
+      ],
+      "supervisorId": "2",
+      "examinerId": "1772541054816"
+    }
+  ],
+  "thesis": [
+    {
+      "id": "th1",
+      "title": "RSR Graduation Platform",
+      "groupId": "1772889606299",
+      "groupName": "RSR Platform",
+      "supervisorId": "2",
+      "description": "A comprehensive platform for managing graduation projects at PTUK, including evaluation forms, timetable scheduling, and grade management.",
+      "submissionDate": "2026-06-05",
+      "status": "in-progress",
+      "createdAt": "2026-03-01T08:00:00Z"
+    }
+  ],
+  "grades": [
+    {
+      "id": "1772831997791",
+      "groupId": "1772889606299",
+      "groupName": "RSR Platform",
+      "formId": "bcf1",
+      "submittedBy": "2",
+      "role": "supervisor",
+      "fields": [
+        { "fieldName": "thesis", "value": 25 },
+        { "fieldName": "implementation", "value": 33 }
+      ],
+      "total": 58,
+      "status": "submitted",
+      "createdAt": "2026-03-06T21:19:57.791Z"
+    },
+    {
+      "id": "1772889900001",
+      "groupId": "1772889606299",
+      "groupName": "RSR Platform",
+      "formId": "2f24",
+      "submittedBy": "1772541054816",
+      "role": "examiner",
+      "fields": [
+        { "fieldName": "thesis", "value": 14 },
+        { "fieldName": "presentation", "value": 13 },
+        { "fieldName": "documentation", "value": 12 }
+      ],
+      "total": 39,
+      "status": "submitted",
+      "createdAt": "2026-03-07T10:00:00Z"
+    }
+  ],
+  "finalGrades": [],
+  "examinationTimetable": [
+    {
+      "id": "1772385613072",
+      "groupId": "1772889606299",
+      "groupName": "RSR Platform",
+      "projectTitle": "RSR graduation platform",
+      "date": "2026-08-06",
+      "time": "10:30",
+      "duration": 30,
+      "room": "H018",
+      "building": "Engineering",
+      "supervisorId": "2",
+      "examiners": ["1772541054816"],
+      "status": "published",
+      "createdAt": "2026-03-01T10:00:00Z"
+    }
+  ],
+  "coordinatorStats": {
+    "totalUsers": 0,
+    "activeProjects": 0,
+    "examinations": 0,
+    "pendingGrades": 0
+  },
+  "examinerStats": {
+    "totalProjects": 8,
+    "completedEvaluations": 5,
+    "pendingEvaluations": 3,
+    "upcomingExaminations": 2
+  },
+  "recentActivities": [],
+  "systemStatus": [],
+  "examinerProjects": [
+    {
+      "id": "p1",
+      "examinerId": "4",
+      "title": "AI-Based Attendance System",
+      "studentName": "Rahaf Salhab",
+      "supervisorName": "Dr. Yazeed Sleet",
+      "status": "pending",
+      "submissionDate": "2026-03-10T00:00:00Z"
+    },
+    {
+      "id": "p2",
+      "examinerId": "4",
+      "title": "Smart Library Management",
+      "studentName": "Ahmad Nasser",
+      "supervisorName": "Dr. Yazeed Sleet",
+      "status": "evaluated",
+      "submissionDate": "2026-03-05T00:00:00Z"
+    }
+  ],
+  "examinerSchedule": [
+    {
+      "id": "s1",
+      "examinerId": "4",
+      "projectTitle": "AI-Based Attendance System",
+      "studentName": "Rahaf Salhab",
+      "date": "2026-03-10T09:00:00Z",
+      "location": "Hall A - Room 101"
+    }
+  ],
+  "evaluationForms": [
+    {
+      "id": "bcf1",
+      "title": "first semester",
+      "assignTo": "Supervisor",
+      "description": "2025-2026",
+      "fields": [
+        { "fieldName": "implementation", "minValue": "20", "maxValue": "25", "id": 1772889710045 },
+        { "fieldName": "thesis", "minValue": "15", "maxValue": "20", "id": 1772889732675 },
+        { "fieldName": "presentation", "minValue": "6", "maxValue": "10", "id": 1772889761213 }
+      ],
+      "status": "published",
+      "createdAt": "2026-03-07T13:22:59.006Z"
+    },
+    {
+      "id": "2f24",
+      "title": "first semester",
+      "assignTo": "Examiner",
+      "description": "2025-2026",
+      "fields": [
+        { "fieldName": "thesis", "minValue": "10", "maxValue": "15", "id": 1772889830266 },
+        { "fieldName": "presentation", "minValue": "10", "maxValue": "15", "id": 1772889857816 },
+        { "fieldName": "documentation", "minValue": "10", "maxValue": "15", "id": 1772889877937 }
+      ],
+      "status": "published",
+      "createdAt": "2026-03-07T13:24:46.107Z"
+    }
+  ],
+  "tasks": [],
+  "schedule": [],
+  "notifications": [],
+  "archive": [
+    {
+      "id": "arc1",
+      "title": "Smart Campus Navigation System",
+      "description": "A mobile application that helps students and visitors navigate the university campus using indoor and outdoor maps with real-time positioning.",
+      "year": "2024",
+      "students": ["Lara Hasan", "Omar Qasem"],
+      "supervisorName": "Dr. Yazeed Sleet",
+      "grade": "Excellent"
+    },
+    {
+      "id": "arc2",
+      "title": "AI-Based Student Performance Predictor",
+      "description": "A machine learning system that analyzes student academic data to predict performance trends and provide early intervention recommendations for at-risk students.",
+      "year": "2024",
+      "students": ["Sana Nabulsi", "Faris Khalil"],
+      "supervisorName": "Dr. Lina Jarrar",
+      "grade": "Excellent"
+    },
+    {
+      "id": "arc3",
+      "title": "Online Exam Anti-Cheating Platform",
+      "description": "A web-based proctoring system using face detection and behavior analysis to ensure academic integrity during remote examinations.",
+      "year": "2023",
+      "students": ["Hana Barakat", "Yousef Mansour", "Dana Saleh"],
+      "supervisorName": "Dr. Anas Melhem",
+      "grade": "Very Good"
+    },
+    {
+      "id": "arc4",
+      "title": "Hospital Appointment Scheduling System",
+      "description": "A comprehensive healthcare management platform enabling patients to book appointments, track medical history, and receive automated reminders.",
+      "year": "2023",
+      "students": ["Rima Haddad", "Khalid Nasser"],
+      "supervisorName": "Dr. Rami Yosef",
+      "grade": "Excellent"
+    },
+    {
+      "id": "arc5",
+      "title": "E-Commerce Recommendation Engine",
+      "description": "A personalized product recommendation system built on collaborative filtering and deep learning to enhance user shopping experience.",
+      "year": "2022",
+      "students": ["Nour Samara", "Ziad Hamdan"],
+      "supervisorName": "Dr. Yazeed Sleet",
+      "grade": "Very Good"
+    },
+    {
+      "id": "arc6",
+      "title": "Automated Irrigation Management System",
+      "description": "An IoT-based smart irrigation solution using soil sensors and weather APIs to optimize water usage for agricultural fields.",
+      "year": "2022",
+      "students": ["Maher Dawoud", "Rana Jamal", "Tala Qasim"],
+      "supervisorName": "Dr. Sami Haddad",
+      "grade": "Excellent"
+    },
+    {
+      "id": "arc7",
+      "title": "University Library Digital Catalog",
+      "description": "A modern digital library management system with full-text search, borrowing history tracking, and book reservation features.",
+      "year": "2021",
+      "students": ["Amira Khalaf", "Bilal Younis"],
+      "supervisorName": "Dr. Lina Jarrar",
+      "grade": "Good"
+    },
+    {
+      "id": "arc8",
+      "title": "Sign Language Recognition App",
+      "description": "A real-time sign language interpretation application using computer vision and neural networks to bridge communication for the hearing impaired.",
+      "year": "2021",
+      "students": ["Samer Issa", "Huda Abed"],
+      "supervisorName": "Dr. Anas Melhem",
+      "grade": "Excellent"
+    }
+  ]
+}
