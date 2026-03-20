@@ -1,16 +1,6 @@
 {
   "users": [
     {
-      "id": "2",
-      "email": "supervisor@ptuk.edu.ps",
-      "password": "Abc@12345",
-      "role": "supervisor",
-      "name": "Dr. Yazeed Sleet",
-      "accessToken": "fake-access-supervisor",
-      "refreshToken": "fake-refresh-supervisor",
-      "createdAt": "2026-02-01T08:00:00Z"
-    },
-    {
       "id": "3",
       "email": "coordinator@ptuk.edu.ps",
       "password": "Abc@12345",
@@ -30,17 +20,6 @@
       "refreshToken": "fake-refresh-examiner",
       "userId": "40005000",
       "createdAt": "2026-02-01T09:00:00Z"
-    },
-    {
-      "id": "7",
-      "email": "sara@ptuk.edu.ps",
-      "password": "Abc@12345",
-      "role": "student",
-      "name": "Sarah Jalal",
-      "accessToken": "fake-access-student4",
-      "refreshToken": "fake-refresh-student4",
-      "userId": "202118645",
-      "createdAt": "2026-02-02T10:00:00Z"
     },
     {
       "id": "8",
@@ -72,61 +51,6 @@
       "accessToken": "fake-token",
       "refreshToken": "fake-refresh",
       "createdAt": "2026-02-10T10:00:00Z"
-    },
-    {
-      "id": "1772365639808",
-      "name": "Rahaf Alawneh",
-      "email": "rahaf@ptuk.edu.ps",
-      "role": "student",
-      "userId": "202118636",
-      "accessToken": "fake-token",
-      "refreshToken": "fake-refresh",
-      "password": "Abc@12345",
-      "createdAt": "2026-02-10T10:30:00Z"
-    },
-    {
-      "id": "1772365854849",
-      "name": "Rahaf Salhab",
-      "email": "rahaf2@ptuk.edu.ps",
-      "role": "student",
-      "userId": "202118635",
-      "accessToken": "fake-token",
-      "refreshToken": "fake-refresh",
-      "password": "Abc@12345",
-      "createdAt": "2026-02-10T11:00:00Z"
-    },
-    {
-      "id": "1772540882428",
-      "name": "Layla Mohamad",
-      "email": "layla@ptuk.edu.ps",
-      "role": "student",
-      "userId": "202117654",
-      "accessToken": "fake-token",
-      "refreshToken": "fake-refresh",
-      "password": "Abc@12345",
-      "createdAt": "2026-02-15T08:00:00Z"
-    },
-    {
-      "id": "1772540928625",
-      "name": "Ali Naser",
-      "email": "ali@ptuk.edu.ps",
-      "role": "student",
-      "userId": "202235465",
-      "accessToken": "fake-token",
-      "refreshToken": "fake-refresh",
-      "password": "Abc@12345",
-      "createdAt": "2026-02-15T08:30:00Z"
-    },
-    {
-      "id": "1772540980803",
-      "name": "Mohamad Mustafa",
-      "email": "mohamad@ptuk.edu.ps",
-      "role": "student",
-      "userId": "202276337",
-      "accessToken": "fake-token",
-      "refreshToken": "fake-refresh",
-      "password": "Abc@12345",
-      "createdAt": "2026-02-15T09:00:00Z"
     },
     {
       "id": "1772541054816",
@@ -186,8 +110,14 @@
       "submittedBy": "2",
       "role": "supervisor",
       "fields": [
-        { "fieldName": "thesis", "value": 25 },
-        { "fieldName": "implementation", "value": 33 }
+        {
+          "fieldName": "thesis",
+          "value": 25
+        },
+        {
+          "fieldName": "implementation",
+          "value": 33
+        }
       ],
       "total": 58,
       "status": "submitted",
@@ -201,16 +131,35 @@
       "submittedBy": "1772541054816",
       "role": "examiner",
       "fields": [
-        { "fieldName": "thesis", "value": 14 },
-        { "fieldName": "presentation", "value": 13 },
-        { "fieldName": "documentation", "value": 12 }
+        {
+          "fieldName": "thesis",
+          "value": 14
+        },
+        {
+          "fieldName": "presentation",
+          "value": 13
+        },
+        {
+          "fieldName": "documentation",
+          "value": 12
+        }
       ],
       "total": 39,
       "status": "submitted",
       "createdAt": "2026-03-07T10:00:00Z"
     }
   ],
-  "finalGrades": [],
+  "finalGrades": [
+    {
+      "id": "1773410003015",
+      "groupId": "1772889606299",
+      "groupName": "RSR Platform",
+      "supervisorTotal": 58,
+      "examinerTotal": 39,
+      "finalGrade": 97,
+      "status": "published"
+    }
+  ],
   "examinationTimetable": [
     {
       "id": "1772385613072",
@@ -223,7 +172,9 @@
       "room": "H018",
       "building": "Engineering",
       "supervisorId": "2",
-      "examiners": ["1772541054816"],
+      "examiners": [
+        "1772541054816"
+      ],
       "status": "published",
       "createdAt": "2026-03-01T10:00:00Z"
     }
@@ -279,9 +230,24 @@
       "assignTo": "Supervisor",
       "description": "2025-2026",
       "fields": [
-        { "fieldName": "implementation", "minValue": "20", "maxValue": "25", "id": 1772889710045 },
-        { "fieldName": "thesis", "minValue": "15", "maxValue": "20", "id": 1772889732675 },
-        { "fieldName": "presentation", "minValue": "6", "maxValue": "10", "id": 1772889761213 }
+        {
+          "fieldName": "implementation",
+          "minValue": "20",
+          "maxValue": "25",
+          "id": 1772889710045
+        },
+        {
+          "fieldName": "thesis",
+          "minValue": "15",
+          "maxValue": "20",
+          "id": 1772889732675
+        },
+        {
+          "fieldName": "presentation",
+          "minValue": "6",
+          "maxValue": "10",
+          "id": 1772889761213
+        }
       ],
       "status": "published",
       "createdAt": "2026-03-07T13:22:59.006Z"
@@ -292,9 +258,24 @@
       "assignTo": "Examiner",
       "description": "2025-2026",
       "fields": [
-        { "fieldName": "thesis", "minValue": "10", "maxValue": "15", "id": 1772889830266 },
-        { "fieldName": "presentation", "minValue": "10", "maxValue": "15", "id": 1772889857816 },
-        { "fieldName": "documentation", "minValue": "10", "maxValue": "15", "id": 1772889877937 }
+        {
+          "fieldName": "thesis",
+          "minValue": "10",
+          "maxValue": "15",
+          "id": 1772889830266
+        },
+        {
+          "fieldName": "presentation",
+          "minValue": "10",
+          "maxValue": "15",
+          "id": 1772889857816
+        },
+        {
+          "fieldName": "documentation",
+          "minValue": "10",
+          "maxValue": "15",
+          "id": 1772889877937
+        }
       ],
       "status": "published",
       "createdAt": "2026-03-07T13:24:46.107Z"
@@ -309,7 +290,10 @@
       "title": "Smart Campus Navigation System",
       "description": "A mobile application that helps students and visitors navigate the university campus using indoor and outdoor maps with real-time positioning.",
       "year": "2024",
-      "students": ["Lara Hasan", "Omar Qasem"],
+      "students": [
+        "Lara Hasan",
+        "Omar Qasem"
+      ],
       "supervisorName": "Dr. Yazeed Sleet",
       "grade": "Excellent"
     },
@@ -318,7 +302,10 @@
       "title": "AI-Based Student Performance Predictor",
       "description": "A machine learning system that analyzes student academic data to predict performance trends and provide early intervention recommendations for at-risk students.",
       "year": "2024",
-      "students": ["Sana Nabulsi", "Faris Khalil"],
+      "students": [
+        "Sana Nabulsi",
+        "Faris Khalil"
+      ],
       "supervisorName": "Dr. Lina Jarrar",
       "grade": "Excellent"
     },
@@ -327,7 +314,11 @@
       "title": "Online Exam Anti-Cheating Platform",
       "description": "A web-based proctoring system using face detection and behavior analysis to ensure academic integrity during remote examinations.",
       "year": "2023",
-      "students": ["Hana Barakat", "Yousef Mansour", "Dana Saleh"],
+      "students": [
+        "Hana Barakat",
+        "Yousef Mansour",
+        "Dana Saleh"
+      ],
       "supervisorName": "Dr. Anas Melhem",
       "grade": "Very Good"
     },
@@ -336,7 +327,10 @@
       "title": "Hospital Appointment Scheduling System",
       "description": "A comprehensive healthcare management platform enabling patients to book appointments, track medical history, and receive automated reminders.",
       "year": "2023",
-      "students": ["Rima Haddad", "Khalid Nasser"],
+      "students": [
+        "Rima Haddad",
+        "Khalid Nasser"
+      ],
       "supervisorName": "Dr. Rami Yosef",
       "grade": "Excellent"
     },
@@ -345,7 +339,10 @@
       "title": "E-Commerce Recommendation Engine",
       "description": "A personalized product recommendation system built on collaborative filtering and deep learning to enhance user shopping experience.",
       "year": "2022",
-      "students": ["Nour Samara", "Ziad Hamdan"],
+      "students": [
+        "Nour Samara",
+        "Ziad Hamdan"
+      ],
       "supervisorName": "Dr. Yazeed Sleet",
       "grade": "Very Good"
     },
@@ -354,7 +351,11 @@
       "title": "Automated Irrigation Management System",
       "description": "An IoT-based smart irrigation solution using soil sensors and weather APIs to optimize water usage for agricultural fields.",
       "year": "2022",
-      "students": ["Maher Dawoud", "Rana Jamal", "Tala Qasim"],
+      "students": [
+        "Maher Dawoud",
+        "Rana Jamal",
+        "Tala Qasim"
+      ],
       "supervisorName": "Dr. Sami Haddad",
       "grade": "Excellent"
     },
@@ -363,7 +364,10 @@
       "title": "University Library Digital Catalog",
       "description": "A modern digital library management system with full-text search, borrowing history tracking, and book reservation features.",
       "year": "2021",
-      "students": ["Amira Khalaf", "Bilal Younis"],
+      "students": [
+        "Amira Khalaf",
+        "Bilal Younis"
+      ],
       "supervisorName": "Dr. Lina Jarrar",
       "grade": "Good"
     },
@@ -372,7 +376,10 @@
       "title": "Sign Language Recognition App",
       "description": "A real-time sign language interpretation application using computer vision and neural networks to bridge communication for the hearing impaired.",
       "year": "2021",
-      "students": ["Samer Issa", "Huda Abed"],
+      "students": [
+        "Samer Issa",
+        "Huda Abed"
+      ],
       "supervisorName": "Dr. Anas Melhem",
       "grade": "Excellent"
     }

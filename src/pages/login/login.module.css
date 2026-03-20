@@ -220,7 +220,89 @@
 .forgot:hover {
   color: #C34C18;
 }
+/*role*/
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
 
+.roleModal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 28px;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.roleModalTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #101828;
+  margin: 0;
+  text-align: center;
+}
+
+.roleModalSubtitle {
+  font-size: 13px;
+  color: #4A5565;
+  margin: 0;
+  text-align: center;
+}
+
+.roleList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.roleOption {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1.5px solid #e4e4e4;
+  border-radius: 10px;
+  background: #fafafa;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.roleOption:hover {
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.roleOptionDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.roleOptionLabel {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  color: #101828;
+  text-align: left;
+}
+
+.roleOptionArrow {
+  font-size: 18px;
+  font-weight: 700;
+}
 /* ========================= */
 /* Responsive */
 /* ========================= */

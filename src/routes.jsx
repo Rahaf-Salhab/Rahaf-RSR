@@ -25,6 +25,7 @@ import FinalGrades from "./pages/coordinator/FinalGrades/FinalGrades";
 
 import ExaminerEvaluationForms from "./pages/examiner/EvaluationForms/ExaminerEvaluationForms";
 import SupervisorEvaluationForms from "./pages/supervisor/EvaluationForms/SupervisorEvaluationForms";
+import SupervisorGroups from "./pages/supervisor/Groups/SupervisorGroups";
 import StudentGrades from "./pages/student/Grades/StudentGrades";
 
 import Profile from "./pages/profile/Profile";
@@ -74,6 +75,7 @@ const routes = createBrowserRouter([
     children: [
       { index: true, element: <SupervisorHome /> },
       { path: "home", element: <SupervisorHome /> },
+      { path: "groups", element: <SupervisorGroups /> },
       { path: "evaluation-forms", element: <SupervisorEvaluationForms /> },
       { path: "profile", element: <Profile /> },
     ],

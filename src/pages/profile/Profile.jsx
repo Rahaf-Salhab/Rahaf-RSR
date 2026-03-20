@@ -1,16 +1,59 @@
 import { useEffect, useState, useRef } from "react";
-import { mockApi as api } from "../../api/axiosInstance";
+import api from "../../api/axiosInstance";
 import styles from "./Profile.module.css";
 import {
   Person, Email, Lock, Visibility, VisibilityOff,
-  CameraAlt, CheckCircle, School, ExpandMore, ExpandLess, Business
+  CameraAlt, CheckCircle, School, ExpandMore, ExpandLess,
+  Business, Badge, Domain
 } from "@mui/icons-material";
+
+const ROLE_ENDPOINT = {
+  student: "student",
+  supervisor: "supervisor",
+  examiner: "examiner",
+  coordinator: "coordinater",
+};
+
+const IMAGE_ENDPOINT = {
+  student: "Student/image-profile-student",
+  supervisor: "Supervisor/image-profile-supervisor",
+  examiner: "User/image-profile-examiner",
+  coordinator: "User/image-profile-coordinater",
+};
+
+const getRoleColor = (r) => {
+  const map = { coordinator: "#6366f1", supervisor: "#0ea5e9", examiner: "#f59e0b", student: "#22c55e" };
+  return map[r] || "#C0441A";
+};
+
+const extractUser = (data, role) => {
+  if (role === "student") {
+    const u = data.student;
+    return { id: u.id, fullName: u.fullName, userName: u.userName, email: u.email, pictureProfileURL: u.pictureProfileURL || "", studentNumber: u.studentNumber, college: u.college, major: u.major };
+  }
+  if (role === "supervisor") {
+    const u = data.supervisor;
+    return { id: u.id, fullName: u.fullName, userName: u.userName, email: u.email, pictureProfileURL: u.pictureProfileURL || "", supervisorNumber: u.supervisorNumber, department: u.department };
+  }
+  if (role === "examiner") {
+    const u = data.examiner;
+    return { id: u.id, fullName: u.fullName, userName: u.userName, email: u.email, pictureProfileURL: u.pictureProfileURL || "", examinerNumber: u.examinerNumber, department: u.department };
+  }
+  if (role === "coordinator") {
+    const u = data.coordinater;
+    return { id: u.id, fullName: u.fullName, userName: u.userName, email: u.email, pictureProfileURL: u.pictureProfileURL || "", coordinatorNumber: u.coordinatorNumber, department: u.department };
+  }
+  return null;
+};
 
 export default function Profile() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [avatar, setAvatar] = useState(null);
+  const [fetchError, setFetchError] = useState("");
+
+  const [avatarLoading, setAvatarLoading] = useState(false);
   const [avatarSuccess, setAvatarSuccess] = useState(false);
+  const [avatarError, setAvatarError] = useState("");
 
   const [showPwSection, setShowPwSection] = useState(false);
   const [pwData, setPwData] = useState({ current: "", newPw: "", confirm: "" });
@@ -27,15 +70,16 @@ export default function Profile() {
 
   const fetchUser = async () => {
     setLoading(true);
+    setFetchError("");
     try {
-      // 🔴 MOCK
-      const res = await api.get(`/users/${userId}`);
-      setUser(res.data);
-      if (res.data.avatar) setAvatar(res.data.avatar);
-      // ✅ REAL
-      // const res = await api.get("/profile");
+      const endpoint = ROLE_ENDPOINT[role];
+      if (!endpoint) throw new Error("Unknown role");
+      const res = await api.get(`/User/${endpoint}/${userId}`);
+      const extracted = extractUser(res.data, role);
+      setUser(extracted);
     } catch (err) {
-      console.error(err);
+      console.error("fetchUser error:", err);
+      setFetchError("Failed to load profile. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -44,48 +88,37 @@ export default function Profile() {
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-      const newAvatar = ev.target.result;
-      setAvatar(newAvatar);
-      try {
-        // 🔴 MOCK
-        await api.patch(`/users/${userId}`, { avatar: newAvatar });
-        // ✅ REAL
-        // const formData = new FormData();
-        // formData.append("avatar", file);
-        // await api.post("/profile/avatar", formData);
-        setAvatarSuccess(true);
-        setTimeout(() => setAvatarSuccess(false), 3000);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    reader.readAsDataURL(file);
+    setAvatarLoading(true);
+    setAvatarError("");
+    setAvatarSuccess(false);
+    try {
+      const formData = new FormData();
+      formData.append("MainImage", file);
+      await api.post(`/${IMAGE_ENDPOINT[role]}`, formData);
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setUser(prev => ({ ...prev, pictureProfileURL: ev.target.result }));
+      };
+      reader.readAsDataURL(file);
+      setAvatarSuccess(true);
+      setTimeout(() => setAvatarSuccess(false), 3000);
+    } catch (err) {
+      setAvatarError("Failed to upload image. Please try again.");
+      console.error("avatarUpload error:", err);
+    } finally {
+      setAvatarLoading(false);
+      e.target.value = "";
+    }
   };
 
   const validatePw = () => {
     const errs = {};
-
-    if (!pwData.current) {
-      errs.current = "Required";
-    } else if (pwData.current !== user?.password) {
-      errs.current = "Current password is incorrect";
-    }
-
+    if (!pwData.current) errs.current = "Required";
     const pwRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!pwData.newPw) {
-      errs.newPw = "Required";
-    } else if (!pwRegex.test(pwData.newPw)) {
-      errs.newPw = "Min 8 chars, uppercase, lowercase, number & special character (@$!%*?&)";
-    }
-
-    if (!pwData.confirm) {
-      errs.confirm = "Required";
-    } else if (pwData.newPw !== pwData.confirm) {
-      errs.confirm = "Passwords don't match";
-    }
-
+    if (!pwData.newPw) errs.newPw = "Required";
+    else if (!pwRegex.test(pwData.newPw)) errs.newPw = "Min 8 chars, uppercase, lowercase, number & special character";
+    if (!pwData.confirm) errs.confirm = "Required";
+    else if (pwData.newPw !== pwData.confirm) errs.confirm = "Passwords don't match";
     setPwErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -94,11 +127,11 @@ export default function Profile() {
     if (!validatePw()) return;
     setSavingPw(true);
     try {
-      // 🔴 MOCK
-      await api.patch(`/users/${userId}`, { password: pwData.newPw });
-      setUser(prev => ({ ...prev, password: pwData.newPw }));
-      // ✅ REAL
-      // await api.put("/profile/password", { currentPassword: pwData.current, newPassword: pwData.newPw });
+      // ✅ REAL — لما يجهز الـ endpoint
+      // await api.patch("/auth/Account/change-password", {
+      //   currentPassword: pwData.current,
+      //   newPassword: pwData.newPw,
+      // });
       setPwData({ current: "", newPw: "", confirm: "" });
       setPwErrors({});
       setPwSuccess(true);
@@ -111,12 +144,21 @@ export default function Profile() {
     }
   };
 
-  const getRoleColor = (r) => {
-    const map = { coordinator: "#6366f1", supervisor: "#0ea5e9", examiner: "#f59e0b", student: "#22c55e" };
-    return map[r] || "#C0441A";
-  };
-
   if (loading) return <div className={styles.loading}>Loading...</div>;
+  if (fetchError) return <div className={styles.loading}>{fetchError}</div>;
+  if (!user) return null;
+
+  const idNumber =
+    role === "student" ? user.studentNumber :
+    role === "supervisor" ? user.supervisorNumber :
+    role === "examiner" ? user.examinerNumber :
+    role === "coordinator" ? user.coordinatorNumber : "-";
+
+  const idLabel =
+    role === "student" ? "Student Number" :
+    role === "supervisor" ? "Supervisor Number" :
+    role === "examiner" ? "Examiner Number" :
+    role === "coordinator" ? "Coordinator Number" : "ID";
 
   return (
     <div className={styles.page}>
@@ -132,41 +174,60 @@ export default function Profile() {
         {/* Avatar Card */}
         <div className={styles.avatarCard}>
           <div className={styles.avatarWrapper}>
-            {avatar ? (
-              <img src={avatar} alt="avatar" className={styles.avatarImg} />
+            {user.pictureProfileURL ? (
+              <img src={user.pictureProfileURL} alt="avatar" className={styles.avatarImg} />
             ) : (
               <div className={styles.avatarFallback}>
-                {user?.name?.charAt(0).toUpperCase()}
+                {user.fullName?.charAt(0)?.toUpperCase()}
               </div>
             )}
-            <button className={styles.avatarEditBtn} onClick={() => fileRef.current.click()}>
+            <button
+              className={styles.avatarEditBtn}
+              onClick={() => fileRef.current.click()}
+              disabled={avatarLoading}
+            >
               <CameraAlt style={{ fontSize: 14 }} />
             </button>
-            <input ref={fileRef} type="file" accept="image/*" hidden onChange={handleAvatarChange} />
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={handleAvatarChange}
+            />
           </div>
-          <h2 className={styles.avatarName}>{user?.name}</h2>
+
+          <h2 className={styles.avatarName}>{user.fullName}</h2>
           <span
             className={styles.roleBadge}
             style={{
               background: getRoleColor(role) + "18",
               color: getRoleColor(role),
-              border: `1px solid ${getRoleColor(role)}40`
+              border: `1px solid ${getRoleColor(role)}40`,
             }}
           >
             {role?.charAt(0).toUpperCase() + role?.slice(1)}
           </span>
+
+          {avatarLoading && (
+            <p style={{ fontSize: 12, color: "#888", margin: 0 }}>Uploading...</p>
+          )}
           {avatarSuccess && (
             <div className={styles.avatarSuccess}>
               <CheckCircle style={{ fontSize: 14 }} /> Photo saved!
             </div>
           )}
+          {avatarError && (
+            <p style={{ fontSize: 12, color: "#ef4444", margin: 0 }}>{avatarError}</p>
+          )}
+
           <p className={styles.avatarHint}>Click the camera icon to update your photo</p>
         </div>
 
         {/* Right Col */}
         <div className={styles.rightCol}>
 
-          {/* Personal Info - Read Only */}
+          {/* Personal Info */}
           <div className={styles.card}>
             <div className={styles.cardTitleRow}>
               <Person fontSize="small" style={{ color: "#C0441A" }} />
@@ -179,51 +240,72 @@ export default function Profile() {
                   <label className={styles.fieldLabel}>Full Name</label>
                   <div className={styles.fieldValue}>
                     <Person fontSize="small" className={styles.fieldIcon} />
-                    {user?.name || "-"}
+                    {user.fullName || "-"}
                   </div>
                 </div>
+                <div className={styles.field}>
+                  <label className={styles.fieldLabel}>Username</label>
+                  <div className={styles.fieldValue}>
+                    <Badge fontSize="small" className={styles.fieldIcon} />
+                    {user.userName || "-"}
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.fieldRow}>
                 <div className={styles.field}>
                   <label className={styles.fieldLabel}>Email Address</label>
                   <div className={styles.fieldValue}>
                     <Email fontSize="small" className={styles.fieldIcon} />
-                    {user?.email || "-"}
+                    {user.email || "-"}
+                  </div>
+                </div>
+                <div className={styles.field}>
+                  <label className={styles.fieldLabel}>{idLabel}</label>
+                  <div className={styles.fieldValue}>
+                    <Badge fontSize="small" className={styles.fieldIcon} />
+                    {idNumber || "-"}
                   </div>
                 </div>
               </div>
 
-              <div className={styles.fieldRow}>
-                <div className={styles.field}>
-                  <label className={styles.fieldLabel}>Role</label>
-                  <div className={styles.fieldValue}>
-                    <Person fontSize="small" className={styles.fieldIcon} />
-                    {role?.charAt(0).toUpperCase() + role?.slice(1) || "-"}
+              {role === "student" && (
+                <div className={styles.fieldRow}>
+                  <div className={styles.field}>
+                    <label className={styles.fieldLabel}>College</label>
+                    <div className={styles.fieldValue}>
+                      <School fontSize="small" className={styles.fieldIcon} />
+                      {user.college || "-"}
+                    </div>
+                  </div>
+                  <div className={styles.field}>
+                    <label className={styles.fieldLabel}>Major</label>
+                    <div className={styles.fieldValue}>
+                      <School fontSize="small" className={styles.fieldIcon} />
+                      {user.major || "-"}
+                    </div>
                   </div>
                 </div>
-                <div className={styles.field}>
-                  <label className={styles.fieldLabel}>University</label>
-                  <div className={styles.fieldValue}>
-                    <Business fontSize="small" className={styles.fieldIcon} />
-                    Palestine Technical University - Kadoorie
-                  </div>
-                </div>
-              </div>
+              )}
 
-              <div className={styles.fieldRow}>
-                <div className={styles.field}>
-                  <label className={styles.fieldLabel}>Faculty</label>
-                  <div className={styles.fieldValue}>
-                    <School fontSize="small" className={styles.fieldIcon} />
-                    Faculty of Engineering & Technology
+              {["supervisor", "examiner", "coordinator"].includes(role) && (
+                <div className={styles.fieldRow}>
+                  <div className={styles.field}>
+                    <label className={styles.fieldLabel}>Department</label>
+                    <div className={styles.fieldValue}>
+                      <Domain fontSize="small" className={styles.fieldIcon} />
+                      {user.department || "-"}
+                    </div>
+                  </div>
+                  <div className={styles.field}>
+                    <label className={styles.fieldLabel}>University</label>
+                    <div className={styles.fieldValue}>
+                      <Business fontSize="small" className={styles.fieldIcon} />
+                      Palestine Technical University
+                    </div>
                   </div>
                 </div>
-                <div className={styles.field}>
-                  <label className={styles.fieldLabel}>Specialization</label>
-                  <div className={styles.fieldValue}>
-                    <School fontSize="small" className={styles.fieldIcon} />
-                    Computer Systems Engineering
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           </div>
 

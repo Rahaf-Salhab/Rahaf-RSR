@@ -4,13 +4,6 @@ import { mockApi as api } from "../../api/axiosInstance";
 import styles from "./Home.module.css";
 import rsrLogo from "../../assets/logo/rsrLogo.png";
 
-const STATS = [
-  { value: "200+", label: "Graduated Projects" },
-  { value: "50+", label: "Faculty Supervisors" },
-  { value: "8", label: "Years of Excellence" },
-  { value: "1200+", label: "Students Graduated" },
-];
-
 const FEATURES = [
   {
     icon: "📋",
@@ -46,10 +39,19 @@ export default function Home() {
   const [loadingArchive, setLoadingArchive] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedYear, setSelectedYear] = useState("All");
-  const [visibleCount, setVisibleCount] = useState(6);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [cardsPerView, setCardsPerView] = useState(
+    window.innerWidth <= 600 ? 1 : 3
+  );
 
   const isLoggedIn = !!localStorage.getItem("accessToken");
   const role = localStorage.getItem("role");
+
+  useEffect(() => {
+    const handleResize = () => setCardsPerView(window.innerWidth <= 600 ? 1 : 3);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     api.get("/archive")
@@ -57,6 +59,8 @@ export default function Home() {
       .catch(() => setArchive([]))
       .finally(() => setLoadingArchive(false));
   }, []);
+
+  useEffect(() => { setCurrentPage(0); }, [searchTerm, selectedYear]);
 
   const years = ["All", ...new Set(archive.map((p) => p.year))].sort((a, b) =>
     a === "All" ? -1 : b - a
@@ -70,8 +74,14 @@ export default function Home() {
     return matchSearch && matchYear;
   });
 
+  const totalPages = Math.ceil(filtered.length / cardsPerView);
+  const paginated = filtered.slice(
+    currentPage * cardsPerView,
+    (currentPage + 1) * cardsPerView
+  );
+
   const handleDashboard = () => {
-    if (role) navigate(`/${role}/home`);
+    navigate("/login");
   };
 
   return (
@@ -119,21 +129,6 @@ export default function Home() {
             )}
           </div>
         </div>
-        <div className={styles.heroDecor}>
-          <div className={styles.heroCircle1} />
-          <div className={styles.heroCircle2} />
-          <div className={styles.heroCircle3} />
-        </div>
-      </section>
-
-      {/* ── STATS ── */}
-      <section className={styles.stats}>
-        {STATS.map((s) => (
-          <div key={s.label} className={styles.statCard}>
-            <span className={styles.statValue}>{s.value}</span>
-            <span className={styles.statLabel}>{s.label}</span>
-          </div>
-        ))}
       </section>
 
       {/* ── ABOUT ── */}
@@ -157,7 +152,7 @@ export default function Home() {
               <div className={styles.aboutCardIcon}>🏛️</div>
               <div>
                 <div className={styles.aboutCardTitle}>Palestine Technical University</div>
-                <div className={styles.aboutCardSub}>Kadoorie — Faculty of Engineering & IT</div>
+                <div className={styles.aboutCardSub}>Kadoorie</div>
               </div>
             </div>
             <div className={styles.aboutCard}>
@@ -197,12 +192,28 @@ export default function Home() {
 
       {/* ── ARCHIVE ── */}
       <section id="archive" className={styles.archiveSection}>
-        <div className={styles.sectionHeader}>
-          <span className={styles.sectionTag}>Project Archive</span>
-          <h2 className={styles.sectionTitle}>Past Graduation Projects</h2>
-          <p className={styles.archiveSubtitle}>
-            Browse outstanding projects from previous years
-          </p>
+        <div className={styles.archiveHeader}>
+          <div className={styles.sectionHeader} style={{ marginBottom: 0, textAlign: "left" }}>
+            <span className={styles.sectionTag}>Project Archive</span>
+            <h2 className={styles.sectionTitle}>Past Graduation Projects</h2>
+          </div>
+          {!loadingArchive && filtered.length > 0 && (
+            <div className={styles.carouselControls}>
+              <span className={styles.carouselInfo}>
+                {currentPage * cardsPerView + 1}–{Math.min((currentPage + 1) * cardsPerView, filtered.length)} of {filtered.length}
+              </span>
+              <button
+                className={styles.arrowBtn}
+                onClick={() => setCurrentPage((p) => p - 1)}
+                disabled={currentPage === 0}
+              >←</button>
+              <button
+                className={styles.arrowBtn}
+                onClick={() => setCurrentPage((p) => p + 1)}
+                disabled={currentPage >= totalPages - 1}
+              >→</button>
+            </div>
+          )}
         </div>
 
         {/* Filters */}
@@ -211,7 +222,7 @@ export default function Home() {
             type="text"
             placeholder="Search projects..."
             value={searchTerm}
-            onChange={(e) => { setSearchTerm(e.target.value); setVisibleCount(6); }}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className={styles.searchInput}
           />
           <div className={styles.yearTabs}>
@@ -219,7 +230,7 @@ export default function Home() {
               <button
                 key={y}
                 className={`${styles.yearTab} ${selectedYear === y ? styles.yearTabActive : ""}`}
-                onClick={() => { setSelectedYear(y); setVisibleCount(6); }}
+                onClick={() => setSelectedYear(y)}
               >
                 {y}
               </button>
@@ -227,7 +238,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Cards */}
         {loadingArchive ? (
           <div className={styles.loading}>Loading projects...</div>
         ) : filtered.length === 0 ? (
@@ -235,7 +245,7 @@ export default function Home() {
         ) : (
           <>
             <div className={styles.archiveGrid}>
-              {filtered.slice(0, visibleCount).map((project) => (
+              {paginated.map((project) => (
                 <div key={project.id} className={styles.archiveCard}>
                   <div className={styles.archiveCardTop}>
                     <span className={styles.archiveYear}>{project.year}</span>
@@ -261,14 +271,16 @@ export default function Home() {
                 </div>
               ))}
             </div>
-            {visibleCount < filtered.length && (
-              <div className={styles.loadMoreWrap}>
-                <button
-                  className={styles.loadMoreBtn}
-                  onClick={() => setVisibleCount((v) => v + 6)}
-                >
-                  Load More
-                </button>
+
+            {totalPages > 1 && (
+              <div className={styles.carouselDots}>
+                {Array.from({ length: totalPages }).map((_, i) => (
+                  <button
+                    key={i}
+                    className={`${styles.dot} ${i === currentPage ? styles.dotActive : ""}`}
+                    onClick={() => setCurrentPage(i)}
+                  />
+                ))}
               </div>
             )}
           </>

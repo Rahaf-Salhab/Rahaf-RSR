@@ -1,26 +1,73 @@
 import { useEffect, useState } from "react";
-import { mockApi as api } from "../../../api/axiosInstance";
+import api, { mockApi } from "../../../api/axiosInstance";
 import styles from "./Users.module.css";
-import { Add, Search, Edit, Delete, People, Close } from "@mui/icons-material";
+import { Add, Search, Delete, People, Close, Visibility, VisibilityOff } from "@mui/icons-material";
 
 const ROLE_COLORS = {
   student: { bg: "#e8f4fd", color: "#1e40af" },
   supervisor: { bg: "#f0fdf4", color: "#166534" },
   examiner: { bg: "#fef3e2", color: "#92400e" },
+  coordinator: { bg: "#fdf4ff", color: "#6b21a8" },
 };
 
 const TABS = [
   { key: "students", label: "Students", role: "student" },
   { key: "supervisors", label: "Supervisors", role: "supervisor" },
   { key: "examiners", label: "Examiners", role: "examiner" },
+  { key: "coordinators", label: "Coordinators", role: "coordinator" },
   { key: "groups", label: "Groups", role: null },
 ];
 
 const ID_LABEL = {
-  student: "Student ID",
-  supervisor: "ID",
-  examiner: "ID",
+  student: "Student Number",
+  supervisor: "Supervisor Number",
+  examiner: "Examiner Number",
+  coordinator: "Coordinator Number",
 };
+
+const ENDPOINT_MAP = {
+  student: "/User/AssignStudent",
+  supervisor: "/User/AssignSupervisor",
+  examiner: "/User/AssignExaminer",
+  coordinator: "/User/AssignCoordinater",
+};
+
+const buildPayload = (form) => {
+  const base = {
+    FullName: form.fullName.trim(),
+    UserName: form.userName.trim(),
+    Email: form.email.trim(),
+    Password: form.password,
+  };
+  if (form.role === "supervisor") return { ...base, SupervisorNumber: form.number.trim(), Department: form.department.trim(), MainImage: form.mainImage?.trim() || "" };
+  if (form.role === "examiner") return { ...base, ExaminerNumber: form.number.trim(), Department: form.department.trim(), MainImage: form.mainImage?.trim() || "" };
+  if (form.role === "coordinator") return { ...base, CoordinatorNumber: form.number.trim(), Department: form.department.trim(), MainImage: form.mainImage?.trim() || "" };
+  if (form.role === "student") return { ...base, StudentNumber: form.number.trim(), College: form.college.trim(), Major: form.major.trim() };
+  return base;
+};
+
+const EMPTY_USER_FORM = (role) => ({
+  fullName: "", userName: "", email: "", password: "",
+  role, number: "", department: "", college: "", major: "",
+  mainImage: "",
+});
+
+function UserAvatar({ user }) {
+  const [imgError, setImgError] = useState(false);
+  if (user.pictureProfileURL && !imgError) {
+    return (
+      <img
+        src={user.pictureProfileURL}
+        alt={user.name}
+        className={styles.avatarImg}
+        onError={() => setImgError(true)}
+      />
+    );
+  }
+  return (
+    <div className={styles.avatar}>{user.name?.charAt(0)?.toUpperCase()}</div>
+  );
+}
 
 export default function Users() {
   const [tab, setTab] = useState("students");
@@ -29,10 +76,9 @@ export default function Users() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [deleteUserId, setDeleteUserId] = useState(null);
-  const [deleteGroupId, setDeleteGroupId] = useState(null);
   const [userModal, setUserModal] = useState(null);
-  const [groupModal, setGroupModal] = useState(null);
   const [userModalError, setUserModalError] = useState("");
+  const [saveLoading, setSaveLoading] = useState(false);
 
   useEffect(() => { fetchData(); }, []);
   useEffect(() => { setSearch(""); }, [tab]);
@@ -40,20 +86,46 @@ export default function Users() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // 🔴 MOCK
-      const [usersRes, groupsRes] = await Promise.all([
-        api.get("/users"),
-        api.get("/groups"),
+      const [studentsRes, supervisorsRes, examinersRes, coordinatorsRes, groupsRes] = await Promise.all([
+        api.get("/User/students"),
+        api.get("/User/supervisors"),
+        api.get("/User/examiners"),
+        api.get("/User/coordinaters"),
+        mockApi.get("/groups"),
       ]);
-      setUsers(usersRes.data);
+
+      const students = (studentsRes.data.students || []).map(u => ({
+        id: u.id, name: u.fullName, email: u.email,
+        userId: u.studentNumber, role: "student",
+        college: u.college, major: u.major,
+        pictureProfileURL: u.pictureProfileURL || "",
+      }));
+
+      const supervisors = (supervisorsRes.data.supervisors || []).map(u => ({
+        id: u.id, name: u.fullName, email: u.email,
+        userId: u.supervisorNumber, role: "supervisor",
+        department: u.department,
+        pictureProfileURL: u.pictureProfileURL || "",
+      }));
+
+      const examiners = (examinersRes.data.examiners || []).map(u => ({
+        id: u.id, name: u.fullName, email: u.email,
+        userId: u.examinerNumber, role: "examiner",
+        department: u.department,
+        pictureProfileURL: u.pictureProfileURL || "",
+      }));
+
+      const coordinators = (coordinatorsRes.data.coordinaters || []).map(u => ({
+        id: u.id, name: u.fullName, email: u.email,
+        userId: u.coordinatorNumber, role: "coordinator",
+        department: u.department,
+        pictureProfileURL: u.pictureProfileURL || "",
+      }));
+
+      setUsers([...students, ...supervisors, ...examiners, ...coordinators]);
       setGroups(groupsRes.data);
-      // ✅ REAL
-      // const [usersRes, groupsRes] = await Promise.all([
-      //   api.get("/admin/users"),
-      //   api.get("/admin/groups"),
-      // ]);
     } catch (err) {
-      console.error(err);
+      console.error("fetchData error:", err);
     } finally {
       setLoading(false);
     }
@@ -62,97 +134,74 @@ export default function Users() {
   const currentRole = TABS.find(t => t.key === tab)?.role;
 
   const filteredUsers = users.filter(u => {
-    const matchRole = u.role === currentRole;
-    const matchSearch =
-      u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase()) ||
-      (u.userId || "").toLowerCase().includes(search.toLowerCase());
-    return matchRole && matchSearch;
+    if (u.role !== currentRole) return false;
+    const q = search.toLowerCase();
+    return (
+      u.name?.toLowerCase().includes(q) ||
+      u.email?.toLowerCase().includes(q) ||
+      (u.userId || "").toLowerCase().includes(q)
+    );
   });
 
-  const handleDeleteUser = async (id) => {
-    try {
-      await api.delete(`/users/${id}`);
-      setUsers(prev => prev.filter(u => u.id !== id));
-      setDeleteUserId(null);
-    } catch (err) { console.error(err); }
+  const handleDeleteUser = (id) => {
+    setUsers(prev => prev.filter(u => u.id !== id));
+    setDeleteUserId(null);
   };
 
-  const handleSaveUser = async (userData) => {
-    const isDuplicateEmail = users.some(u =>
-      u.email.toLowerCase() === userData.email.toLowerCase() && u.id !== userData.id
-    );
-    if (isDuplicateEmail) {
-      setUserModalError("This email is already used by another user.");
-      return;
-    }
-
-    const isDuplicateUserId = users.some(u =>
-      u.userId && u.userId === userData.userId && u.id !== userData.id
-    );
-    if (isDuplicateUserId) {
-      setUserModalError("This ID is already used by another user.");
-      return;
-    }
-
+  const handleSaveUser = async (form) => {
+    setSaveLoading(true);
+    setUserModalError("");
     try {
-      if (userData.id) {
-        await api.put(`/users/${userData.id}`, userData);
-        setUsers(prev => prev.map(u => u.id === userData.id ? userData : u));
-      } else {
-        const newUser = {
-          ...userData,
-          id: Date.now().toString(),
-          accessToken: "fake-token",
-          refreshToken: "fake-refresh",
-          password: "Abc@12345",
-        };
-        const res = await api.post("/users", newUser);
-        setUsers(prev => [...prev, res.data]);
+      const endpoint = ENDPOINT_MAP[form.role];
+      const payload = buildPayload(form);
+
+      const formData = new FormData();
+      Object.entries(payload).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          formData.append(key, value);
+        }
+      });
+
+      const res = await api.post(endpoint, formData);
+
+      if (res.data?.success === false) {
+        setUserModalError(res.data.message || "User creation failed.");
+        return;
       }
-      setUserModalError("");
+
+      await fetchData();
       setUserModal(null);
-    } catch (err) { console.error(err); }
-  };
-
-  const handleDeleteGroup = async (id) => {
-    try {
-      await api.delete(`/groups/${id}`);
-      setGroups(prev => prev.filter(g => g.id !== id));
-      setDeleteGroupId(null);
-    } catch (err) { console.error(err); }
-  };
-
-  const handleSaveGroup = async (groupData) => {
-    try {
-      if (groupData.id) {
-        await api.put(`/groups/${groupData.id}`, groupData);
-        setGroups(prev => prev.map(g => g.id === groupData.id ? groupData : g));
+      setUserModalError("");
+    } catch (err) {
+      const data = err.response?.data;
+      if (data?.errors) {
+        const messages = Object.values(data.errors).flat().join(" ");
+        setUserModalError(messages);
+      } else if (data?.message) {
+        setUserModalError(data.message);
+      } else if (data?.title) {
+        setUserModalError(data.title);
       } else {
-        const newGroup = { ...groupData, id: Date.now().toString() };
-        const res = await api.post("/groups", newGroup);
-        setGroups(prev => [...prev, res.data]);
+        setUserModalError("Something went wrong. Please try again.");
       }
-      setGroupModal(null);
-    } catch (err) { console.error(err); }
+    } finally {
+      setSaveLoading(false);
+    }
   };
 
   const getUserName = (id) => users.find(u => u.id === id)?.name || null;
+
+  const handleAddClick = () => {
+    setUserModalError("");
+    setUserModal(EMPTY_USER_FORM(currentRole));
+  };
 
   const getAddLabel = () => {
     if (tab === "students") return "Add Student";
     if (tab === "supervisors") return "Add Supervisor";
     if (tab === "examiners") return "Add Examiner";
-    return "Add Group";
-  };
-
-  const handleAddClick = () => {
-    setUserModalError("");
-    if (tab === "groups") {
-      setGroupModal({ name: "", students: [], supervisorId: "", examinerId: "" });
-    } else {
-      setUserModal({ name: "", email: "", role: currentRole, userId: "" });
-    }
+    if (tab === "coordinators") return "Add Coordinator";
+    return "";
   };
 
   return (
@@ -162,9 +211,11 @@ export default function Users() {
           <h1 className={styles.pageTitle}>Users</h1>
           <p className={styles.pageSubtitle}>Manage users and groups</p>
         </div>
-        <button className={styles.addBtn} onClick={handleAddClick}>
-          <Add fontSize="small" /> {getAddLabel()}
-        </button>
+        {tab !== "groups" && (
+          <button className={styles.addBtn} onClick={handleAddClick}>
+            <Add fontSize="small" /> {getAddLabel()}
+          </button>
+        )}
       </div>
 
       <div className={styles.tabs}>
@@ -217,36 +268,23 @@ export default function Users() {
                     <tr key={u.id}>
                       <td className={styles.num}>{i + 1}</td>
                       <td className={styles.nameCell}>
-                        <div className={styles.avatar}>{u.name.charAt(0)}</div>
-                        {u.name}
+                        <UserAvatar user={u} />
+                        <span>{u.name}</span>
                       </td>
                       <td className={styles.emailCell}>{u.email}</td>
                       <td className={styles.idCell}>{u.userId || "-"}</td>
                       <td>
                         <span className={styles.roleBadge} style={{
                           background: ROLE_COLORS[u.role]?.bg,
-                          color: ROLE_COLORS[u.role]?.color
+                          color: ROLE_COLORS[u.role]?.color,
                         }}>
-                          {u.role.charAt(0).toUpperCase() + u.role.slice(1)}
+                          {u.role?.charAt(0).toUpperCase() + u.role?.slice(1)}
                         </span>
                       </td>
                       <td>
-                        <div className={styles.actions}>
-                          <button
-                            className={styles.editBtn}
-                            onClick={() => { setUserModalError(""); setUserModal(u); }}
-                            title="Edit"
-                          >
-                            <Edit fontSize="small" />
-                          </button>
-                          <button
-                            className={styles.deleteBtn}
-                            onClick={() => setDeleteUserId(u.id)}
-                            title="Delete"
-                          >
-                            <Delete fontSize="small" />
-                          </button>
-                        </div>
+                        <button className={styles.deleteBtn} onClick={() => setDeleteUserId(u.id)} title="Delete">
+                          <Delete fontSize="small" />
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -267,10 +305,7 @@ export default function Users() {
           ) : groups.length === 0 ? (
             <div className={styles.emptyBox}>
               <People style={{ fontSize: 48, color: "#ddd" }} />
-              <p>No groups yet.</p>
-              <button className={styles.addBtn} onClick={() => setGroupModal({ name: "", students: [], supervisorId: "", examinerId: "" })}>
-                <Add fontSize="small" /> Add Group
-              </button>
+              <p>No groups yet. Groups are created by supervisors.</p>
             </div>
           ) : (
             <div className={styles.groupsGrid}>
@@ -278,14 +313,6 @@ export default function Users() {
                 <div key={g.id} className={styles.groupCard}>
                   <div className={styles.groupCardHeader}>
                     <h3 className={styles.groupName}>{g.name}</h3>
-                    <div className={styles.actions}>
-                      <button className={styles.editBtn} onClick={() => setGroupModal(g)} title="Edit">
-                        <Edit fontSize="small" />
-                      </button>
-                      <button className={styles.deleteBtn} onClick={() => setDeleteGroupId(g.id)} title="Delete">
-                        <Delete fontSize="small" />
-                      </button>
-                    </div>
                   </div>
                   <div className={styles.groupInfo}>
                     <div className={styles.groupInfoRow}>
@@ -299,14 +326,10 @@ export default function Users() {
                     <div className={styles.groupInfoRow}>
                       <span className={styles.groupInfoLabel}>Students</span>
                       <div className={styles.studentsList}>
-                        {g.students
-                          .filter(sid => getUserName(sid) !== null)
-                          .map(sid => (
-                            <span key={sid} className={styles.studentChip}>
-                              {getUserName(sid)}
-                            </span>
-                          ))}
-                        {g.students.filter(sid => getUserName(sid) !== null).length === 0 && (
+                        {g.students?.filter(sid => getUserName(sid)).map(sid => (
+                          <span key={sid} className={styles.studentChip}>{getUserName(sid)}</span>
+                        ))}
+                        {(!g.students || g.students.filter(sid => getUserName(sid)).length === 0) && (
                           <span className={styles.noStudents}>No students assigned</span>
                         )}
                       </div>
@@ -323,18 +346,10 @@ export default function Users() {
         <UserModal
           user={userModal}
           externalError={userModalError}
+          saveLoading={saveLoading}
           onClose={() => { setUserModal(null); setUserModalError(""); }}
           onSave={handleSaveUser}
           onClearError={() => setUserModalError("")}
-        />
-      )}
-      {groupModal && (
-        <GroupModal
-          group={groupModal}
-          users={users}
-          groups={groups}
-          onClose={() => setGroupModal(null)}
-          onSave={handleSaveGroup}
         />
       )}
 
@@ -350,230 +365,132 @@ export default function Users() {
           </div>
         </div>
       )}
-
-      {deleteGroupId && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.confirmModal}>
-            <h3 className={styles.modalTitle}>Delete Group</h3>
-            <p className={styles.modalText}>Are you sure you want to delete this group?</p>
-            <div className={styles.modalActions}>
-              <button className={styles.cancelBtn} onClick={() => setDeleteGroupId(null)}>Cancel</button>
-              <button className={styles.confirmDeleteBtn} onClick={() => handleDeleteGroup(deleteGroupId)}>Delete</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
-// ── User Modal ──────────────────────────────────────────────────────
-function UserModal({ user, externalError, onClose, onSave, onClearError }) {
+function UserModal({ user, externalError, saveLoading, onClose, onSave, onClearError }) {
   const [form, setForm] = useState({ ...user });
-  const [error, setError] = useState("");
+  const [localError, setLocalError] = useState("");
+  const [showPass, setShowPass] = useState(false);
 
-  const idLabel = ID_LABEL[form.role] || "ID";
-  const combinedError = externalError || error;
+  const displayError = externalError || localError;
 
   const handleChange = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
-    setError("");
+    setLocalError("");
     onClearError();
   };
 
-  const handleSave = () => {
-    if (!form.name.trim() || !form.email.trim() || !form.userId?.trim()) {
-      setError("All fields are required.");
-      return;
-    }
+  const validate = () => {
+    if (!form.fullName.trim()) return "Full Name is required.";
+    if (!form.userName.trim()) return "Username is required.";
+    if (!form.email.trim()) return "Email is required.";
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(form.email)) {
-      setError("Please enter a valid email address.");
-      return;
+    if (!emailRegex.test(form.email)) return "Please enter a valid email address.";
+    if (!form.password) return "Password is required.";
+    if (form.password.length < 8) return "Password must be at least 8 characters.";
+    if (!form.number.trim()) return `${ID_LABEL[form.role] || "ID"} is required.`;
+    if (form.role === "student") {
+      if (!form.college.trim()) return "College is required.";
+      if (!form.major.trim()) return "Major is required.";
     }
-    setError("");
+    if (["supervisor", "examiner", "coordinator"].includes(form.role)) {
+      if (!form.department.trim()) return "Department is required.";
+    }
+    return null;
+  };
+
+  const handleSave = () => {
+    const err = validate();
+    if (err) { setLocalError(err); return; }
+    setLocalError("");
     onSave(form);
   };
+
+  const roleLabel = form.role?.charAt(0).toUpperCase() + form.role?.slice(1);
 
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modal}>
         <div className={styles.modalHeader}>
-          <h3 className={styles.modalTitle}>{user.id ? "Edit User" : "Add User"}</h3>
+          <h3 className={styles.modalTitle}>Add {roleLabel}</h3>
           <button className={styles.closeBtn} onClick={onClose}><Close fontSize="small" /></button>
         </div>
         <div className={styles.modalBody}>
-          {combinedError && <p className={styles.errorMsg}>{combinedError}</p>}
+          {displayError && <p className={styles.errorMsg}>{displayError}</p>}
+
           <div className={styles.fieldGroup}>
             <label className={styles.label}>Full Name <span className={styles.required}>*</span></label>
-            <input
-              className={styles.input}
-              value={form.name}
-              onChange={(e) => handleChange("name", e.target.value)}
-              placeholder="e.g. Rahaf Salhab"
-            />
+            <input className={styles.input} value={form.fullName} onChange={e => handleChange("fullName", e.target.value)} placeholder="e.g. Ahmad Khalil" />
           </div>
+
+          <div className={styles.fieldGroup}>
+            <label className={styles.label}>Username <span className={styles.required}>*</span></label>
+            <input className={styles.input} value={form.userName} onChange={e => handleChange("userName", e.target.value)} placeholder="e.g. ahmad.khalil" />
+          </div>
+
           <div className={styles.fieldGroup}>
             <label className={styles.label}>Email <span className={styles.required}>*</span></label>
-            <input
-              className={styles.input}
-              type="email"
-              value={form.email}
-              onChange={(e) => handleChange("email", e.target.value)}
-              placeholder="e.g. user@ptuk.edu.ps"
-            />
-          </div>
-          <div className={styles.fieldGroup}>
-            <label className={styles.label}>{idLabel} <span className={styles.required}>*</span></label>
-            <input
-              className={styles.input}
-              value={form.userId || ""}
-              onChange={(e) => handleChange("userId", e.target.value)}
-              placeholder={form.role === "student" ? "e.g. 1201234" : "e.g. EMP001"}
-            />
-          </div>
-          <div className={styles.fieldGroup}>
-            <label className={styles.label}>Role <span className={styles.required}>*</span></label>
-            <select
-              className={styles.select}
-              value={form.role}
-              onChange={(e) => handleChange("role", e.target.value)}
-            >
-              <option value="student">Student</option>
-              <option value="supervisor">Supervisor</option>
-              <option value="examiner">Examiner</option>
-            </select>
-          </div>
-        </div>
-        <div className={styles.modalFooter}>
-          <button className={styles.cancelBtn} onClick={onClose}>Cancel</button>
-          <button className={styles.saveBtn} onClick={handleSave}>
-            {user.id ? "Save Changes" : "Add User"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Group Modal ─────────────────────────────────────────────────────
-function GroupModal({ group, users, groups, onClose, onSave }) {
-  const [form, setForm] = useState({ ...group });
-  const [error, setError] = useState("");
-  const [studentSearch, setStudentSearch] = useState("");
-
-  const students = users.filter(u => u.role === "student");
-  const supervisors = users.filter(u => u.role === "supervisor");
-  const examiners = users.filter(u => u.role === "examiner");
-
-  const filteredStudents = students.filter(s =>
-    s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
-    (s.userId || "").includes(studentSearch)
-  );
-
-  const isStudentInAnotherGroup = (studentId) => {
-    return groups.some(g => g.id !== form.id && g.students.includes(studentId));
-  };
-
-  const handleStudentToggle = (id) => {
-    if (isStudentInAnotherGroup(id)) return;
-    setForm(prev => ({
-      ...prev,
-      students: prev.students.includes(id)
-        ? prev.students.filter(s => s !== id)
-        : [...prev.students, id]
-    }));
-  };
-
-  const handleSave = () => {
-    if (!form.name.trim() || !form.supervisorId || !form.examinerId || form.students.length === 0) {
-      setError("All fields are required and at least one student must be selected.");
-      return;
-    }
-    setError("");
-    onSave(form);
-  };
-
-  return (
-    <div className={styles.modalOverlay}>
-      <div className={styles.modal}>
-        <div className={styles.modalHeader}>
-          <h3 className={styles.modalTitle}>{group.id ? "Edit Group" : "Add Group"}</h3>
-          <button className={styles.closeBtn} onClick={onClose}><Close fontSize="small" /></button>
-        </div>
-        <div className={styles.modalBody}>
-          {error && <p className={styles.errorMsg}>{error}</p>}
-
-          <div className={styles.fieldGroup}>
-            <label className={styles.label}>Group Name <span className={styles.required}>*</span></label>
-            <input
-              className={styles.input}
-              value={form.name}
-              onChange={(e) => { setForm({ ...form, name: e.target.value }); setError(""); }}
-              placeholder="e.g. Group A"
-            />
+            <input className={styles.input} type="email" value={form.email} onChange={e => handleChange("email", e.target.value)} placeholder="e.g. ahmad@ptuk.edu.ps" />
           </div>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>Assign Supervisor <span className={styles.required}>*</span></label>
-            <select className={styles.select} value={form.supervisorId} onChange={(e) => { setForm({ ...form, supervisorId: e.target.value }); setError(""); }}>
-              <option value="">Select Supervisor</option>
-              {supervisors.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
-          </div>
-
-          <div className={styles.fieldGroup}>
-            <label className={styles.label}>Assign Examiner <span className={styles.required}>*</span></label>
-            <select className={styles.select} value={form.examinerId} onChange={(e) => { setForm({ ...form, examinerId: e.target.value }); setError(""); }}>
-              <option value="">Select Examiner</option>
-              {examiners.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
-            </select>
-          </div>
-
-          <div className={styles.fieldGroup}>
-            <label className={styles.label}>Select Students <span className={styles.required}>*</span></label>
-            <div className={styles.studentSearchWrapper}>
-              <Search className={styles.studentSearchIcon} fontSize="small" />
+            <label className={styles.label}>Password <span className={styles.required}>*</span></label>
+            <div className={styles.passwordWrapper}>
               <input
-                className={styles.studentSearchInput}
-                placeholder="Search by name or ID..."
-                value={studentSearch}
-                onChange={(e) => setStudentSearch(e.target.value)}
+                className={styles.input}
+                type={showPass ? "text" : "password"}
+                value={form.password}
+                onChange={e => handleChange("password", e.target.value)}
+                placeholder="Min 8 characters"
+                style={{ paddingRight: "42px" }}
               />
-            </div>
-            <div className={styles.studentsCheckList}>
-              {filteredStudents.map(s => {
-                const inAnotherGroup = isStudentInAnotherGroup(s.id);
-                return (
-                  <label
-                    key={s.id}
-                    className={`${styles.checkLabel} ${inAnotherGroup ? styles.checkLabelDisabled : ""}`}
-                    title={inAnotherGroup ? "Already assigned to another group" : ""}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={form.students.includes(s.id)}
-                      onChange={() => handleStudentToggle(s.id)}
-                      disabled={inAnotherGroup}
-                    />
-                    <span>{s.name}</span>
-                    {s.userId && <span className={styles.studentId}>#{s.userId}</span>}
-                    {inAnotherGroup && (
-                      <span className={styles.assignedBadge}>Already in a group</span>
-                    )}
-                  </label>
-                );
-              })}
-              {filteredStudents.length === 0 && (
-                <p className={styles.noStudents}>No students found.</p>
-              )}
+              <button type="button" className={styles.eyeBtn} onClick={() => setShowPass(p => !p)}>
+                {showPass
+                  ? <Visibility fontSize="small" sx={{ color: "#888" }} />
+                  : <VisibilityOff fontSize="small" sx={{ color: "#888" }} />
+                }
+              </button>
             </div>
           </div>
+
+          <div className={styles.fieldGroup}>
+            <label className={styles.label}>{ID_LABEL[form.role] || "ID"} <span className={styles.required}>*</span></label>
+            <input className={styles.input} value={form.number} onChange={e => handleChange("number", e.target.value)} placeholder="e.g. 1201234" />
+          </div>
+
+          {["supervisor", "examiner", "coordinator"].includes(form.role) && (
+            <>
+              <div className={styles.fieldGroup}>
+                <label className={styles.label}>Department <span className={styles.required}>*</span></label>
+                <input className={styles.input} value={form.department} onChange={e => handleChange("department", e.target.value)} placeholder="e.g. Computer Science" />
+              </div>
+              <div className={styles.fieldGroup}>
+                <label className={styles.label}>Main Image URL <span className={styles.optional}>(optional)</span></label>
+                <input className={styles.input} value={form.mainImage} onChange={e => handleChange("mainImage", e.target.value)} placeholder="https://..." />
+              </div>
+            </>
+          )}
+
+          {form.role === "student" && (
+            <>
+              <div className={styles.fieldGroup}>
+                <label className={styles.label}>College <span className={styles.required}>*</span></label>
+                <input className={styles.input} value={form.college} onChange={e => handleChange("college", e.target.value)} placeholder="e.g. Engineering" />
+              </div>
+              <div className={styles.fieldGroup}>
+                <label className={styles.label}>Major <span className={styles.required}>*</span></label>
+                <input className={styles.input} value={form.major} onChange={e => handleChange("major", e.target.value)} placeholder="e.g. Computer Science" />
+              </div>
+            </>
+          )}
         </div>
+
         <div className={styles.modalFooter}>
-          <button className={styles.cancelBtn} onClick={onClose}>Cancel</button>
-          <button className={styles.saveBtn} onClick={handleSave}>
-            {group.id ? "Save Changes" : "Add Group"}
+          <button className={styles.cancelBtn} onClick={onClose} disabled={saveLoading}>Cancel</button>
+          <button className={styles.saveBtn} onClick={handleSave} disabled={saveLoading}>
+            {saveLoading ? "Saving..." : `Add ${roleLabel}`}
           </button>
         </div>
       </div>
