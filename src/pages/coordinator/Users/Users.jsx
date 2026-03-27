@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api, { mockApi } from "../../../api/axiosInstance";
 import styles from "./Users.module.css";
-import { Add, Search, Delete, People, Close, Visibility, VisibilityOff } from "@mui/icons-material";
+import { Add, Search, People, Close, Visibility, VisibilityOff, Delete, LockOpen } from "@mui/icons-material";
 
 const ROLE_COLORS = {
   student: { bg: "#e8f4fd", color: "#1e40af" },
@@ -75,7 +75,8 @@ export default function Users() {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [deleteUserId, setDeleteUserId] = useState(null);
+  const [blockUserId, setBlockUserId] = useState(null);
+  const [unblockUserId, setUnblockUserId] = useState(null);
   const [userModal, setUserModal] = useState(null);
   const [userModalError, setUserModalError] = useState("");
   const [saveLoading, setSaveLoading] = useState(false);
@@ -99,6 +100,7 @@ export default function Users() {
         userId: u.studentNumber, role: "student",
         college: u.college, major: u.major,
         pictureProfileURL: u.pictureProfileURL || "",
+        isBlocked: u.isBlocked || false,
       }));
 
       const supervisors = (supervisorsRes.data.supervisors || []).map(u => ({
@@ -106,6 +108,7 @@ export default function Users() {
         userId: u.supervisorNumber, role: "supervisor",
         department: u.department,
         pictureProfileURL: u.pictureProfileURL || "",
+        isBlocked: u.isBlocked || false,
       }));
 
       const examiners = (examinersRes.data.examiners || []).map(u => ({
@@ -113,6 +116,7 @@ export default function Users() {
         userId: u.examinerNumber, role: "examiner",
         department: u.department,
         pictureProfileURL: u.pictureProfileURL || "",
+        isBlocked: u.isBlocked || false,
       }));
 
       const coordinators = (coordinatorsRes.data.coordinaters || []).map(u => ({
@@ -120,6 +124,7 @@ export default function Users() {
         userId: u.coordinatorNumber, role: "coordinator",
         department: u.department,
         pictureProfileURL: u.pictureProfileURL || "",
+        isBlocked: u.isBlocked || false,
       }));
 
       setUsers([...students, ...supervisors, ...examiners, ...coordinators]);
@@ -143,9 +148,24 @@ export default function Users() {
     );
   });
 
-  const handleDeleteUser = (id) => {
-    setUsers(prev => prev.filter(u => u.id !== id));
-    setDeleteUserId(null);
+  const handleBlockUser = async (id) => {
+    try {
+      await api.patch(`/User/block/${id}`);
+      setUsers(prev => prev.map(u => u.id === id ? { ...u, isBlocked: true } : u));
+      setBlockUserId(null);
+    } catch (err) {
+      console.error("blockUser error:", err);
+    }
+  };
+
+  const handleUnblockUser = async (id) => {
+    try {
+      await api.patch(`/User/unblock/${id}`);
+      setUsers(prev => prev.map(u => u.id === id ? { ...u, isBlocked: false } : u));
+      setUnblockUserId(null);
+    } catch (err) {
+      console.error("unblockUser error:", err);
+    }
   };
 
   const handleSaveUser = async (form) => {
@@ -260,6 +280,7 @@ export default function Users() {
                     <th>Email</th>
                     <th>{ID_LABEL[currentRole] || "ID"}</th>
                     <th>Role</th>
+                    <th>Status</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -282,9 +303,33 @@ export default function Users() {
                         </span>
                       </td>
                       <td>
-                        <button className={styles.deleteBtn} onClick={() => setDeleteUserId(u.id)} title="Delete">
-                          <Delete fontSize="small" />
-                        </button>
+                        <span className={styles.statusBadge} style={{
+                          background: u.isBlocked ? "#fff0ed" : "#f0fdf4",
+                          color: u.isBlocked ? "#C0441A" : "#166534",
+                        }}>
+                          {u.isBlocked ? "Blocked" : "Active"}
+                        </span>
+                      </td>
+                      <td>
+                        <div className={styles.actions}>
+                          {u.isBlocked ? (
+                            <button
+                              className={styles.unblockBtn}
+                              onClick={() => setUnblockUserId(u.id)}
+                              title="Unblock"
+                            >
+                              <LockOpen fontSize="small" />
+                            </button>
+                          ) : (
+                            <button
+                              className={styles.blockBtn}
+                              onClick={() => setBlockUserId(u.id)}
+                              title=""
+                            >
+                              <Delete fontSize="small" />
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -353,14 +398,27 @@ export default function Users() {
         />
       )}
 
-      {deleteUserId && (
+      {blockUserId && (
         <div className={styles.modalOverlay}>
           <div className={styles.confirmModal}>
-            <h3 className={styles.modalTitle}>Delete User</h3>
-            <p className={styles.modalText}>Are you sure you want to delete this user?</p>
+            <h3 className={styles.modalTitle}>Block User</h3>
+            <p className={styles.modalText}>Are you sure you want to block this user?</p>
             <div className={styles.modalActions}>
-              <button className={styles.cancelBtn} onClick={() => setDeleteUserId(null)}>Cancel</button>
-              <button className={styles.confirmDeleteBtn} onClick={() => handleDeleteUser(deleteUserId)}>Delete</button>
+              <button className={styles.cancelBtn} onClick={() => setBlockUserId(null)}>Cancel</button>
+              <button className={styles.confirmBlockBtn} onClick={() => handleBlockUser(blockUserId)}>Block</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {unblockUserId && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.confirmModal}>
+            <h3 className={styles.modalTitle}>Unblock User</h3>
+            <p className={styles.modalText}>Are you sure you want to unblock this user?</p>
+            <div className={styles.modalActions}>
+              <button className={styles.cancelBtn} onClick={() => setUnblockUserId(null)}>Cancel</button>
+              <button className={styles.confirmUnblockBtn} onClick={() => handleUnblockUser(unblockUserId)}>Unblock</button>
             </div>
           </div>
         </div>

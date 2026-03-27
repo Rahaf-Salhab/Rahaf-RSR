@@ -115,7 +115,7 @@ const routes = createBrowserRouter([
       { path: "home", element: <ExaminerHome /> },
       { path: "evaluation-forms", element: <ExaminerEvaluationForms /> },
       { path: "profile", element: <Profile /> },
-    ],
+     ],
   },
 ]);
 

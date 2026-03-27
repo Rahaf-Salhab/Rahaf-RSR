@@ -8,21 +8,21 @@ import {
 
 const sidebarConfig = {
   coordinator: [
-    { label: "Dashboard",            icon: <Dashboard />,    path: "/coordinator/home" },
-    { label: "Users",                icon: <People />,       path: "/coordinator/users" },
-    { label: "Evaluation Forms",     icon: <Assignment />,   path: "/coordinator/evaluation-forms" },
-    { label: "Examination Timetable",icon: <CalendarMonth />,path: "/coordinator/examination-timetable" },
-    { label: "Thesis Management",    icon: <MenuBook />,     path: "/coordinator/thesis-management" },
-    { label: "Final Grades",         icon: <Grade />,        path: "/coordinator/final-grades" },
-    { label: "Archive",              icon: <Archive />,      path: "/coordinator/archive" },
-    { label: "Profile",              icon: <Person />,       path: "/coordinator/profile" },
+    { label: "Dashboard",             icon: <Dashboard />,    path: "/coordinator/home" },
+    { label: "Users",                 icon: <People />,       path: "/coordinator/users" },
+    { label: "Evaluation Forms",      icon: <Assignment />,   path: "/coordinator/evaluation-forms" },
+    { label: "Examination Timetable", icon: <CalendarMonth />,path: "/coordinator/examination-timetable" },
+    { label: "Thesis Management",     icon: <MenuBook />,     path: "/coordinator/thesis-management" },
+    { label: "Final Grades",          icon: <Grade />,        path: "/coordinator/final-grades" },
+    { label: "Archive",               icon: <Archive />,      path: "/coordinator/archive" },
+    { label: "Profile",               icon: <Person />,       path: "/coordinator/profile" },
   ],
   examiner: [
-    { label: "Dashboard",          icon: <Dashboard />,  path: "/examiner/home" },
-    { label: "My Projects",        icon: <Folder />,     path: "/examiner/projects" },
-    { label: "Evaluation Forms",   icon: <RateReview />, path: "/examiner/evaluation-forms" },
-    { label: "Examination Schedule",icon: <Schedule />,  path: "/examiner/schedule" },
-    { label: "Profile",            icon: <Person />,     path: "/examiner/profile" },
+    { label: "Dashboard",             icon: <Dashboard />,  path: "/examiner/home" },
+    { label: "My Projects",           icon: <Folder />,     path: "/examiner/projects" },
+    { label: "Evaluation Forms",      icon: <RateReview />, path: "/examiner/evaluation-forms" },
+    { label: "Examination Schedule",  icon: <Schedule />,   path: "/examiner/examination-timetable" },
+    { label: "Profile",               icon: <Person />,     path: "/examiner/profile" },
   ],
   supervisor: [
     { label: "Dashboard",        icon: <Dashboard />,  path: "/supervisor/home" },
@@ -36,7 +36,7 @@ const sidebarConfig = {
   ],
   student: [
     { label: "Dashboard", icon: <Dashboard />, path: "/student/home" },
-    { label: "My Project",icon: <Folder />,    path: "/student/project" },
+    { label: "My Project", icon: <Folder />,   path: "/student/project" },
     { label: "Grades",    icon: <Grade />,     path: "/student/grades" },
     { label: "Schedule",  icon: <Schedule />,  path: "/student/schedule" },
     { label: "Profile",   icon: <Person />,    path: "/student/profile" },

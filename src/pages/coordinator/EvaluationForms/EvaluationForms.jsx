@@ -42,7 +42,7 @@ export default function EvaluationForms() {
       // 🔴 MOCK
       const res = await api.get("/evaluationForms");
       setForms(res.data);
-      // ✅ REAL
+      //  REAL
       // const res = await api.get("/evaluation-forms");
       // setForms(res.data);
     } catch (err) {
@@ -54,9 +54,9 @@ export default function EvaluationForms() {
 
   const handleDelete = async (id) => {
     try {
-      // 🔴 MOCK
+      //  MOCK
       await api.delete(`/evaluationForms/${id}`);
-      // ✅ REAL
+      //  REAL
       // await api.delete(`/evaluation-forms/${id}`);
       setForms(prev => prev.filter(f => f.id !== id));
       setDeleteId(null);
