@@ -151,7 +151,7 @@ export default function Users() {
   const handleBlockUser = async (id) => {
     try {
       await api.patch(`/User/block/${id}`);
-      setUsers(prev => prev.map(u => u.id === id ? { ...u, isBlocked: true } : u));
+      setUsers(prev => prev.filter(u => u.id !== id));
       setBlockUserId(null);
     } catch (err) {
       console.error("blockUser error:", err);
