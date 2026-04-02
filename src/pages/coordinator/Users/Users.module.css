@@ -1,6 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-.page { display: flex; flex-direction: column; gap: 24px; font-family: 'Inter', sans-serif; }
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  font-family: 'Inter', sans-serif;
+}
 
 .pageHeader {
   display: flex;
@@ -10,8 +15,17 @@
   gap: 12px;
 }
 
-.pageTitle { font-size: 24px; font-weight: 700; color: #101828; }
-.pageSubtitle { font-size: 14px; color: #4A5565; margin-top: 4px; }
+.pageTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #101828;
+}
+
+.pageSubtitle {
+  font-size: 14px;
+  color: #4A5565;
+  margin-top: 4px;
+}
 
 .addBtn {
   display: flex;
@@ -29,7 +43,9 @@
   transition: opacity 0.2s;
 }
 
-.addBtn:hover { opacity: 0.88; }
+.addBtn:hover {
+  opacity: 0.88;
+}
 
 .tabs {
   display: flex;
@@ -58,7 +74,7 @@
 .tabActive {
   background: #fff;
   color: #C0441A;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
 .tabCount {
@@ -86,7 +102,7 @@
   background: #fff;
   border-radius: 12px;
   padding: 16px 20px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -119,16 +135,23 @@
   transition: border-color 0.2s;
 }
 
-.searchInput:focus { border-color: #C0441A; outline: none; }
+.searchInput:focus {
+  border-color: #C0441A;
+  outline: none;
+}
 
 .tableWrapper {
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   overflow-x: auto;
 }
 
-.table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
 
 .table th {
   text-align: left;
@@ -147,10 +170,18 @@
   vertical-align: middle;
 }
 
-.table tr:last-child td { border-bottom: none; }
-.table tr:hover td { background: #fafafa; }
+.table tr:last-child td {
+  border-bottom: none;
+}
 
-.num { color: #888; font-size: 13px; }
+.table tr:hover td {
+  background: #fafafa;
+}
+
+.num {
+  color: #888;
+  font-size: 13px;
+}
 
 .nameCell {
   display: flex;
@@ -159,8 +190,16 @@
   font-weight: 500;
 }
 
-.emailCell { color: #4A5565; font-size: 13px; }
-.idCell { color: #4A5565; font-size: 13px; font-weight: 500; }
+.emailCell {
+  color: #4A5565;
+  font-size: 13px;
+}
+
+.idCell {
+  color: #4A5565;
+  font-size: 13px;
+  font-weight: 500;
+}
 
 /* Avatar — حرف أو صورة صغيرة دائرية */
 .avatar {
@@ -193,7 +232,10 @@
   font-weight: 500;
 }
 
-.actions { display: flex; gap: 6px; }
+.actions {
+  display: flex;
+  gap: 6px;
+}
 
 .deleteBtn {
   width: 32px;
@@ -209,7 +251,9 @@
   transition: background 0.2s;
 }
 
-.deleteBtn:hover { background: #fecaca; }
+.deleteBtn:hover {
+  background: #fecaca;
+}
 
 .groupsGrid {
   display: grid;
@@ -221,7 +265,7 @@
   background: #fff;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .groupCardHeader {
@@ -231,8 +275,17 @@
   margin-bottom: 16px;
 }
 
-.groupName { font-size: 16px; font-weight: 600; color: #101828; }
-.groupInfo { display: flex; flex-direction: column; gap: 10px; }
+.groupName {
+  font-size: 16px;
+  font-weight: 600;
+  color: #101828;
+}
+
+.groupInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
 .groupInfoRow {
   display: flex;
@@ -247,8 +300,16 @@
   min-width: 80px;
 }
 
-.groupInfoValue { font-size: 13px; color: #101828; }
-.studentsList { display: flex; flex-wrap: wrap; gap: 6px; }
+.groupInfoValue {
+  font-size: 13px;
+  color: #101828;
+}
+
+.studentsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
 
 .studentChip {
   padding: 3px 10px;
@@ -259,7 +320,10 @@
   font-weight: 500;
 }
 
-.noStudents { font-size: 12px; color: #888; }
+.noStudents {
+  font-size: 12px;
+  color: #888;
+}
 
 .empty {
   text-align: center;
@@ -273,7 +337,7 @@
   border-radius: 12px;
   padding: 48px 24px;
   text-align: center;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -294,7 +358,7 @@
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
   z-index: 200;
   display: flex;
   align-items: center;
@@ -309,7 +373,7 @@
   max-width: 480px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
 }
@@ -320,7 +384,7 @@
   padding: 28px;
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
 }
 
 .modalHeader {
@@ -331,8 +395,17 @@
   border-bottom: 1px solid #f0f0f0;
 }
 
-.modalTitle { font-size: 18px; font-weight: 700; color: #101828; }
-.modalText { font-size: 14px; color: #4A5565; margin: 8px 0 24px; }
+.modalTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #101828;
+}
+
+.modalText {
+  font-size: 14px;
+  color: #4A5565;
+  margin: 8px 0 24px;
+}
 
 .closeBtn {
   background: none;
@@ -345,7 +418,9 @@
   border-radius: 6px;
 }
 
-.closeBtn:hover { background: #f0f0f0; }
+.closeBtn:hover {
+  background: #f0f0f0;
+}
 
 .modalBody {
   padding: 20px 24px;
@@ -368,10 +443,28 @@
   gap: 10px;
 }
 
-.fieldGroup { display: flex; flex-direction: column; gap: 6px; }
-.label { font-size: 13px; font-weight: 500; color: #333; }
-.required { color: #C0441A; }
-.optional { font-size: 11px; color: #888; font-weight: 400; margin-left: 4px; }
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+}
+
+.required {
+  color: #C0441A;
+}
+
+.optional {
+  font-size: 11px;
+  color: #888;
+  font-weight: 400;
+  margin-left: 4px;
+}
 
 .input {
   width: 100%;
@@ -386,7 +479,10 @@
   transition: border-color 0.2s;
 }
 
-.input:focus { border-color: #C0441A; outline: none; }
+.input:focus {
+  border-color: #C0441A;
+  outline: none;
+}
 
 .passwordWrapper {
   position: relative;
@@ -425,7 +521,9 @@
   color: #4A5565;
 }
 
-.cancelBtn:hover { background: #e4e4e4; }
+.cancelBtn:hover {
+  background: #e4e4e4;
+}
 
 .saveBtn {
   padding: 9px 20px;
@@ -439,7 +537,9 @@
   cursor: pointer;
 }
 
-.saveBtn:hover { opacity: 0.88; }
+.saveBtn:hover {
+  opacity: 0.88;
+}
 
 .confirmDeleteBtn {
   padding: 9px 18px;
@@ -452,11 +552,36 @@
   font-weight: 600;
   cursor: pointer;
 }
+
 .statusBadge {
   padding: 4px 10px;
   border-radius: 99px;
   font-size: 12px;
   font-weight: 500;
+}
+
+/*==============================================================================================================================*/
+.editBtn {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.editBtn:hover {
+  background: #dbeafe;
+}
+
+.editBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .blockBtn {
@@ -473,7 +598,9 @@
   transition: background 0.2s;
 }
 
-.blockBtn:hover { background: #fecaca; }
+.blockBtn:hover {
+  background: #fecaca;
+}
 
 .unblockBtn {
   width: 32px;
@@ -489,7 +616,9 @@
   transition: background 0.2s;
 }
 
-.unblockBtn:hover { background: #bbf7d0; }
+.unblockBtn:hover {
+  background: #bbf7d0;
+}
 
 .confirmBlockBtn {
   padding: 9px 18px;
@@ -503,7 +632,9 @@
   cursor: pointer;
 }
 
-.confirmBlockBtn:hover { opacity: 0.88; }
+.confirmBlockBtn:hover {
+  opacity: 0.88;
+}
 
 .confirmUnblockBtn {
   padding: 9px 18px;
@@ -517,13 +648,31 @@
   cursor: pointer;
 }
 
-.confirmUnblockBtn:hover { opacity: 0.88; }
+.confirmUnblockBtn:hover {
+  opacity: 0.88;
+}
 
-.confirmDeleteBtn:hover { opacity: 0.88; }
+.confirmDeleteBtn:hover {
+  opacity: 0.88;
+}
 
 @media (max-width: 768px) {
-  .filtersBox { flex-direction: column; align-items: stretch; }
-  .groupsGrid { grid-template-columns: 1fr; }
-  .pageHeader { flex-direction: column; align-items: flex-start; }
-  .tabs { width: 100%; overflow-x: auto; }
+  .filtersBox {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .groupsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tabs {
+    width: 100%;
+    overflow-x: auto;
+  }
 }
