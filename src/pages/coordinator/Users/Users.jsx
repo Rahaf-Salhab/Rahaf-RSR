@@ -1,7 +1,18 @@
 import { useEffect, useState } from "react";
 import api, { mockApi } from "../../../api/axiosInstance";
 import styles from "./Users.module.css";
-import { Add, Search, People, Close, Visibility, VisibilityOff, Delete, LockOpen } from "@mui/icons-material";
+import {
+  Add,
+  Search,
+  People,
+  Close,
+  Visibility,
+  VisibilityOff,
+  Delete,
+  LockOpen,
+  Edit,
+} from "@mui/icons-material";
+import EditUserModal from "./EditUserModal";
 
 const ROLE_COLORS = {
   student: { bg: "#e8f4fd", color: "#1e40af" },
@@ -32,6 +43,12 @@ const ENDPOINT_MAP = {
   coordinator: "/User/AssignCoordinater",
 };
 
+const UPDATE_ENDPOINT_MAP = {
+  student: "/User/update-student/{id}",
+  supervisor: "/User/update-supervisor/{id}",
+  coordinator: "/User/update-coordinater/{id}",
+};
+
 const buildPayload = (form) => {
   const base = {
     FullName: form.fullName.trim(),
@@ -39,16 +56,92 @@ const buildPayload = (form) => {
     Email: form.email.trim(),
     Password: form.password,
   };
-  if (form.role === "supervisor") return { ...base, SupervisorNumber: form.number.trim(), Department: form.department.trim(), MainImage: form.mainImage?.trim() || "" };
-  if (form.role === "examiner") return { ...base, ExaminerNumber: form.number.trim(), Department: form.department.trim(), MainImage: form.mainImage?.trim() || "" };
-  if (form.role === "coordinator") return { ...base, CoordinatorNumber: form.number.trim(), Department: form.department.trim(), MainImage: form.mainImage?.trim() || "" };
-  if (form.role === "student") return { ...base, StudentNumber: form.number.trim(), College: form.college.trim(), Major: form.major.trim() };
+  if (form.role === "supervisor")
+    return {
+      ...base,
+      SupervisorNumber: form.number.trim(),
+      Department: form.department.trim(),
+      MainImage: form.mainImage?.trim() || "",
+    };
+  if (form.role === "examiner")
+    return {
+      ...base,
+      ExaminerNumber: form.number.trim(),
+      Department: form.department.trim(),
+      MainImage: form.mainImage?.trim() || "",
+    };
+  if (form.role === "coordinator")
+    return {
+      ...base,
+      CoordinatorNumber: form.number.trim(),
+      Department: form.department.trim(),
+      MainImage: form.mainImage?.trim() || "",
+    };
+  if (form.role === "student")
+    return {
+      ...base,
+      StudentNumber: form.number.trim(),
+      College: form.college.trim(),
+      Major: form.major.trim(),
+    };
+  return base;
+};
+
+//=======================================================================================================================================
+
+const buildUpdatePayload = (form) => {
+  const base = {
+    FullName: form.fullName.trim(),
+    UserName: form.userName.trim(),
+    Email: form.email.trim(),
+  };
+
+  if (form.role === "student") {
+    return {
+      ...base,
+      StudentNumber: form.number.trim(),
+      College: form.college.trim(),
+      Major: form.major.trim(),
+    };
+  }
+
+  if (form.role === "supervisor") {
+    return {
+      ...base,
+      SupervisorNumber: form.number.trim(),
+      Department: form.department.trim(),
+    };
+  }
+
+  if (form.role === "coordinator") {
+    return {
+      ...base,
+      CoordinatorNumber: form.number.trim(),
+      Department: form.department.trim(),
+    };
+  }
+
+  if (form.role === "examiner") {
+    return {
+      ...base,
+      ExaminerNumber: form.number.trim(),
+      Department: form.department.trim(),
+    };
+  }
+
   return base;
 };
 
 const EMPTY_USER_FORM = (role) => ({
-  fullName: "", userName: "", email: "", password: "",
-  role, number: "", department: "", college: "", major: "",
+  fullName: "",
+  userName: "",
+  email: "",
+  password: "",
+  role,
+  number: "",
+  department: "",
+  college: "",
+  major: "",
   mainImage: "",
 });
 
@@ -80,14 +173,28 @@ export default function Users() {
   const [userModal, setUserModal] = useState(null);
   const [userModalError, setUserModalError] = useState("");
   const [saveLoading, setSaveLoading] = useState(false);
+  //==============================================================================================================
+  const [editModalUser, setEditModalUser] = useState(null);
+  const [editModalError, setEditModalError] = useState("");
+  const [editLoading, setEditLoading] = useState(false);
 
-  useEffect(() => { fetchData(); }, []);
-  useEffect(() => { setSearch(""); }, [tab]);
+  useEffect(() => {
+    fetchData();
+  }, []);
+  useEffect(() => {
+    setSearch("");
+  }, [tab]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [studentsRes, supervisorsRes, examinersRes, coordinatorsRes, groupsRes] = await Promise.all([
+      const [
+        studentsRes,
+        supervisorsRes,
+        examinersRes,
+        coordinatorsRes,
+        groupsRes,
+      ] = await Promise.all([
         api.get("/User/students"),
         api.get("/User/supervisors"),
         api.get("/User/examiners"),
@@ -95,37 +202,56 @@ export default function Users() {
         mockApi.get("/groups"),
       ]);
 
-      const students = (studentsRes.data.students || []).map(u => ({
-        id: u.id, name: u.fullName, email: u.email,
-        userId: u.studentNumber, role: "student",
-        college: u.college, major: u.major,
+      const students = (studentsRes.data.students || []).map((u) => ({
+        id: u.id,
+        name: u.fullName,
+        userName: u.userName,
+        email: u.email,
+        userId: u.studentNumber,
+        role: "student",
+        college: u.college,
+        major: u.major,
         pictureProfileURL: u.pictureProfileURL || "",
         isBlocked: u.isBlocked || false,
       }));
 
-      const supervisors = (supervisorsRes.data.supervisors || []).map(u => ({
-        id: u.id, name: u.fullName, email: u.email,
-        userId: u.supervisorNumber, role: "supervisor",
+      const supervisors = (supervisorsRes.data.supervisors || []).map((u) => ({
+        id: u.id,
+        name: u.fullName,
+        userName: u.userName,
+        email: u.email,
+        userId: u.supervisorNumber,
+        role: "supervisor",
         department: u.department,
         pictureProfileURL: u.pictureProfileURL || "",
         isBlocked: u.isBlocked || false,
       }));
 
-      const examiners = (examinersRes.data.examiners || []).map(u => ({
-        id: u.id, name: u.fullName, email: u.email,
-        userId: u.examinerNumber, role: "examiner",
+      const examiners = (examinersRes.data.examiners || []).map((u) => ({
+        id: u.id,
+        name: u.fullName,
+        userName: u.userName,
+        email: u.email,
+        userId: u.examinerNumber,
+        role: "examiner",
         department: u.department,
         pictureProfileURL: u.pictureProfileURL || "",
         isBlocked: u.isBlocked || false,
       }));
 
-      const coordinators = (coordinatorsRes.data.coordinaters || []).map(u => ({
-        id: u.id, name: u.fullName, email: u.email,
-        userId: u.coordinatorNumber, role: "coordinator",
-        department: u.department,
-        pictureProfileURL: u.pictureProfileURL || "",
-        isBlocked: u.isBlocked || false,
-      }));
+      const coordinators = (coordinatorsRes.data.coordinaters || []).map(
+        (u) => ({
+          id: u.id,
+          name: u.fullName,
+          userName: u.userName,
+          email: u.email,
+          userId: u.coordinatorNumber,
+          role: "coordinator",
+          department: u.department,
+          pictureProfileURL: u.pictureProfileURL || "",
+          isBlocked: u.isBlocked || false,
+        }),
+      );
 
       setUsers([...students, ...supervisors, ...examiners, ...coordinators]);
       setGroups(groupsRes.data);
@@ -136,9 +262,9 @@ export default function Users() {
     }
   };
 
-  const currentRole = TABS.find(t => t.key === tab)?.role;
+  const currentRole = TABS.find((t) => t.key === tab)?.role;
 
-  const filteredUsers = users.filter(u => {
+  const filteredUsers = users.filter((u) => {
     if (u.role !== currentRole) return false;
     const q = search.toLowerCase();
     return (
@@ -151,7 +277,7 @@ export default function Users() {
   const handleBlockUser = async (id) => {
     try {
       await api.patch(`/User/block/${id}`);
-      setUsers(prev => prev.filter(u => u.id !== id));
+      setUsers((prev) => prev.filter((u) => u.id !== id));
       setBlockUserId(null);
     } catch (err) {
       console.error("blockUser error:", err);
@@ -161,10 +287,56 @@ export default function Users() {
   const handleUnblockUser = async (id) => {
     try {
       await api.patch(`/User/unblock/${id}`);
-      setUsers(prev => prev.map(u => u.id === id ? { ...u, isBlocked: false } : u));
+      setUsers((prev) =>
+        prev.map((u) => (u.id === id ? { ...u, isBlocked: false } : u)),
+      );
       setUnblockUserId(null);
     } catch (err) {
       console.error("unblockUser error:", err);
+    }
+  };
+
+
+  const handleUpdateUser = async (form) => {
+    const endpointTemplate = UPDATE_ENDPOINT_MAP[form.role];//role الحال من خلال ال EndPoint تحديد ال  
+
+    if (!endpointTemplate) {
+      setEditModalError("Update API is not available for this role yet.");
+      return;
+    }
+
+    setEditLoading(true);
+    setEditModalError("");
+
+    try {
+      const endpoint = endpointTemplate.replace("{id}", form.id);
+      const payload = buildUpdatePayload(form);
+
+      const res = await api.patch(endpoint, payload);
+
+      if (res.data?.success === false) {
+        setEditModalError(res.data.message || "User update failed.");
+        return;
+      }
+
+      await fetchData();
+      setEditModalUser(null);
+      setEditModalError("");
+    } catch (err) {
+      const data = err.response?.data;
+
+      if (data?.errors) {
+        const messages = Object.values(data.errors).flat().join(" ");
+        setEditModalError(messages);
+      } else if (data?.message) {
+        setEditModalError(data.message);
+      } else if (data?.title) {
+        setEditModalError(data.title);
+      } else {
+        setEditModalError("Something went wrong. Please try again.");
+      }
+    } finally {
+      setEditLoading(false);
     }
   };
 
@@ -209,11 +381,29 @@ export default function Users() {
     }
   };
 
-  const getUserName = (id) => users.find(u => u.id === id)?.name || null;
+  const getUserName = (id) => users.find((u) => u.id === id)?.name || null;
 
   const handleAddClick = () => {
     setUserModalError("");
     setUserModal(EMPTY_USER_FORM(currentRole));
+  };
+
+  const handleEditClick = (user) => {
+    if (user.role === "examiner") return;
+
+    setEditModalError("");
+
+    setEditModalUser({
+      id: user.id,
+      fullName: user.name || "",
+      userName: user.userName || "",
+      email: user.email || "",
+      role: user.role,
+      number: user.userId || "",
+      department: user.department || "",
+      college: user.college || "",
+      major: user.major || "",
+    });
   };
 
   const getAddLabel = () => {
@@ -239,7 +429,7 @@ export default function Users() {
       </div>
 
       <div className={styles.tabs}>
-        {TABS.map(t => (
+        {TABS.map((t) => (
           <button
             key={t.key}
             className={`${styles.tab} ${tab === t.key ? styles.tabActive : ""}`}
@@ -247,7 +437,9 @@ export default function Users() {
           >
             {t.label}
             <span className={styles.tabCount}>
-              {t.role ? users.filter(u => u.role === t.role).length : groups.length}
+              {t.role
+                ? users.filter((u) => u.role === t.role).length
+                : groups.length}
             </span>
           </button>
         ))}
@@ -295,23 +487,38 @@ export default function Users() {
                       <td className={styles.emailCell}>{u.email}</td>
                       <td className={styles.idCell}>{u.userId || "-"}</td>
                       <td>
-                        <span className={styles.roleBadge} style={{
-                          background: ROLE_COLORS[u.role]?.bg,
-                          color: ROLE_COLORS[u.role]?.color,
-                        }}>
+                        <span
+                          className={styles.roleBadge}
+                          style={{
+                            background: ROLE_COLORS[u.role]?.bg,
+                            color: ROLE_COLORS[u.role]?.color,
+                          }}
+                        >
                           {u.role?.charAt(0).toUpperCase() + u.role?.slice(1)}
                         </span>
                       </td>
                       <td>
-                        <span className={styles.statusBadge} style={{
-                          background: u.isBlocked ? "#fff0ed" : "#f0fdf4",
-                          color: u.isBlocked ? "#C0441A" : "#166534",
-                        }}>
+                        <span
+                          className={styles.statusBadge}
+                          style={{
+                            background: u.isBlocked ? "#fff0ed" : "#f0fdf4",
+                            color: u.isBlocked ? "#C0441A" : "#166534",
+                          }}
+                        >
                           {u.isBlocked ? "Blocked" : "Active"}
                         </span>
                       </td>
                       <td>
                         <div className={styles.actions}>
+                          {u.role !== "examiner" && (
+                            <button
+                              className={styles.editBtn}
+                              onClick={() => handleEditClick(u)}
+                              title="Edit"
+                            >
+                              <Edit fontSize="small" />
+                            </button>
+                          )}
                           {u.isBlocked ? (
                             <button
                               className={styles.unblockBtn}
@@ -362,20 +569,32 @@ export default function Users() {
                   <div className={styles.groupInfo}>
                     <div className={styles.groupInfoRow}>
                       <span className={styles.groupInfoLabel}>Supervisor</span>
-                      <span className={styles.groupInfoValue}>{getUserName(g.supervisorId) || "-"}</span>
+                      <span className={styles.groupInfoValue}>
+                        {getUserName(g.supervisorId) || "-"}
+                      </span>
                     </div>
                     <div className={styles.groupInfoRow}>
                       <span className={styles.groupInfoLabel}>Examiner</span>
-                      <span className={styles.groupInfoValue}>{getUserName(g.examinerId) || "-"}</span>
+                      <span className={styles.groupInfoValue}>
+                        {getUserName(g.examinerId) || "-"}
+                      </span>
                     </div>
                     <div className={styles.groupInfoRow}>
                       <span className={styles.groupInfoLabel}>Students</span>
                       <div className={styles.studentsList}>
-                        {g.students?.filter(sid => getUserName(sid)).map(sid => (
-                          <span key={sid} className={styles.studentChip}>{getUserName(sid)}</span>
-                        ))}
-                        {(!g.students || g.students.filter(sid => getUserName(sid)).length === 0) && (
-                          <span className={styles.noStudents}>No students assigned</span>
+                        {g.students
+                          ?.filter((sid) => getUserName(sid))
+                          .map((sid) => (
+                            <span key={sid} className={styles.studentChip}>
+                              {getUserName(sid)}
+                            </span>
+                          ))}
+                        {(!g.students ||
+                          g.students.filter((sid) => getUserName(sid))
+                            .length === 0) && (
+                          <span className={styles.noStudents}>
+                            No students assigned
+                          </span>
                         )}
                       </div>
                     </div>
@@ -392,9 +611,26 @@ export default function Users() {
           user={userModal}
           externalError={userModalError}
           saveLoading={saveLoading}
-          onClose={() => { setUserModal(null); setUserModalError(""); }}
+          onClose={() => {
+            setUserModal(null);
+            setUserModalError("");
+          }}
           onSave={handleSaveUser}
           onClearError={() => setUserModalError("")}
+        />
+      )}
+
+      {editModalUser && (
+        <EditUserModal
+          user={editModalUser}
+          externalError={editModalError}
+          saveLoading={editLoading}
+          onClose={() => {
+            setEditModalUser(null);
+            setEditModalError("");
+          }}
+          onSave={handleUpdateUser}
+          onClearError={() => setEditModalError("")}
         />
       )}
 
@@ -402,10 +638,22 @@ export default function Users() {
         <div className={styles.modalOverlay}>
           <div className={styles.confirmModal}>
             <h3 className={styles.modalTitle}>Block User</h3>
-            <p className={styles.modalText}>Are you sure you want to block this user?</p>
+            <p className={styles.modalText}>
+              Are you sure you want to block this user?
+            </p>
             <div className={styles.modalActions}>
-              <button className={styles.cancelBtn} onClick={() => setBlockUserId(null)}>Cancel</button>
-              <button className={styles.confirmBlockBtn} onClick={() => handleBlockUser(blockUserId)}>Block</button>
+              <button
+                className={styles.cancelBtn}
+                onClick={() => setBlockUserId(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className={styles.confirmBlockBtn}
+                onClick={() => handleBlockUser(blockUserId)}
+              >
+                Block
+              </button>
             </div>
           </div>
         </div>
@@ -415,10 +663,22 @@ export default function Users() {
         <div className={styles.modalOverlay}>
           <div className={styles.confirmModal}>
             <h3 className={styles.modalTitle}>Unblock User</h3>
-            <p className={styles.modalText}>Are you sure you want to unblock this user?</p>
+            <p className={styles.modalText}>
+              Are you sure you want to unblock this user?
+            </p>
             <div className={styles.modalActions}>
-              <button className={styles.cancelBtn} onClick={() => setUnblockUserId(null)}>Cancel</button>
-              <button className={styles.confirmUnblockBtn} onClick={() => handleUnblockUser(unblockUserId)}>Unblock</button>
+              <button
+                className={styles.cancelBtn}
+                onClick={() => setUnblockUserId(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className={styles.confirmUnblockBtn}
+                onClick={() => handleUnblockUser(unblockUserId)}
+              >
+                Unblock
+              </button>
             </div>
           </div>
         </div>
@@ -427,7 +687,14 @@ export default function Users() {
   );
 }
 
-function UserModal({ user, externalError, saveLoading, onClose, onSave, onClearError }) {
+function UserModal({
+  user,
+  externalError,
+  saveLoading,
+  onClose,
+  onSave,
+  onClearError,
+}) {
   const [form, setForm] = useState({ ...user });
   const [localError, setLocalError] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -435,7 +702,7 @@ function UserModal({ user, externalError, saveLoading, onClose, onSave, onClearE
   const displayError = externalError || localError;
 
   const handleChange = (field, value) => {
-    setForm(prev => ({ ...prev, [field]: value }));
+    setForm((prev) => ({ ...prev, [field]: value }));
     setLocalError("");
     onClearError();
   };
@@ -445,10 +712,13 @@ function UserModal({ user, externalError, saveLoading, onClose, onSave, onClearE
     if (!form.userName.trim()) return "Username is required.";
     if (!form.email.trim()) return "Email is required.";
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(form.email)) return "Please enter a valid email address.";
+    if (!emailRegex.test(form.email))
+      return "Please enter a valid email address.";
     if (!form.password) return "Password is required.";
-    if (form.password.length < 8) return "Password must be at least 8 characters.";
-    if (!form.number.trim()) return `${ID_LABEL[form.role] || "ID"} is required.`;
+    if (form.password.length < 8)
+      return "Password must be at least 8 characters.";
+    if (!form.number.trim())
+      return `${ID_LABEL[form.role] || "ID"} is required.`;
     if (form.role === "student") {
       if (!form.college.trim()) return "College is required.";
       if (!form.major.trim()) return "Major is required.";
@@ -461,7 +731,10 @@ function UserModal({ user, externalError, saveLoading, onClose, onSave, onClearE
 
   const handleSave = () => {
     const err = validate();
-    if (err) { setLocalError(err); return; }
+    if (err) {
+      setLocalError(err);
+      return;
+    }
     setLocalError("");
     onSave(form);
   };
@@ -469,64 +742,118 @@ function UserModal({ user, externalError, saveLoading, onClose, onSave, onClearE
   const roleLabel = form.role?.charAt(0).toUpperCase() + form.role?.slice(1);
 
   return (
-    <div className={styles.modalOverlay}>
-      <div className={styles.modal}>
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
           <h3 className={styles.modalTitle}>Add {roleLabel}</h3>
-          <button className={styles.closeBtn} onClick={onClose}><Close fontSize="small" /></button>
+          <button className={styles.closeBtn} onClick={onClose}>
+            <Close fontSize="small" />
+          </button>
         </div>
         <div className={styles.modalBody}>
           {displayError && <p className={styles.errorMsg}>{displayError}</p>}
 
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>Full Name <span className={styles.required}>*</span></label>
-            <input className={styles.input} value={form.fullName} onChange={e => handleChange("fullName", e.target.value)} placeholder="e.g. Ahmad Khalil" />
+            <label className={styles.label}>
+              Full Name <span className={styles.required}>*</span>
+            </label>
+            <input
+              className={styles.input}
+              value={form.fullName}
+              onChange={(e) => handleChange("fullName", e.target.value)}
+              placeholder="e.g. Ahmad Khalil"
+            />
           </div>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>Username <span className={styles.required}>*</span></label>
-            <input className={styles.input} value={form.userName} onChange={e => handleChange("userName", e.target.value)} placeholder="e.g. ahmad.khalil" />
+            <label className={styles.label}>
+              Username <span className={styles.required}>*</span>
+            </label>
+            <input
+              className={styles.input}
+              value={form.userName}
+              onChange={(e) => handleChange("userName", e.target.value)}
+              placeholder="e.g. ahmad.khalil"
+            />
           </div>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>Email <span className={styles.required}>*</span></label>
-            <input className={styles.input} type="email" value={form.email} onChange={e => handleChange("email", e.target.value)} placeholder="e.g. ahmad@ptuk.edu.ps" />
+            <label className={styles.label}>
+              Email <span className={styles.required}>*</span>
+            </label>
+            <input
+              className={styles.input}
+              type="email"
+              value={form.email}
+              onChange={(e) => handleChange("email", e.target.value)}
+              placeholder="e.g. ahmad@ptuk.edu.ps"
+            />
           </div>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>Password <span className={styles.required}>*</span></label>
+            <label className={styles.label}>
+              Password <span className={styles.required}>*</span>
+            </label>
             <div className={styles.passwordWrapper}>
               <input
                 className={styles.input}
                 type={showPass ? "text" : "password"}
                 value={form.password}
-                onChange={e => handleChange("password", e.target.value)}
+                onChange={(e) => handleChange("password", e.target.value)}
                 placeholder="Min 8 characters"
                 style={{ paddingRight: "42px" }}
               />
-              <button type="button" className={styles.eyeBtn} onClick={() => setShowPass(p => !p)}>
-                {showPass
-                  ? <Visibility fontSize="small" sx={{ color: "#888" }} />
-                  : <VisibilityOff fontSize="small" sx={{ color: "#888" }} />
-                }
+              <button
+                type="button"
+                className={styles.eyeBtn}
+                onClick={() => setShowPass((p) => !p)}
+              >
+                {showPass ? (
+                  <Visibility fontSize="small" sx={{ color: "#888" }} />
+                ) : (
+                  <VisibilityOff fontSize="small" sx={{ color: "#888" }} />
+                )}
               </button>
             </div>
           </div>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>{ID_LABEL[form.role] || "ID"} <span className={styles.required}>*</span></label>
-            <input className={styles.input} value={form.number} onChange={e => handleChange("number", e.target.value)} placeholder="e.g. 1201234" />
+            <label className={styles.label}>
+              {ID_LABEL[form.role] || "ID"}{" "}
+              <span className={styles.required}>*</span>
+            </label>
+            <input
+              className={styles.input}
+              value={form.number}
+              onChange={(e) => handleChange("number", e.target.value)}
+              placeholder="e.g. 1201234"
+            />
           </div>
 
           {["supervisor", "examiner", "coordinator"].includes(form.role) && (
             <>
               <div className={styles.fieldGroup}>
-                <label className={styles.label}>Department <span className={styles.required}>*</span></label>
-                <input className={styles.input} value={form.department} onChange={e => handleChange("department", e.target.value)} placeholder="e.g. Computer Science" />
+                <label className={styles.label}>
+                  Department <span className={styles.required}>*</span>
+                </label>
+                <input
+                  className={styles.input}
+                  value={form.department}
+                  onChange={(e) => handleChange("department", e.target.value)}
+                  placeholder="e.g. Computer Science"
+                />
               </div>
               <div className={styles.fieldGroup}>
-                <label className={styles.label}>Main Image URL <span className={styles.optional}>(optional)</span></label>
-                <input className={styles.input} value={form.mainImage} onChange={e => handleChange("mainImage", e.target.value)} placeholder="https://..." />
+                <label className={styles.label}>
+                  Main Image URL{" "}
+                  <span className={styles.optional}>(optional)</span>
+                </label>
+                <input
+                  className={styles.input}
+                  value={form.mainImage}
+                  onChange={(e) => handleChange("mainImage", e.target.value)}
+                  placeholder="https://..."
+                />
               </div>
             </>
           )}
@@ -534,20 +861,44 @@ function UserModal({ user, externalError, saveLoading, onClose, onSave, onClearE
           {form.role === "student" && (
             <>
               <div className={styles.fieldGroup}>
-                <label className={styles.label}>College <span className={styles.required}>*</span></label>
-                <input className={styles.input} value={form.college} onChange={e => handleChange("college", e.target.value)} placeholder="e.g. Engineering" />
+                <label className={styles.label}>
+                  College <span className={styles.required}>*</span>
+                </label>
+                <input
+                  className={styles.input}
+                  value={form.college}
+                  onChange={(e) => handleChange("college", e.target.value)}
+                  placeholder="e.g. Engineering"
+                />
               </div>
               <div className={styles.fieldGroup}>
-                <label className={styles.label}>Major <span className={styles.required}>*</span></label>
-                <input className={styles.input} value={form.major} onChange={e => handleChange("major", e.target.value)} placeholder="e.g. Computer Science" />
+                <label className={styles.label}>
+                  Major <span className={styles.required}>*</span>
+                </label>
+                <input
+                  className={styles.input}
+                  value={form.major}
+                  onChange={(e) => handleChange("major", e.target.value)}
+                  placeholder="e.g. Computer Science"
+                />
               </div>
             </>
           )}
         </div>
 
         <div className={styles.modalFooter}>
-          <button className={styles.cancelBtn} onClick={onClose} disabled={saveLoading}>Cancel</button>
-          <button className={styles.saveBtn} onClick={handleSave} disabled={saveLoading}>
+          <button
+            className={styles.cancelBtn}
+            onClick={onClose}
+            disabled={saveLoading}
+          >
+            Cancel
+          </button>
+          <button
+            className={styles.saveBtn}
+            onClick={handleSave}
+            disabled={saveLoading}
+          >
             {saveLoading ? "Saving..." : `Add ${roleLabel}`}
           </button>
         </div>
