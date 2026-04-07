@@ -22,6 +22,7 @@ import Users from "./pages/coordinator/Users/Users";
 import ExaminationTimetable from "./pages/coordinator/ExaminationTimetable/ExaminationTimetable";
 import ThesisManagement from "./pages/coordinator/ThesisManagement/ThesisManagement";
 import FinalGrades from "./pages/coordinator/FinalGrades/FinalGrades";
+import Semester from "./pages/coordinator/Semester/Semester";
 
 import ExaminerEvaluationForms from "./pages/examiner/EvaluationForms/ExaminerEvaluationForms";
 import SupervisorEvaluationForms from "./pages/supervisor/EvaluationForms/SupervisorEvaluationForms";
@@ -99,6 +100,7 @@ const routes = createBrowserRouter([
       { path: "thesis-management", element: <ThesisManagement /> },
       { path: "final-grades", element: <FinalGrades /> },
       { path: "profile", element: <Profile /> },
+      { path: "semester", element: <Semester /> },
     ],
   },
 

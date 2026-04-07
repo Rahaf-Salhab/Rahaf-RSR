@@ -61,21 +61,21 @@ const buildPayload = (form) => {
       ...base,
       SupervisorNumber: form.number.trim(),
       Department: form.department.trim(),
-      MainImage: form.mainImage?.trim() || "",
+      MainImage: "",
     };
   if (form.role === "examiner")
     return {
       ...base,
       ExaminerNumber: form.number.trim(),
       Department: form.department.trim(),
-      MainImage: form.mainImage?.trim() || "",
+      MainImage: "",
     };
   if (form.role === "coordinator")
     return {
       ...base,
       CoordinatorNumber: form.number.trim(),
       Department: form.department.trim(),
-      MainImage: form.mainImage?.trim() || "",
+      MainImage: "",
     };
   if (form.role === "student")
     return {
@@ -86,8 +86,6 @@ const buildPayload = (form) => {
     };
   return base;
 };
-
-//=======================================================================================================================================
 
 const buildUpdatePayload = (form) => {
   const base = {
@@ -142,7 +140,6 @@ const EMPTY_USER_FORM = (role) => ({
   department: "",
   college: "",
   major: "",
-  mainImage: "",
 });
 
 function UserAvatar({ user }) {
@@ -173,7 +170,6 @@ export default function Users() {
   const [userModal, setUserModal] = useState(null);
   const [userModalError, setUserModalError] = useState("");
   const [saveLoading, setSaveLoading] = useState(false);
-  //==============================================================================================================
   const [editModalUser, setEditModalUser] = useState(null);
   const [editModalError, setEditModalError] = useState("");
   const [editLoading, setEditLoading] = useState(false);
@@ -296,9 +292,8 @@ export default function Users() {
     }
   };
 
-
   const handleUpdateUser = async (form) => {
-    const endpointTemplate = UPDATE_ENDPOINT_MAP[form.role];//role الحال من خلال ال EndPoint تحديد ال  
+    const endpointTemplate = UPDATE_ENDPOINT_MAP[form.role];
 
     if (!endpointTemplate) {
       setEditModalError("Update API is not available for this role yet.");
@@ -831,31 +826,17 @@ function UserModal({
           </div>
 
           {["supervisor", "examiner", "coordinator"].includes(form.role) && (
-            <>
-              <div className={styles.fieldGroup}>
-                <label className={styles.label}>
-                  Department <span className={styles.required}>*</span>
-                </label>
-                <input
-                  className={styles.input}
-                  value={form.department}
-                  onChange={(e) => handleChange("department", e.target.value)}
-                  placeholder="e.g. Computer Science"
-                />
-              </div>
-              <div className={styles.fieldGroup}>
-                <label className={styles.label}>
-                  Main Image URL{" "}
-                  <span className={styles.optional}>(optional)</span>
-                </label>
-                <input
-                  className={styles.input}
-                  value={form.mainImage}
-                  onChange={(e) => handleChange("mainImage", e.target.value)}
-                  placeholder="https://..."
-                />
-              </div>
-            </>
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>
+                Department <span className={styles.required}>*</span>
+              </label>
+              <input
+                className={styles.input}
+                value={form.department}
+                onChange={(e) => handleChange("department", e.target.value)}
+                placeholder="e.g. Computer Science"
+              />
+            </div>
           )}
 
           {form.role === "student" && (

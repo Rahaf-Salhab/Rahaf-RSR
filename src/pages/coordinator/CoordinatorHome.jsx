@@ -1,13 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { mockApi as api } from "../../api/axiosInstance";
+import api, { mockApi } from "../../api/axiosInstance";
 import styles from "./CoordinatorHome.module.css";
 import {
-  People,
-  FolderOpen,
-  EventNote,
-  HourglassEmpty,
-  Add,
+  People, FolderOpen, EventNote, HourglassEmpty, Add, CalendarMonth,
 } from "@mui/icons-material";
 
 const timeAgo = (dateString) => {
@@ -23,163 +19,257 @@ const timeAgo = (dateString) => {
   return `${Math.floor(diff / 31536000)} years ago`;
 };
 
+function StartSemesterScreen({ onStart, loading }) {
+  const [form, setForm] = useState({ Name: "", StartDate: "", EndDate: "" });
+  const [error, setError] = useState("");
+
+  const handleSubmit = () => {
+    if (!form.Name.trim()) { setError("Semester name is required."); return; }
+    if (!form.StartDate) { setError("Start date is required."); return; }
+    if (!form.EndDate) { setError("End date is required."); return; }
+    if (new Date(form.EndDate) <= new Date(form.StartDate)) {
+      setError("End date must be after start date.");
+      return;
+    }
+    setError("");
+    onStart(form);
+  };
+
+  return (
+    <div className={styles.semesterScreen}>
+      <div className={styles.semesterCard}>
+        <div className={styles.semesterIcon}>
+          <CalendarMonth style={{ fontSize: 48, color: "#C0441A" }} />
+        </div>
+        <h1 className={styles.semesterTitle}>Start New Semester</h1>
+        <p className={styles.semesterSubtitle}>
+          Please fill in the semester details to get started.
+        </p>
+
+        {error && <p className={styles.semesterError}>{error}</p>}
+
+        <div className={styles.semesterForm}>
+          <div className={styles.semesterFieldGroup}>
+            <label className={styles.semesterLabel}>Semester Name <span className={styles.required}>*</span></label>
+            <input
+              className={styles.semesterInput}
+              value={form.Name}
+              onChange={e => { setForm(p => ({ ...p, Name: e.target.value })); setError(""); }}
+              placeholder="e.g. 2025/2026"
+            />
+          </div>
+          <div className={styles.semesterFieldGroup}>
+            <label className={styles.semesterLabel}>Start Date <span className={styles.required}>*</span></label>
+            <input
+              className={styles.semesterInput}
+              type="date"
+              value={form.StartDate}
+              onChange={e => { setForm(p => ({ ...p, StartDate: e.target.value })); setError(""); }}
+            />
+          </div>
+          <div className={styles.semesterFieldGroup}>
+            <label className={styles.semesterLabel}>End Date <span className={styles.required}>*</span></label>
+            <input
+              className={styles.semesterInput}
+              type="date"
+              value={form.EndDate}
+              onChange={e => { setForm(p => ({ ...p, EndDate: e.target.value })); setError(""); }}
+            />
+          </div>
+        </div>
+
+        <button
+          className={styles.semesterBtn}
+          onClick={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? "Starting..." : "Start New Semester"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function CoordinatorHome() {
   const navigate = useNavigate();
+  const [checkingSemester, setCheckingSemester] = useState(true);
+  const [semesterState, setSemesterState] = useState(null);
+  const [startingSemester, setStartingSemester] = useState(false);
   const [stats, setStats] = useState(null);
   const [activities, setActivities] = useState([]);
   const [systemStatus, setSystemStatus] = useState([]);
   const [loading, setLoading] = useState(true);
+  const intervalRef = useRef(null);
+  const endDateRef = useRef(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // 🔴 MOCK
-        const [
-          statsRes, usersRes, timetableRes,
-          thesisRes, groupsRes, gradesRes
-        ] = await Promise.all([
-          api.get("/coordinatorStats"),
-          api.get("/users"),
-          api.get("/examinationTimetable"),
-          api.get("/thesis"),
-          api.get("/groups"),
-          api.get("/grades"),
-        ]);
+    checkActiveSemester();
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
 
-        // ✅ REAL
-        // const [
-        //   statsRes, usersRes, timetableRes,
-        //   thesisRes, groupsRes, gradesRes
-        // ] = await Promise.all([
-        //   api.get("/coordinator/stats"),
-        //   api.get("/admin/users"),
-        //   api.get("/examination-timetable"),
-        //   api.get("/thesis"),
-        //   api.get("/admin/groups"),
-        //   api.get("/admin/grades"),
-        // ]);
+  // بيشوف إذا انتهى الفصل كل دقيقة
+  const startEndDateWatcher = (endDate) => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    endDateRef.current = endDate;
+    intervalRef.current = setInterval(() => {
+      const now = new Date();
+      const end = new Date(endDateRef.current);
+      if (now >= end) {
+        setSemesterState("ended");
+        clearInterval(intervalRef.current);
+      }
+    }, 60000); // كل دقيقة
+  };
 
-        // Stats
-        const realUsers = usersRes.data.filter(u => u.role !== "coordinator");
-        const activeProjects = thesisRes.data.filter(t => t.status === "in-progress").length;
-        const pendingGrades = groupsRes.data.reduce((count, group) => {
-          const hasSupervisor = gradesRes.data.some(g => g.groupId === group.id && g.role === "supervisor");
-          const hasExaminer = gradesRes.data.some(g => g.groupId === group.id && g.role === "examiner");
-          if (!hasSupervisor) count++;
-          if (!hasExaminer) count++;
-          return count;
-        }, 0);
+  const checkActiveSemester = async () => {
+    setCheckingSemester(true);
+    try {
+      const res = await api.get("/Semester/ActiveSemester");
+      const semester = res.data?.semester;
 
-        setStats({
-          ...statsRes.data,
-          totalUsers: realUsers.length,
-          examinations: timetableRes.data.length,
-          activeProjects,
-          pendingGrades,
-        });
+      if (semester) {
+        const now = new Date();
+        const endDate = new Date(semester.endDate);
 
-        // Recent Activities - من مصادر متعددة بدون duplicates
-        const gradeActivities = gradesRes.data.map(g => ({
-          id: `grade-${g.id}`,
-          text: `Grades submitted for ${g.groupName} by ${g.role}`,
-          createdAt: g.createdAt,
-        }));
-
-        const userActivities = usersRes.data
-          .filter(u => u.role !== "coordinator" && u.createdAt)
-          .map(u => ({
-            id: `user-${u.id}`,
-            text: `New ${u.role} registered: ${u.name}`,
-            createdAt: u.createdAt,
-          }));
-
-        const thesisActivities = thesisRes.data
-          .filter(t => t.createdAt)
-          .map(t => ({
-            id: `thesis-${t.id}`,
-            text: `Thesis "${t.title}" added with status ${t.status}`,
-            createdAt: t.createdAt,
-          }));
-
-        const timetableActivities = timetableRes.data
-          .filter(t => t.createdAt)
-          .map(t => ({
-            id: `timetable-${t.id}`,
-            text: `Examination scheduled for ${t.groupName}`,
-            createdAt: t.createdAt,
-          }));
-
-        const seen = new Set();
-        const allActivities = [
-          ...gradeActivities,
-          ...userActivities,
-          ...thesisActivities,
-          ...timetableActivities,
-        ]
-          .filter(a => a.createdAt)
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-          .filter(a => {
-            if (seen.has(a.text)) return false;
-            seen.add(a.text);
-            return true;
-          })
-          .slice(0, 5);
-
-        setActivities(allActivities);
-
-        // System Status
-        const allSupervisors = usersRes.data.filter(u => u.role === "supervisor");
-        const allStudents = usersRes.data.filter(u => u.role === "student");
-        const allExaminers = usersRes.data.filter(u => u.role === "examiner");
-
-        const activeSupervisors = allSupervisors.filter(u =>
-          groupsRes.data.some(g => g.supervisorId === u.id)
-        ).length;
-
-        const activeStudents = allStudents.filter(u =>
-          groupsRes.data.some(g => g.students.includes(u.id))
-        ).length;
-
-        const activeExaminers = allExaminers.filter(u =>
-          groupsRes.data.some(g => g.examinerId === u.id)
-        ).length;
-
-        // ✅ REAL
-        // const { activeSupervisors, activeStudents, activeExaminers,
-        //         totalSupervisors, totalStudents, totalExaminers } = statsRes.data;
-
-        setSystemStatus([
-          {
-            id: 1,
-            label: "Active Supervisors",
-            value: activeSupervisors,
-            max: allSupervisors.length,
-            color: "#22c55e",
-          },
-          {
-            id: 2,
-            label: "Active Students",
-            value: activeStudents,
-            max: allStudents.length,
-            color: "#3b82f6",
-          },
-          {
-            id: 3,
-            label: "Active Examiners",
-            value: activeExaminers,
-            max: allExaminers.length,
-            color: "#a855f7",
-          },
-        ]);
-
-      } catch (err) {
-        console.error(err);
-      } finally {
+        if (now >= endDate) {
+          setSemesterState("ended");
+          setLoading(false);
+        } else {
+          setSemesterState("active");
+          startEndDateWatcher(semester.endDate);
+          fetchDashboardData();
+        }
+      } else {
+        setSemesterState("none");
         setLoading(false);
       }
-    };
-    fetchData();
-  }, []);
+    } catch (err) {
+      if (err.response?.status === 404) {
+        setSemesterState("none");
+      } else {
+        setSemesterState("active");
+        fetchDashboardData();
+      }
+      setLoading(false);
+    } finally {
+      setCheckingSemester(false);
+    }
+  };
+
+  const handleStartSemester = async (form) => {
+    setStartingSemester(true);
+    try {
+      await api.post("/Semester/CreateSemester", {
+        Name: form.Name,
+        StartDate: new Date(form.StartDate).toISOString(),
+        EndDate: new Date(form.EndDate).toISOString(),
+      });
+      setSemesterState("active");
+      startEndDateWatcher(form.EndDate);
+      fetchDashboardData();
+    } catch (err) {
+      console.error("createSemester error:", err);
+    } finally {
+      setStartingSemester(false);
+    }
+  };
+
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      const [usersRes, groupsRes, gradesRes, timetableRes, thesisRes] = await Promise.all([
+        mockApi.get("/users"),
+        mockApi.get("/groups"),
+        mockApi.get("/grades"),
+        mockApi.get("/examinationTimetable"),
+        mockApi.get("/thesis"),
+      ]);
+
+      const realUsers = usersRes.data.filter(u => u.role !== "coordinator");
+      const activeProjects = thesisRes.data.filter(t => t.status === "in-progress").length;
+      const pendingGrades = groupsRes.data.reduce((count, group) => {
+        const hasSupervisor = gradesRes.data.some(g => g.groupId === group.id && g.role === "supervisor");
+        const hasExaminer = gradesRes.data.some(g => g.groupId === group.id && g.role === "examiner");
+        if (!hasSupervisor) count++;
+        if (!hasExaminer) count++;
+        return count;
+      }, 0);
+
+      setStats({
+        totalUsers: realUsers.length,
+        examinations: timetableRes.data.length,
+        activeProjects,
+        pendingGrades,
+      });
+
+      const gradeActivities = gradesRes.data.map(g => ({
+        id: `grade-${g.id}`,
+        text: `Grades submitted for ${g.groupName} by ${g.role}`,
+        createdAt: g.createdAt,
+      }));
+
+      const userActivities = usersRes.data
+        .filter(u => u.role !== "coordinator" && u.createdAt)
+        .map(u => ({
+          id: `user-${u.id}`,
+          text: `New ${u.role} registered: ${u.name}`,
+          createdAt: u.createdAt,
+        }));
+
+      const seen = new Set();
+      const allActivities = [...gradeActivities, ...userActivities]
+        .filter(a => a.createdAt)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .filter(a => {
+          if (seen.has(a.text)) return false;
+          seen.add(a.text);
+          return true;
+        })
+        .slice(0, 5);
+
+      setActivities(allActivities);
+
+      const allSupervisors = usersRes.data.filter(u => u.role === "supervisor");
+      const allStudents = usersRes.data.filter(u => u.role === "student");
+      const allExaminers = usersRes.data.filter(u => u.role === "examiner");
+
+      const activeSupervisors = allSupervisors.filter(u =>
+        groupsRes.data.some(g => g.supervisorId === u.id)
+      ).length;
+
+      const activeStudents = allStudents.filter(u =>
+        groupsRes.data.some(g => g.students.includes(u.id))
+      ).length;
+
+      const activeExaminers = allExaminers.filter(u =>
+        groupsRes.data.some(g => g.examinerId === u.id)
+      ).length;
+
+      setSystemStatus([
+        { id: 1, label: "Active Supervisors", value: activeSupervisors, max: allSupervisors.length, color: "#22c55e" },
+        { id: 2, label: "Active Students", value: activeStudents, max: allStudents.length, color: "#3b82f6" },
+        { id: 3, label: "Active Examiners", value: activeExaminers, max: allExaminers.length, color: "#a855f7" },
+      ]);
+
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (checkingSemester) return <div className={styles.loading}>Loading...</div>;
+
+  if (semesterState === "none" || semesterState === "ended") {
+    return (
+      <StartSemesterScreen
+        onStart={handleStartSemester}
+        loading={startingSemester}
+      />
+    );
+  }
 
   if (loading) return <div className={styles.loading}>Loading...</div>;
 
@@ -192,7 +282,6 @@ export default function CoordinatorHome() {
 
   return (
     <div className={styles.page}>
-      {/* Header */}
       <div className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>Dashboard</h1>
@@ -207,7 +296,6 @@ export default function CoordinatorHome() {
         </button>
       </div>
 
-      {/* Stats Cards */}
       <div className={styles.cards}>
         {cards.map((card, i) => (
           <div key={i} className={styles.card}>
@@ -222,9 +310,7 @@ export default function CoordinatorHome() {
         ))}
       </div>
 
-      {/* Bottom Section */}
       <div className={styles.bottom}>
-        {/* Recent Activities */}
         <div className={styles.box}>
           <h2 className={styles.boxTitle}>Recent Activities</h2>
           {activities.length === 0 ? (
@@ -241,7 +327,6 @@ export default function CoordinatorHome() {
           )}
         </div>
 
-        {/* System Status */}
         <div className={styles.box}>
           <h2 className={styles.boxTitle}>System Status</h2>
           <div className={styles.statusList}>

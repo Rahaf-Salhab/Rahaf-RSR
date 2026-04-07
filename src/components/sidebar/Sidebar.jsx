@@ -3,12 +3,13 @@ import styles from "./Sidebar.module.css";
 import rsrLogo from "../../assets/logo/rsrLogo.png";
 import {
   Dashboard, People, Assignment, CalendarMonth, MenuBook,
-  Grade, Archive, Person, Logout, Close, RateReview, Schedule, Folder, Task,
+  Grade, Archive, Person, Logout, Close, RateReview, Schedule, Folder, Task, DateRange,
 } from "@mui/icons-material";
 
 const sidebarConfig = {
   coordinator: [
     { label: "Dashboard",             icon: <Dashboard />,    path: "/coordinator/home" },
+    { label: "Semester",              icon: <DateRange />,    path: "/coordinator/semester" },
     { label: "Users",                 icon: <People />,       path: "/coordinator/users" },
     { label: "Evaluation Forms",      icon: <Assignment />,   path: "/coordinator/evaluation-forms" },
     { label: "Examination Timetable", icon: <CalendarMonth />,path: "/coordinator/examination-timetable" },
