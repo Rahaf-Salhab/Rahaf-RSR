@@ -1,6 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-.page { display: flex; flex-direction: column; gap: 24px; font-family: 'Inter', sans-serif; }
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  font-family: 'Inter', sans-serif;
+}
 
 .pageHeader {
   display: flex;
@@ -10,8 +15,17 @@
   gap: 12px;
 }
 
-.pageTitle { font-size: 24px; font-weight: 700; color: #101828; }
-.pageSubtitle { font-size: 14px; color: #4A5565; margin-top: 4px; }
+.pageTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #101828;
+}
+
+.pageSubtitle {
+  font-size: 14px;
+  color: #4A5565;
+  margin-top: 4px;
+}
 
 .loading {
   display: flex;
@@ -38,13 +52,15 @@
   transition: opacity 0.2s;
 }
 
-.editBtn:hover { opacity: 0.88; }
+.editBtn:hover {
+  opacity: 0.88;
+}
 
 .card {
   background: #fff;
   border-radius: 16px;
   padding: 28px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -90,7 +106,11 @@
   gap: 20px;
 }
 
-.infoItem { display: flex; flex-direction: column; gap: 6px; }
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 
 .infoLabel {
   font-size: 11px;
@@ -112,7 +132,11 @@
 }
 
 /* Progress */
-.progressSection { display: flex; flex-direction: column; gap: 8px; }
+.progressSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
 .progressHeader {
   display: flex;
@@ -120,8 +144,17 @@
   justify-content: space-between;
 }
 
-.progressLabel { font-size: 13px; font-weight: 500; color: #4A5565; }
-.progressPercent { font-size: 13px; font-weight: 700; color: #C0441A; }
+.progressLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: #4A5565;
+}
+
+.progressPercent {
+  font-size: 13px;
+  font-weight: 700;
+  color: #C0441A;
+}
 
 .progressBar {
   height: 10px;
@@ -174,7 +207,11 @@
 }
 
 /* Form */
-.form { display: flex; flex-direction: column; gap: 16px; }
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
 .fieldRow {
   display: grid;
@@ -182,9 +219,21 @@
   gap: 16px;
 }
 
-.fieldGroup { display: flex; flex-direction: column; gap: 6px; }
-.label { font-size: 13px; font-weight: 500; color: #333; }
-.required { color: #C0441A; }
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+}
+
+.required {
+  color: #C0441A;
+}
 
 .input {
   width: 100%;
@@ -199,7 +248,10 @@
   transition: border-color 0.2s;
 }
 
-.input:focus { border-color: #C0441A; outline: none; }
+.input:focus {
+  border-color: #C0441A;
+  outline: none;
+}
 
 .formActions {
   display: flex;
@@ -222,7 +274,9 @@
   color: #4A5565;
 }
 
-.cancelBtn:hover { background: #e4e4e4; }
+.cancelBtn:hover {
+  background: #e4e4e4;
+}
 
 .saveBtn {
   display: flex;
@@ -239,8 +293,14 @@
   cursor: pointer;
 }
 
-.saveBtn:hover:not(:disabled) { opacity: 0.88; }
-.saveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.saveBtn:hover:not(:disabled) {
+  opacity: 0.88;
+}
+
+.saveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .successMsg {
   display: flex;
@@ -265,9 +325,24 @@
 }
 
 @media (max-width: 768px) {
-  .infoGrid { grid-template-columns: 1fr; }
-  .fieldRow { grid-template-columns: 1fr; }
-  .pageHeader { flex-direction: column; align-items: flex-start; }
-  .counterBox { padding: 20px 32px; }
-  .counterNumber { font-size: 48px; }
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .fieldRow {
+    grid-template-columns: 1fr;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .counterBox {
+    padding: 20px 32px;
+  }
+
+  .counterNumber {
+    font-size: 48px;
+  }
 }

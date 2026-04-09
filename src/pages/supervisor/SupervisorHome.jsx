@@ -1,10 +1,7 @@
-import React from 'react'
- 
+import React from "react";
 
 function SupervisorHome() {
-  return (
-    <div>SupervisorHome</div>
-  )
+  return <div>SupervisorHome</div>;
 }
 
-export default SupervisorHome
+export default SupervisorHome;
