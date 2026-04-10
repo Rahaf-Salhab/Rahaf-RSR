@@ -23,6 +23,8 @@ import ExaminationTimetable from "./pages/coordinator/ExaminationTimetable/Exami
 import ThesisManagement from "./pages/coordinator/ThesisManagement/ThesisManagement";
 import FinalGrades from "./pages/coordinator/FinalGrades/FinalGrades";
 import Semester from "./pages/coordinator/Semester/Semester";
+import ArchiveSemesters from "./pages/coordinator/archive/ArchiveSemesters";
+import ArchivedThesis from "./pages/coordinator/archive/ArchivedThesis";
 
 import ExaminerEvaluationForms from "./pages/examiner/EvaluationForms/ExaminerEvaluationForms";
 import SupervisorEvaluationForms from "./pages/supervisor/EvaluationForms/SupervisorEvaluationForms";
@@ -101,6 +103,8 @@ const routes = createBrowserRouter([
       { path: "final-grades", element: <FinalGrades /> },
       { path: "profile", element: <Profile /> },
       { path: "semester", element: <Semester /> },
+      { path: "archive", element: <ArchiveSemesters /> },
+      { path: "archive/:semesterId", element: <ArchivedThesis /> },
     ],
   },
 
@@ -117,7 +121,7 @@ const routes = createBrowserRouter([
       { path: "home", element: <ExaminerHome /> },
       { path: "evaluation-forms", element: <ExaminerEvaluationForms /> },
       { path: "profile", element: <Profile /> },
-     ],
+    ],
   },
 ]);
 

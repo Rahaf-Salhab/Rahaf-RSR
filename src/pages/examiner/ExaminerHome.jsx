@@ -41,7 +41,7 @@ export default function ExaminerHome() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 🔴 MOCK
+        //  MOCK
         const [statsRes, projectsRes, scheduleRes] = await Promise.all([
           api.get("/examinerStats"),
           api.get("/examinerProjects"),
@@ -51,7 +51,7 @@ export default function ExaminerHome() {
         setProjects(projectsRes.data.slice(0, 4));
         setSchedule(scheduleRes.data);
 
-        // ✅ REAL
+        //  REAL
         // const [statsRes, projectsRes, scheduleRes] = await Promise.all([
         //   api.get("/examiner/stats"),
         //   api.get("/examiner/projects"),
