@@ -1,31 +1,29 @@
 import { useEffect, useState } from "react";
-import { mockApi as api } from "../../../api/axiosInstance";
+import api from "../../../api/axiosInstance";
 import styles from "./SupervisorGroups.module.css";
-import { Add, Search, Edit, Delete, People, Close } from "@mui/icons-material";
+import { Add, Search, Delete, People, Close } from "@mui/icons-material";
 
 export default function SupervisorGroups() {
   const [groups, setGroups] = useState([]);
-  const [users, setUsers] = useState([]);
+  const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [groupModal, setGroupModal] = useState(null);
   const [deleteGroupId, setDeleteGroupId] = useState(null);
   const [search, setSearch] = useState("");
-
-  const supervisorId = localStorage.getItem("id");
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [groupsRes, usersRes] = await Promise.all([
-        api.get("/groups"),
-        api.get("/users"),
+      const [groupsRes, studentsRes] = await Promise.all([
+        api.get("/Group/groups-supervisor"),
+        api.get("/User/students"),
       ]);
-      // بس الجروبات الي هاد السوبرفايزر مسؤول عنها
-      const myGroups = groupsRes.data.filter(g => g.supervisorId === supervisorId);
-      setGroups(myGroups);
-      setUsers(usersRes.data);
+      setGroups(groupsRes.data?.groups || []);
+      setStudents(studentsRes.data?.students || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -33,33 +31,45 @@ export default function SupervisorGroups() {
     }
   };
 
-  const getUserName = (id) => users.find(u => u.id === id)?.name || "-";
-
   const filteredGroups = groups.filter(g =>
-    g.name.toLowerCase().includes(search.toLowerCase())
+    g.groupName?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleSaveGroup = async (groupData) => {
+  const handleSaveGroup = async (formData) => {
+    setSaveLoading(true);
+    setSaveError("");
     try {
-      const dataWithSupervisor = { ...groupData, supervisorId };
-      if (groupData.id) {
-        await api.put(`/groups/${groupData.id}`, dataWithSupervisor);
-        setGroups(prev => prev.map(g => g.id === groupData.id ? dataWithSupervisor : g));
-      } else {
-        const newGroup = { ...dataWithSupervisor, id: Date.now().toString() };
-        const res = await api.post("/groups", newGroup);
-        setGroups(prev => [...prev, res.data]);
-      }
+      await api.post("/Group/create-group", {
+        GroupName: formData.GroupName,
+        ProjectIdea: formData.ProjectIdea,
+        ProjectName: formData.ProjectName,
+        Description: formData.Description || "",
+        StudentIds: formData.StudentIds,
+      });
+      await fetchData();
       setGroupModal(null);
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      const data = err.response?.data;
+      if (data?.message) {
+        setSaveError(data.message);
+      } else if (data?.errors) {
+        setSaveError(Object.values(data.errors).flat().join(" "));
+      } else {
+        setSaveError("Something went wrong. Please try again.");
+      }
+    } finally {
+      setSaveLoading(false);
+    }
   };
 
   const handleDeleteGroup = async (id) => {
     try {
-      await api.delete(`/groups/${id}`);
-      setGroups(prev => prev.filter(g => g.id !== id));
+      await api.delete(`/Group/${id}`);
+      setGroups(prev => prev.filter(g => g.groupId !== id));
       setDeleteGroupId(null);
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -69,7 +79,7 @@ export default function SupervisorGroups() {
           <h1 className={styles.pageTitle}>My Groups</h1>
           <p className={styles.pageSubtitle}>Manage your graduation project groups</p>
         </div>
-        <button className={styles.addBtn} onClick={() => setGroupModal({ name: "", students: [], examinerId: "" })}>
+        <button className={styles.addBtn} onClick={() => { setSaveError(""); setGroupModal({ GroupName: "", ProjectIdea: "", ProjectName: "", Description: "", StudentIds: [] }); }}>
           <Add fontSize="small" /> Add Group
         </button>
       </div>
@@ -93,37 +103,43 @@ export default function SupervisorGroups() {
         <div className={styles.emptyBox}>
           <People style={{ fontSize: 48, color: "#ddd" }} />
           <p>No groups yet.</p>
-          <button className={styles.addBtn} onClick={() => setGroupModal({ name: "", students: [], examinerId: "" })}>
+          <button className={styles.addBtn} onClick={() => { setSaveError(""); setGroupModal({ GroupName: "", ProjectIdea: "", ProjectName: "", Description: "", StudentIds: [] }); }}>
             <Add fontSize="small" /> Add Group
           </button>
         </div>
       ) : (
         <div className={styles.groupsGrid}>
           {filteredGroups.map((g) => (
-            <div key={g.id} className={styles.groupCard}>
+            <div key={g.groupId} className={styles.groupCard}>
               <div className={styles.groupCardHeader}>
-                <h3 className={styles.groupName}>{g.name}</h3>
-                <div className={styles.actions}>
-                  <button className={styles.editBtn} onClick={() => setGroupModal(g)} title="Edit">
-                    <Edit fontSize="small" />
-                  </button>
-                  <button className={styles.deleteBtn} onClick={() => setDeleteGroupId(g.id)} title="Delete">
-                    <Delete fontSize="small" />
-                  </button>
-                </div>
+                <h3 className={styles.groupName}>{g.groupName}</h3>
+                <button className={styles.deleteBtn} onClick={() => setDeleteGroupId(g.groupId)} title="Delete">
+                  <Delete fontSize="small" />
+                </button>
               </div>
               <div className={styles.groupInfo}>
                 <div className={styles.groupInfoRow}>
-                  <span className={styles.groupInfoLabel}>Examiner</span>
-                  <span className={styles.groupInfoValue}>{getUserName(g.examinerId)}</span>
+                  <span className={styles.groupInfoLabel}>Project</span>
+                  <span className={styles.groupInfoValue}>{g.projectName || "-"}</span>
                 </div>
+                <div className={styles.groupInfoRow}>
+                  <span className={styles.groupInfoLabel}>Idea</span>
+                  <span className={styles.groupInfoValue}>{g.projectIdea || "-"}</span>
+                </div>
+                {g.description && (
+                  <div className={styles.groupInfoRow}>
+                    <span className={styles.groupInfoLabel}>Description</span>
+                    <span className={styles.groupInfoValue}>{g.description}</span>
+                  </div>
+                )}
                 <div className={styles.groupInfoRow}>
                   <span className={styles.groupInfoLabel}>Students</span>
                   <div className={styles.studentsList}>
-                    {g.students?.filter(sid => getUserName(sid) !== null).map(sid => (
-                      <span key={sid} className={styles.studentChip}>{getUserName(sid)}</span>
-                    ))}
-                    {(!g.students || g.students.length === 0) && (
+                    {g.students?.length > 0 ? (
+                      g.students.map((s, i) => (
+                        <span key={i} className={styles.studentChip}>{s.fullName}</span>
+                      ))
+                    ) : (
                       <span className={styles.noStudents}>No students assigned</span>
                     )}
                   </div>
@@ -137,10 +153,13 @@ export default function SupervisorGroups() {
       {groupModal && (
         <GroupModal
           group={groupModal}
-          users={users}
+          students={students}
           groups={groups}
-          onClose={() => setGroupModal(null)}
+          saveLoading={saveLoading}
+          saveError={saveError}
+          onClose={() => { setGroupModal(null); setSaveError(""); }}
           onSave={handleSaveGroup}
+          onClearError={() => setSaveError("")}
         />
       )}
 
@@ -160,38 +179,45 @@ export default function SupervisorGroups() {
   );
 }
 
-function GroupModal({ group, users, groups, onClose, onSave }) {
+function GroupModal({ group, students, groups, saveLoading, saveError, onClose, onSave, onClearError }) {
   const [form, setForm] = useState({ ...group });
-  const [error, setError] = useState("");
+  const [localError, setLocalError] = useState("");
   const [studentSearch, setStudentSearch] = useState("");
 
-  const students = users.filter(u => u.role === "student");
-  const examiners = users.filter(u => u.role === "examiner");
+  const displayError = saveError || localError;
 
   const filteredStudents = students.filter(s =>
-    s.name?.toLowerCase().includes(studentSearch.toLowerCase()) ||
-    (s.userId || "").includes(studentSearch)
+    s.fullName?.toLowerCase().includes(studentSearch.toLowerCase()) ||
+    (s.studentNumber || "").includes(studentSearch)
   );
 
   const isStudentInAnotherGroup = (studentId) =>
-    groups.some(g => g.id !== form.id && g.students?.includes(studentId));
+    groups.some(g => g.students?.some(s => s.id === studentId));
 
   const handleStudentToggle = (id) => {
     if (isStudentInAnotherGroup(id)) return;
     setForm(prev => ({
       ...prev,
-      students: prev.students.includes(id)
-        ? prev.students.filter(s => s !== id)
-        : [...prev.students, id],
+      StudentIds: prev.StudentIds.includes(id)
+        ? prev.StudentIds.filter(s => s !== id)
+        : [...prev.StudentIds, id],
     }));
+    onClearError();
+    setLocalError("");
+  };
+
+  const handleChange = (field, value) => {
+    setForm(prev => ({ ...prev, [field]: value }));
+    setLocalError("");
+    onClearError();
   };
 
   const handleSave = () => {
-    if (!form.name.trim() || form.students.length === 0) {
-      setError("Group name and at least one student are required.");
-      return;
-    }
-    setError("");
+    if (!form.GroupName.trim()) { setLocalError("Group name is required."); return; }
+    if (!form.ProjectName.trim()) { setLocalError("Project name is required."); return; }
+    if (!form.ProjectIdea.trim()) { setLocalError("Project idea is required."); return; }
+    if (form.StudentIds.length === 0) { setLocalError("At least one student is required."); return; }
+    setLocalError("");
     onSave(form);
   };
 
@@ -199,32 +225,51 @@ function GroupModal({ group, users, groups, onClose, onSave }) {
     <div className={styles.modalOverlay}>
       <div className={styles.modal}>
         <div className={styles.modalHeader}>
-          <h3 className={styles.modalTitle}>{group.id ? "Edit Group" : "Add Group"}</h3>
+          <h3 className={styles.modalTitle}>Add Group</h3>
           <button className={styles.closeBtn} onClick={onClose}><Close fontSize="small" /></button>
         </div>
         <div className={styles.modalBody}>
-          {error && <p className={styles.errorMsg}>{error}</p>}
+          {displayError && <p className={styles.errorMsg}>{displayError}</p>}
 
           <div className={styles.fieldGroup}>
             <label className={styles.label}>Group Name <span className={styles.required}>*</span></label>
             <input
               className={styles.input}
-              value={form.name}
-              onChange={(e) => { setForm({ ...form, name: e.target.value }); setError(""); }}
+              value={form.GroupName}
+              onChange={e => handleChange("GroupName", e.target.value)}
               placeholder="e.g. Group A"
             />
           </div>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>Examiner <span className={styles.optional}>(optional)</span></label>
-            <select
-              className={styles.select}
-              value={form.examinerId}
-              onChange={(e) => setForm({ ...form, examinerId: e.target.value })}
-            >
-              <option value="">Select Examiner</option>
-              {examiners.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
-            </select>
+            <label className={styles.label}>Project Name <span className={styles.required}>*</span></label>
+            <input
+              className={styles.input}
+              value={form.ProjectName}
+              onChange={e => handleChange("ProjectName", e.target.value)}
+              placeholder="e.g. RSR Platform"
+            />
+          </div>
+
+          <div className={styles.fieldGroup}>
+            <label className={styles.label}>Project Idea <span className={styles.required}>*</span></label>
+            <input
+              className={styles.input}
+              value={form.ProjectIdea}
+              onChange={e => handleChange("ProjectIdea", e.target.value)}
+              placeholder="e.g. Graduation Project Management System"
+            />
+          </div>
+
+          <div className={styles.fieldGroup}>
+            <label className={styles.label}>Description <span className={styles.optional}>(optional)</span></label>
+            <textarea
+              className={styles.textarea}
+              value={form.Description}
+              onChange={e => handleChange("Description", e.target.value)}
+              placeholder="e.g. A system to manage graduation projects..."
+              rows={3}
+            />
           </div>
 
           <div className={styles.fieldGroup}>
@@ -235,7 +280,7 @@ function GroupModal({ group, users, groups, onClose, onSave }) {
                 className={styles.studentSearchInput}
                 placeholder="Search by name or ID..."
                 value={studentSearch}
-                onChange={(e) => setStudentSearch(e.target.value)}
+                onChange={e => setStudentSearch(e.target.value)}
               />
             </div>
             <div className={styles.studentsCheckList}>
@@ -248,12 +293,12 @@ function GroupModal({ group, users, groups, onClose, onSave }) {
                   >
                     <input
                       type="checkbox"
-                      checked={form.students.includes(s.id)}
+                      checked={form.StudentIds.includes(s.id)}
                       onChange={() => handleStudentToggle(s.id)}
                       disabled={inAnotherGroup}
                     />
-                    <span>{s.name}</span>
-                    {s.userId && <span className={styles.studentId}>#{s.userId}</span>}
+                    <span>{s.fullName}</span>
+                    {s.studentNumber && <span className={styles.studentId}>#{s.studentNumber}</span>}
                     {inAnotherGroup && <span className={styles.assignedBadge}>Already in a group</span>}
                   </label>
                 );
@@ -265,9 +310,9 @@ function GroupModal({ group, users, groups, onClose, onSave }) {
           </div>
         </div>
         <div className={styles.modalFooter}>
-          <button className={styles.cancelBtn} onClick={onClose}>Cancel</button>
-          <button className={styles.saveBtn} onClick={handleSave}>
-            {group.id ? "Save Changes" : "Add Group"}
+          <button className={styles.cancelBtn} onClick={onClose} disabled={saveLoading}>Cancel</button>
+          <button className={styles.saveBtn} onClick={handleSave} disabled={saveLoading}>
+            {saveLoading ? "Saving..." : "Add Group"}
           </button>
         </div>
       </div>
