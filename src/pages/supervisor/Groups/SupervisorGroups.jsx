@@ -35,6 +35,11 @@ export default function SupervisorGroups() {
     g.groupName?.toLowerCase().includes(search.toLowerCase())
   );
 
+  // نجيب كل الـ studentNumbers الموجودة في أي group
+  const assignedStudentNumbers = groups.flatMap(g =>
+    g.students?.map(s => s.studentNumber) || []
+  );
+
   const handleSaveGroup = async (formData) => {
     setSaveLoading(true);
     setSaveError("");
@@ -154,7 +159,7 @@ export default function SupervisorGroups() {
         <GroupModal
           group={groupModal}
           students={students}
-          groups={groups}
+          assignedStudentNumbers={assignedStudentNumbers}
           saveLoading={saveLoading}
           saveError={saveError}
           onClose={() => { setGroupModal(null); setSaveError(""); }}
@@ -179,7 +184,7 @@ export default function SupervisorGroups() {
   );
 }
 
-function GroupModal({ group, students, groups, saveLoading, saveError, onClose, onSave, onClearError }) {
+function GroupModal({ group, students, assignedStudentNumbers, saveLoading, saveError, onClose, onSave, onClearError }) {
   const [form, setForm] = useState({ ...group });
   const [localError, setLocalError] = useState("");
   const [studentSearch, setStudentSearch] = useState("");
@@ -191,16 +196,17 @@ function GroupModal({ group, students, groups, saveLoading, saveError, onClose, 
     (s.studentNumber || "").includes(studentSearch)
   );
 
-  const isStudentInAnotherGroup = (studentId) =>
-    groups.some(g => g.students?.some(s => s.id === studentId));
+  // نتحقق بالـ studentNumber بدل الـ id
+  const isStudentAssigned = (studentNumber) =>
+    assignedStudentNumbers.includes(studentNumber);
 
-  const handleStudentToggle = (id) => {
-    if (isStudentInAnotherGroup(id)) return;
+  const handleStudentToggle = (student) => {
+    if (isStudentAssigned(student.studentNumber)) return;
     setForm(prev => ({
       ...prev,
-      StudentIds: prev.StudentIds.includes(id)
-        ? prev.StudentIds.filter(s => s !== id)
-        : [...prev.StudentIds, id],
+      StudentIds: prev.StudentIds.includes(student.id)
+        ? prev.StudentIds.filter(s => s !== student.id)
+        : [...prev.StudentIds, student.id],
     }));
     onClearError();
     setLocalError("");
@@ -285,21 +291,21 @@ function GroupModal({ group, students, groups, saveLoading, saveError, onClose, 
             </div>
             <div className={styles.studentsCheckList}>
               {filteredStudents.map(s => {
-                const inAnotherGroup = isStudentInAnotherGroup(s.id);
+                const assigned = isStudentAssigned(s.studentNumber);
                 return (
                   <label
                     key={s.id}
-                    className={`${styles.checkLabel} ${inAnotherGroup ? styles.checkLabelDisabled : ""}`}
+                    className={`${styles.checkLabel} ${assigned ? styles.checkLabelDisabled : ""}`}
                   >
                     <input
                       type="checkbox"
                       checked={form.StudentIds.includes(s.id)}
-                      onChange={() => handleStudentToggle(s.id)}
-                      disabled={inAnotherGroup}
+                      onChange={() => handleStudentToggle(s)}
+                      disabled={assigned}
                     />
                     <span>{s.fullName}</span>
                     {s.studentNumber && <span className={styles.studentId}>#{s.studentNumber}</span>}
-                    {inAnotherGroup && <span className={styles.assignedBadge}>Already in a group</span>}
+                    {assigned && <span className={styles.assignedBadge}>Already in a group</span>}
                   </label>
                 );
               })}
