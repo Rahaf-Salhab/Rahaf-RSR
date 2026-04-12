@@ -163,8 +163,7 @@ export default function Semester() {
 
   if (loading) return <div className={styles.loading}>Loading...</div>;
 
-  // ─── Semester Ended / No Active Semester ───────────────────────────────────
-  if (semesterEnded) return (
+   if (semesterEnded) return (
     <div className={styles.page}>
       {!creating ? (
         <div className={styles.semesterEndedBox}>
@@ -256,8 +255,7 @@ export default function Semester() {
   const duration = getDuration(semester.startDate, semester.endDate);
   const progress = getProgress(semester.startDate, semester.endDate);
 
-  // ─── Active Semester View ──────────────────────────────────────────────────
-  return (
+   return (
     <div className={styles.page}>
       <div className={styles.pageHeader}>
         <div>
