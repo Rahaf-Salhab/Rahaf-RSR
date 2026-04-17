@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowForward, Search} from "@mui/icons-material";
+import { ArrowForward, Search } from "@mui/icons-material";
 import styles from "./ArchiveSemesters.module.css";
 import axiosInstance from "../../../api/axiosInstance";
 
@@ -17,10 +17,10 @@ export default function ArchiveSemesters() {
       try {
         setError("");
 
-        const cached = sessionStorage.getItem("archiveSemesters");
+        const cached = sessionStorage.getItem("archiveSemesters");// Check if semesters are cached in sessionStorage
 
         if (cached) {
-          setSemesters(JSON.parse(cached));
+          setSemesters(JSON.parse(cached));// Use cached data if available )(اذا موجودة بحولها من نص الى ارري)
         } else {
           setLoading(true);
         }
@@ -29,7 +29,7 @@ export default function ArchiveSemesters() {
         const data = res.data?.semesters || [];
 
         setSemesters(data);
-        sessionStorage.setItem("archiveSemesters", JSON.stringify(data));
+        sessionStorage.setItem("archiveSemesters", JSON.stringify(data));// Cache the fetched semesters in sessionStorage
       } catch (err) {
         console.error(err);
         setError("Failed to load semesters");
@@ -52,12 +52,12 @@ export default function ArchiveSemesters() {
     });
   };
 
-  const filteredSemesters = useMemo(() => {
+  const filteredSemesters = useMemo(() => { // Filter semesters based on search term
     return semesters.filter((sem) => {
       const semesterName = sem.name || "";
       return semesterName.toLowerCase().includes(searchTerm.toLowerCase());
     });
-  }, [semesters, searchTerm]);
+  }, [semesters, searchTerm]);// Use useMemo to avoid unnecessary filtering on every render
 
   const handleSemesterClick = (semester) => {
     const semesterId = semester.semesterId;
@@ -72,13 +72,16 @@ export default function ArchiveSemesters() {
       </p>
 
       <div className={styles.searchBox}>
-        <input
-          type="text"
-          placeholder= "Search archived semesters..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className={styles.searchInput}
-        />
+        <div className={styles.searchWrapper}>
+          <Search className={styles.searchIcon} fontSize="small" />
+          <input
+            type="text"
+            placeholder="Search archived semesters..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={styles.searchInput}
+          />
+        </div>
       </div>
 
       <div className={styles.section}>
@@ -93,7 +96,7 @@ export default function ArchiveSemesters() {
           <p className={styles.infoText}>No semesters found.</p>
         )}
 
-        <div className={styles.list}>
+        <div className={styles.list}> {/*card يتحول الى sem عرض الفصول, كل */}
           {filteredSemesters.map((sem, index) => (
             <div
               key={sem.semesterId || index}
@@ -117,7 +120,7 @@ export default function ArchiveSemesters() {
               </div>
 
               <span className={styles.viewThesis}>
-                View Thesis <ArrowForward />
+                View Theses <ArrowForward />
               </span>
             </div>
           ))}
