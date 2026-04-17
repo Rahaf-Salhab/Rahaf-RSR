@@ -29,6 +29,7 @@ import ArchivedThesis from "./pages/coordinator/archive/ArchivedThesis";
 import ExaminerEvaluationForms from "./pages/examiner/EvaluationForms/ExaminerEvaluationForms";
 import SupervisorEvaluationForms from "./pages/supervisor/EvaluationForms/SupervisorEvaluationForms";
 import SupervisorGroups from "./pages/supervisor/Groups/SupervisorGroups";
+import GroupDetails from "./pages/supervisor/Groups/GroupDetails";
 import StudentGrades from "./pages/student/Grades/StudentGrades";
 
 import Profile from "./pages/profile/Profile";
@@ -81,6 +82,7 @@ const routes = createBrowserRouter([
       { path: "groups", element: <SupervisorGroups /> },
       { path: "evaluation-forms", element: <SupervisorEvaluationForms /> },
       { path: "profile", element: <Profile /> },
+      { path: "groups/:groupId", element: <GroupDetails /> }
     ],
   },
 
