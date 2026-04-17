@@ -6,7 +6,6 @@ import {
   People, FolderOpen, EventNote, HourglassEmpty, Add, CalendarMonth,
 } from "@mui/icons-material";
 
-
 const timeAgo = (dateString) => {
   const now = new Date();
   const date = new Date(dateString);
@@ -93,7 +92,6 @@ function StartSemesterScreen({ onStart, loading }) {
 
 export default function CoordinatorHome() {
   const navigate = useNavigate();
-
   const [checkingSemester, setCheckingSemester] = useState(true);
   const [semesterState, setSemesterState] = useState(null);
   const [startingSemester, setStartingSemester] = useState(false);
@@ -177,32 +175,29 @@ export default function CoordinatorHome() {
       setStartingSemester(false);
     }
   };
+
   const fetchDashboardData = async () => {
-      
-   
     setLoading(true);
-    
     try {
       const [usersRes, groupsRes, gradesRes, timetableRes, thesisRes] = await Promise.all([
         mockApi.get("/users"),
-        api.get("/Groups/groups-coordinater"),
+        mockApi.get("/groups"),
         mockApi.get("/grades"),
         mockApi.get("/examinationTimetable"),
         mockApi.get("/thesis"),
       ]);
 
-      console.log("GROUPS:", groupsRes.data);
       const realUsers = usersRes.data.filter(u => u.role !== "coordinator");
       const activeProjects = thesisRes.data.filter(t => t.status === "in-progress").length;
-    const pendingGrades = groupsRes.data.reduce((count, group) => {
-  const hasSupervisor = gradesRes.data.some(g => g.groupId === group.id && g.role === "supervisor");
-  const hasExaminer = gradesRes.data.some(g => g.groupId === group.id && g.role === "examiner");
-  if (!hasSupervisor) count++;
-  if (!hasExaminer) count++;
-  return count;
-}, 0);
+      const pendingGrades = groupsRes.data.reduce((count, group) => {
+        const hasSupervisor = gradesRes.data.some(g => g.groupId === group.id && g.role === "supervisor");
+        const hasExaminer = gradesRes.data.some(g => g.groupId === group.id && g.role === "examiner");
+        if (!hasSupervisor) count++;
+        if (!hasExaminer) count++;
+        return count;
+      }, 0);
 
-      setStats({ 
+      setStats({
         totalUsers: realUsers.length,
         examinations: timetableRes.data.length,
         activeProjects,

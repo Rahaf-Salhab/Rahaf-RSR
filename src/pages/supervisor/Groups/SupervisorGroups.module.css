@@ -50,7 +50,7 @@
 
 .searchIcon {
   position: absolute;
-  left: 20px;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
   color: #888;
@@ -81,15 +81,8 @@
   background: #fff;
   border-radius: 12px;
   padding: 20px;
-  transition: 0.2s ease;
-  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
-
-.groupCard:hover { 
-    transform: translateY(-4px);
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
-    border-color: #C34C18;
- }
 
 .groupCardHeader {
   display: flex;
@@ -121,10 +114,8 @@
 
 .studentChip {
   padding: 3px 10px;
-
-
-  background: #C0441A;
-  color: #fff;
+  background: #e8f4fd;
+  color: #1e40af;
   border-radius: 99px;
   font-size: 12px;
   font-weight: 500;
@@ -133,47 +124,39 @@
 .noStudents { font-size: 12px; color: #888; }
 
 /* Actions */
-.groupCardActions { 
-  display: flex;
-   gap: 6px;
-   margin-left: auto;
-  }
+.actions { display: flex; gap: 6px; }
 
 .editBtn {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
   border: none;
-  border-radius: 8px;
-  background: #eff6ff;
-  color: #1d4ed8;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: 0.2s ease;
+  background: #fef3e2;
+  color: #92400e;
+  transition: background 0.2s;
 }
 
-.editBtn:hover {
-  background: #dbeafe;
-}
+.editBtn:hover { background: #fde68a; }
 
-.editBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
- .detailsBtn {
-  padding: 8px 16px;
-  background: #f0f0f0;
-  color: #333;
+.deleteBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
   border: none;
-  border-radius: 8px;
-  font-size: 12px;
   cursor: pointer;
- }
-.detailsBtn:hover {
-  background: #e4e4e4;
-  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff0ed;
+  color: #C0441A;
+  transition: background 0.2s;
 }
+
+.deleteBtn:hover { background: #fecaca; }
 
 /* Empty */
 .empty {

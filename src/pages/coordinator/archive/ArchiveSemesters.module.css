@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 body {
     font-family: 'Inter', sans-serif;
@@ -25,31 +26,20 @@ body {
 .searchBox {
     margin-bottom: 24px;
 }
-.searchWrapper {
-  position: relative;
-  flex: 1;
-  min-width: 200px;
-}
-.searchIcon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #888;
-}
 
 .searchInput {
     width: 100%;
-    padding: 16px 8px 16px 36px;
+    padding: 18px 20px;
     border: 1px solid #dcdfe4;
     border-radius: 20px;
-    font-size: 14px;
+    font-size: 17px;
     outline: none;
     background: #fff;
 }
 
 .searchInput:focus {
     border-color: #C34C18;
+
 }
 
 .section {
@@ -101,7 +91,7 @@ body {
 }
 
 .itemCard:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
     box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
     border-color: #C34C18;
 }
