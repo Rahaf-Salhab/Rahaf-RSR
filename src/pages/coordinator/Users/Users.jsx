@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api, { mockApi } from "../../../api/axiosInstance";
+import api from "../../../api/axiosInstance";
 import styles from "./Users.module.css";
 import {
   Add,
@@ -57,33 +57,13 @@ const buildPayload = (form) => {
     Password: form.password,
   };
   if (form.role === "supervisor")
-    return {
-      ...base,
-      SupervisorNumber: form.number.trim(),
-      Department: form.department.trim(),
-      MainImage: "",
-    };
+    return { ...base, SupervisorNumber: form.number.trim(), Department: form.department.trim(), MainImage: "" };
   if (form.role === "examiner")
-    return {
-      ...base,
-      ExaminerNumber: form.number.trim(),
-      Department: form.department.trim(),
-      MainImage: "",
-    };
+    return { ...base, ExaminerNumber: form.number.trim(), Department: form.department.trim(), MainImage: "" };
   if (form.role === "coordinator")
-    return {
-      ...base,
-      CoordinatorNumber: form.number.trim(),
-      Department: form.department.trim(),
-      MainImage: "",
-    };
+    return { ...base, CoordinatorNumber: form.number.trim(), Department: form.department.trim(), MainImage: "" };
   if (form.role === "student")
-    return {
-      ...base,
-      StudentNumber: form.number.trim(),
-      College: form.college.trim(),
-      Major: form.major.trim(),
-    };
+    return { ...base, StudentNumber: form.number.trim(), College: form.college.trim(), Major: form.major.trim() };
   return base;
 };
 
@@ -93,53 +73,20 @@ const buildUpdatePayload = (form) => {
     UserName: form.userName.trim(),
     Email: form.email.trim(),
   };
-
-  if (form.role === "student") {
-    return {
-      ...base,
-      StudentNumber: form.number.trim(),
-      College: form.college.trim(),
-      Major: form.major.trim(),
-    };
-  }
-
-  if (form.role === "supervisor") {
-    return {
-      ...base,
-      SupervisorNumber: form.number.trim(),
-      Department: form.department.trim(),
-    };
-  }
-
-  if (form.role === "coordinator") {
-    return {
-      ...base,
-      CoordinatorNumber: form.number.trim(),
-      Department: form.department.trim(),
-    };
-  }
-
-  if (form.role === "examiner") {
-    return {
-      ...base,
-      ExaminerNumber: form.number.trim(),
-      Department: form.department.trim(),
-    };
-  }
-
+  if (form.role === "student")
+    return { ...base, StudentNumber: form.number.trim(), College: form.college.trim(), Major: form.major.trim() };
+  if (form.role === "supervisor")
+    return { ...base, SupervisorNumber: form.number.trim(), Department: form.department.trim() };
+  if (form.role === "coordinator")
+    return { ...base, CoordinatorNumber: form.number.trim(), Department: form.department.trim() };
+  if (form.role === "examiner")
+    return { ...base, ExaminerNumber: form.number.trim(), Department: form.department.trim() };
   return base;
 };
 
 const EMPTY_USER_FORM = (role) => ({
-  fullName: "",
-  userName: "",
-  email: "",
-  password: "",
-  role,
-  number: "",
-  department: "",
-  college: "",
-  major: "",
+  fullName: "", userName: "", email: "", password: "",
+  role, number: "", department: "", college: "", major: "",
 });
 
 function UserAvatar({ user }) {
@@ -154,9 +101,7 @@ function UserAvatar({ user }) {
       />
     );
   }
-  return (
-    <div className={styles.avatar}>{user.name?.charAt(0)?.toUpperCase()}</div>
-  );
+  return <div className={styles.avatar}>{user.name?.charAt(0)?.toUpperCase()}</div>;
 }
 
 export default function Users() {
@@ -173,84 +118,49 @@ export default function Users() {
   const [editModalUser, setEditModalUser] = useState(null);
   const [editModalError, setEditModalError] = useState("");
   const [editLoading, setEditLoading] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState(null);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-  useEffect(() => {
-    setSearch("");
-  }, [tab]);
+  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { setSearch(""); }, [tab]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [
-        studentsRes,
-        supervisorsRes,
-        examinersRes,
-        coordinatorsRes,
-        groupsRes,
-      ] = await Promise.all([
-        api.get("/User/students"),
-        api.get("/User/supervisors"),
-        api.get("/User/examiners"),
-        api.get("/User/coordinaters"),
-        mockApi.get("/groups"),
-      ]);
+      const [studentsRes, supervisorsRes, examinersRes, coordinatorsRes, groupsRes] =
+        await Promise.all([
+          api.get("/User/students"),
+          api.get("/User/supervisors"),
+          api.get("/User/examiners"),
+          api.get("/User/coordinaters"),
+          api.get("/Groups/groups-coordinater"),
+        ]);
 
       const students = (studentsRes.data.students || []).map((u) => ({
-        id: u.id,
-        name: u.fullName,
-        userName: u.userName,
-        email: u.email,
-        userId: u.studentNumber,
-        role: "student",
-        college: u.college,
-        major: u.major,
-        pictureProfileURL: u.pictureProfileURL || "",
-        isBlocked: u.isBlocked || false,
+        id: u.id, name: u.fullName, userName: u.userName, email: u.email,
+        userId: u.studentNumber, role: "student", college: u.college, major: u.major,
+        pictureProfileURL: u.pictureProfileURL || "", isBlocked: u.isBlocked || false,
       }));
 
       const supervisors = (supervisorsRes.data.supervisors || []).map((u) => ({
-        id: u.id,
-        name: u.fullName,
-        userName: u.userName,
-        email: u.email,
-        userId: u.supervisorNumber,
-        role: "supervisor",
-        department: u.department,
-        pictureProfileURL: u.pictureProfileURL || "",
-        isBlocked: u.isBlocked || false,
+        id: u.id, name: u.fullName, userName: u.userName, email: u.email,
+        userId: u.supervisorNumber, role: "supervisor", department: u.department,
+        pictureProfileURL: u.pictureProfileURL || "", isBlocked: u.isBlocked || false,
       }));
 
       const examiners = (examinersRes.data.examiners || []).map((u) => ({
-        id: u.id,
-        name: u.fullName,
-        userName: u.userName,
-        email: u.email,
-        userId: u.examinerNumber,
-        role: "examiner",
-        department: u.department,
-        pictureProfileURL: u.pictureProfileURL || "",
-        isBlocked: u.isBlocked || false,
+        id: u.id, name: u.fullName, userName: u.userName, email: u.email,
+        userId: u.examinerNumber, role: "examiner", department: u.department,
+        pictureProfileURL: u.pictureProfileURL || "", isBlocked: u.isBlocked || false,
       }));
 
-      const coordinators = (coordinatorsRes.data.coordinaters || []).map(
-        (u) => ({
-          id: u.id,
-          name: u.fullName,
-          userName: u.userName,
-          email: u.email,
-          userId: u.coordinatorNumber,
-          role: "coordinator",
-          department: u.department,
-          pictureProfileURL: u.pictureProfileURL || "",
-          isBlocked: u.isBlocked || false,
-        }),
-      );
+      const coordinators = (coordinatorsRes.data.coordinaters || []).map((u) => ({
+        id: u.id, name: u.fullName, userName: u.userName, email: u.email,
+        userId: u.coordinatorNumber, role: "coordinator", department: u.department,
+        pictureProfileURL: u.pictureProfileURL || "", isBlocked: u.isBlocked || false,
+      }));
 
       setUsers([...students, ...supervisors, ...examiners, ...coordinators]);
-      setGroups(groupsRes.data);
+      setGroups(groupsRes.data.allSupervisorsWithGroups || []);
     } catch (err) {
       console.error("fetchData error:", err);
     } finally {
@@ -270,6 +180,22 @@ export default function Users() {
     );
   });
 
+   const filteredGroups = groups.filter((sup) => {
+    if (sup.groups.length === 0) return false;
+    const q = search.toLowerCase();
+    if (!q) return true;
+    return (
+      sup.supervisorName?.toLowerCase().includes(q) ||
+      sup.groups?.some(
+        (g) =>
+          g.groupName?.toLowerCase().includes(q) ||
+          g.projectName?.toLowerCase().includes(q)
+      )
+    );
+  });
+
+  const totalGroupsCount = groups.reduce((acc, s) => acc + s.groups.length, 0);
+
   const handleBlockUser = async (id) => {
     try {
       await api.patch(`/User/block/${id}`);
@@ -283,9 +209,7 @@ export default function Users() {
   const handleUnblockUser = async (id) => {
     try {
       await api.patch(`/User/unblock/${id}`);
-      setUsers((prev) =>
-        prev.map((u) => (u.id === id ? { ...u, isBlocked: false } : u)),
-      );
+      setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, isBlocked: false } : u)));
       setUnblockUserId(null);
     } catch (err) {
       console.error("unblockUser error:", err);
@@ -294,35 +218,27 @@ export default function Users() {
 
   const handleUpdateUser = async (form) => {
     const endpointTemplate = UPDATE_ENDPOINT_MAP[form.role];
-
     if (!endpointTemplate) {
       setEditModalError("Update API is not available for this role yet.");
       return;
     }
-
     setEditLoading(true);
     setEditModalError("");
-
     try {
       const endpoint = endpointTemplate.replace("{id}", form.id);
       const payload = buildUpdatePayload(form);
-
       const res = await api.patch(endpoint, payload);
-
       if (res.data?.success === false) {
         setEditModalError(res.data.message || "User update failed.");
         return;
       }
-
       await fetchData();
       setEditModalUser(null);
       setEditModalError("");
     } catch (err) {
       const data = err.response?.data;
-
       if (data?.errors) {
-        const messages = Object.values(data.errors).flat().join(" ");
-        setEditModalError(messages);
+        setEditModalError(Object.values(data.errors).flat().join(" "));
       } else if (data?.message) {
         setEditModalError(data.message);
       } else if (data?.title) {
@@ -341,29 +257,22 @@ export default function Users() {
     try {
       const endpoint = ENDPOINT_MAP[form.role];
       const payload = buildPayload(form);
-
       const formData = new FormData();
       Object.entries(payload).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
-          formData.append(key, value);
-        }
+        if (value !== null && value !== undefined) formData.append(key, value);
       });
-
       const res = await api.post(endpoint, formData);
-
       if (res.data?.success === false) {
         setUserModalError(res.data.message || "User creation failed.");
         return;
       }
-
       await fetchData();
       setUserModal(null);
       setUserModalError("");
     } catch (err) {
       const data = err.response?.data;
       if (data?.errors) {
-        const messages = Object.values(data.errors).flat().join(" ");
-        setUserModalError(messages);
+        setUserModalError(Object.values(data.errors).flat().join(" "));
       } else if (data?.message) {
         setUserModalError(data.message);
       } else if (data?.title) {
@@ -376,8 +285,6 @@ export default function Users() {
     }
   };
 
-  const getUserName = (id) => users.find((u) => u.id === id)?.name || null;
-
   const handleAddClick = () => {
     setUserModalError("");
     setUserModal(EMPTY_USER_FORM(currentRole));
@@ -385,19 +292,11 @@ export default function Users() {
 
   const handleEditClick = (user) => {
     if (user.role === "examiner") return;
-
     setEditModalError("");
-
     setEditModalUser({
-      id: user.id,
-      fullName: user.name || "",
-      userName: user.userName || "",
-      email: user.email || "",
-      role: user.role,
-      number: user.userId || "",
-      department: user.department || "",
-      college: user.college || "",
-      major: user.major || "",
+      id: user.id, fullName: user.name || "", userName: user.userName || "",
+      email: user.email || "", role: user.role, number: user.userId || "",
+      department: user.department || "", college: user.college || "", major: user.major || "",
     });
   };
 
@@ -432,9 +331,11 @@ export default function Users() {
           >
             {t.label}
             <span className={styles.tabCount}>
-              {t.role
+              {t.key === "groups"
+                ? totalGroupsCount
+                : t.role
                 ? users.filter((u) => u.role === t.role).length
-                : groups.length}
+                : 0}
             </span>
           </button>
         ))}
@@ -506,28 +407,16 @@ export default function Users() {
                       <td>
                         <div className={styles.actions}>
                           {u.role !== "examiner" && (
-                            <button
-                              className={styles.editBtn}
-                              onClick={() => handleEditClick(u)}
-                              title="Edit"
-                            >
+                            <button className={styles.editBtn} onClick={() => handleEditClick(u)} title="Edit">
                               <Edit fontSize="small" />
                             </button>
                           )}
                           {u.isBlocked ? (
-                            <button
-                              className={styles.unblockBtn}
-                              onClick={() => setUnblockUserId(u.id)}
-                              title="Unblock"
-                            >
+                            <button className={styles.unblockBtn} onClick={() => setUnblockUserId(u.id)} title="Unblock">
                               <LockOpen fontSize="small" />
                             </button>
                           ) : (
-                            <button
-                              className={styles.blockBtn}
-                              onClick={() => setBlockUserId(u.id)}
-                              title=""
-                            >
+                            <button className={styles.blockBtn} onClick={() => setBlockUserId(u.id)}>
                               <Delete fontSize="small" />
                             </button>
                           )}
@@ -547,58 +436,138 @@ export default function Users() {
 
       {tab === "groups" && (
         <>
+          <div className={styles.filtersBox}>
+            <div className={styles.searchWrapper}>
+              <Search className={styles.searchIcon} fontSize="small" />
+              <input
+                type="text"
+                placeholder="Search by supervisor or group name..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className={styles.searchInput}
+              />
+            </div>
+          </div>
+
           {loading ? (
             <div className={styles.loading}>Loading...</div>
-          ) : groups.length === 0 ? (
-            <div className={styles.emptyBox}>
-              <People style={{ fontSize: 48, color: "#ddd" }} />
-              <p>No groups yet. Groups are created by supervisors.</p>
-            </div>
           ) : (
-            <div className={styles.groupsGrid}>
-              {groups.map((g) => (
-                <div key={g.id} className={styles.groupCard}>
-                  <div className={styles.groupCardHeader}>
-                    <h3 className={styles.groupName}>{g.name}</h3>
+            <div className={styles.supervisorsGrid}>
+              {filteredGroups.map((sup, i) => (
+                <div key={i} className={styles.supervisorCard}>
+                  <div className={styles.supervisorCardHeader}>
+                    <div className={styles.supervisorAvatar}>
+                      {sup.supervisorName?.charAt(0)?.toUpperCase()}
+                    </div>
+                    <div>
+                      <h3 className={styles.supervisorCardName}>{sup.supervisorName}</h3>
+                      <span className={styles.groupCountBadge}>
+                        {sup.groups.length} group{sup.groups.length !== 1 ? "s" : ""}
+                      </span>
+                    </div>
                   </div>
-                  <div className={styles.groupInfo}>
-                    <div className={styles.groupInfoRow}>
-                      <span className={styles.groupInfoLabel}>Supervisor</span>
-                      <span className={styles.groupInfoValue}>
-                        {getUserName(g.supervisorId) || "-"}
-                      </span>
-                    </div>
-                    <div className={styles.groupInfoRow}>
-                      <span className={styles.groupInfoLabel}>Examiner</span>
-                      <span className={styles.groupInfoValue}>
-                        {getUserName(g.examinerId) || "-"}
-                      </span>
-                    </div>
-                    <div className={styles.groupInfoRow}>
-                      <span className={styles.groupInfoLabel}>Students</span>
-                      <div className={styles.studentsList}>
-                        {g.students
-                          ?.filter((sid) => getUserName(sid))
-                          .map((sid) => (
-                            <span key={sid} className={styles.studentChip}>
-                              {getUserName(sid)}
-                            </span>
-                          ))}
-                        {(!g.students ||
-                          g.students.filter((sid) => getUserName(sid))
-                            .length === 0) && (
-                          <span className={styles.noStudents}>
-                            No students assigned
-                          </span>
-                        )}
+
+                  <div className={styles.groupsList}>
+                    {sup.groups.map((g) => (
+                      <div
+                        key={g.groupId}
+                        className={styles.groupChipCard}
+                        onClick={() => setSelectedGroup({ ...g, supervisorName: sup.supervisorName })}
+                      >
+                        <div className={styles.groupChipTop}>
+                          <span className={styles.groupChipName}>{g.groupName}</span>
+                          <span className={styles.groupChipStatus}>{g.projectStatus}</span>
+                        </div>
+                        <span className={styles.groupChipProject}>{g.projectName}</span>
+                        <span className={styles.groupChipStudents}>
+                          👥 {g.students?.length || 0} student{g.students?.length !== 1 ? "s" : ""}
+                        </span>
                       </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
               ))}
+
+              {filteredGroups.length === 0 && (
+                <div className={styles.emptyBox}>
+                  <People style={{ fontSize: 48, color: "#ddd" }} />
+                  <p>No groups found.</p>
+                </div>
+              )}
             </div>
           )}
         </>
+      )}
+
+      {selectedGroup && (
+        <div className={styles.modalOverlay} onClick={() => setSelectedGroup(null)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div>
+                <h3 className={styles.modalTitle}>{selectedGroup.groupName}</h3>
+                <span style={{ fontSize: 13, color: "#4A5565" }}>
+                  Supervisor: {selectedGroup.supervisorName}
+                </span>
+              </div>
+              <button className={styles.closeBtn} onClick={() => setSelectedGroup(null)}>
+                <Close fontSize="small" />
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.groupDetailGrid}>
+                <div className={styles.groupDetailItem}>
+                  <label className={styles.groupDetailLabel}>Project Name</label>
+                  <p className={styles.groupDetailValue}>{selectedGroup.projectName}</p>
+                </div>
+                <div className={styles.groupDetailItem}>
+                  <label className={styles.groupDetailLabel}>Status</label>
+                  <p className={styles.groupDetailValue}>
+                    <span
+                      className={styles.statusBadge}
+                      style={{
+                        background: selectedGroup.projectStatus === "InProgress" ? "#e8f4fd" : "#f0fdf4",
+                        color: selectedGroup.projectStatus === "InProgress" ? "#1e40af" : "#166534",
+                      }}
+                    >
+                      {selectedGroup.projectStatus}
+                    </span>
+                  </p>
+                </div>
+                <div className={styles.groupDetailItem} style={{ gridColumn: "1/-1" }}>
+                  <label className={styles.groupDetailLabel}>Project Idea</label>
+                  <p className={styles.groupDetailValue}>{selectedGroup.projectIdea || "-"}</p>
+                </div>
+                {selectedGroup.description && (
+                  <div className={styles.groupDetailItem} style={{ gridColumn: "1/-1" }}>
+                    <label className={styles.groupDetailLabel}>Description</label>
+                    <p className={styles.groupDetailValue}>{selectedGroup.description}</p>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className={styles.groupDetailLabel}>Students</label>
+                <div className={styles.studentsDetailList}>
+                  {selectedGroup.students?.length > 0 ? (
+                    selectedGroup.students.map((s) => (
+                      <div key={s.studentNumber} className={styles.studentDetailCard}>
+                        <div className={styles.studentDetailAvatar}>
+                          {s.fullName?.charAt(0)?.toUpperCase()}
+                        </div>
+                        <div>
+                          <p className={styles.studentDetailName}>{s.fullName}</p>
+                          <p className={styles.studentDetailNum}>#{s.studentNumber}</p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className={styles.noStudents}>No students assigned</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {userModal && (
@@ -606,10 +575,7 @@ export default function Users() {
           user={userModal}
           externalError={userModalError}
           saveLoading={saveLoading}
-          onClose={() => {
-            setUserModal(null);
-            setUserModalError("");
-          }}
+          onClose={() => { setUserModal(null); setUserModalError(""); }}
           onSave={handleSaveUser}
           onClearError={() => setUserModalError("")}
         />
@@ -620,10 +586,7 @@ export default function Users() {
           user={editModalUser}
           externalError={editModalError}
           saveLoading={editLoading}
-          onClose={() => {
-            setEditModalUser(null);
-            setEditModalError("");
-          }}
+          onClose={() => { setEditModalUser(null); setEditModalError(""); }}
           onSave={handleUpdateUser}
           onClearError={() => setEditModalError("")}
         />
@@ -633,22 +596,10 @@ export default function Users() {
         <div className={styles.modalOverlay}>
           <div className={styles.confirmModal}>
             <h3 className={styles.modalTitle}>Block User</h3>
-            <p className={styles.modalText}>
-              Are you sure you want to block this user?
-            </p>
+            <p className={styles.modalText}>Are you sure you want to block this user?</p>
             <div className={styles.modalActions}>
-              <button
-                className={styles.cancelBtn}
-                onClick={() => setBlockUserId(null)}
-              >
-                Cancel
-              </button>
-              <button
-                className={styles.confirmBlockBtn}
-                onClick={() => handleBlockUser(blockUserId)}
-              >
-                Block
-              </button>
+              <button className={styles.cancelBtn} onClick={() => setBlockUserId(null)}>Cancel</button>
+              <button className={styles.confirmBlockBtn} onClick={() => handleBlockUser(blockUserId)}>Block</button>
             </div>
           </div>
         </div>
@@ -658,22 +609,10 @@ export default function Users() {
         <div className={styles.modalOverlay}>
           <div className={styles.confirmModal}>
             <h3 className={styles.modalTitle}>Unblock User</h3>
-            <p className={styles.modalText}>
-              Are you sure you want to unblock this user?
-            </p>
+            <p className={styles.modalText}>Are you sure you want to unblock this user?</p>
             <div className={styles.modalActions}>
-              <button
-                className={styles.cancelBtn}
-                onClick={() => setUnblockUserId(null)}
-              >
-                Cancel
-              </button>
-              <button
-                className={styles.confirmUnblockBtn}
-                onClick={() => handleUnblockUser(unblockUserId)}
-              >
-                Unblock
-              </button>
+              <button className={styles.cancelBtn} onClick={() => setUnblockUserId(null)}>Cancel</button>
+              <button className={styles.confirmUnblockBtn} onClick={() => handleUnblockUser(unblockUserId)}>Unblock</button>
             </div>
           </div>
         </div>
@@ -682,14 +621,7 @@ export default function Users() {
   );
 }
 
-function UserModal({
-  user,
-  externalError,
-  saveLoading,
-  onClose,
-  onSave,
-  onClearError,
-}) {
+function UserModal({ user, externalError, saveLoading, onClose, onSave, onClearError }) {
   const [form, setForm] = useState({ ...user });
   const [localError, setLocalError] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -707,13 +639,10 @@ function UserModal({
     if (!form.userName.trim()) return "Username is required.";
     if (!form.email.trim()) return "Email is required.";
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(form.email))
-      return "Please enter a valid email address.";
+    if (!emailRegex.test(form.email)) return "Please enter a valid email address.";
     if (!form.password) return "Password is required.";
-    if (form.password.length < 8)
-      return "Password must be at least 8 characters.";
-    if (!form.number.trim())
-      return `${ID_LABEL[form.role] || "ID"} is required.`;
+    if (form.password.length < 8) return "Password must be at least 8 characters.";
+    if (!form.number.trim()) return `${ID_LABEL[form.role] || "ID"} is required.`;
     if (form.role === "student") {
       if (!form.college.trim()) return "College is required.";
       if (!form.major.trim()) return "Major is required.";
@@ -726,10 +655,7 @@ function UserModal({
 
   const handleSave = () => {
     const err = validate();
-    if (err) {
-      setLocalError(err);
-      return;
-    }
+    if (err) { setLocalError(err); return; }
     setLocalError("");
     onSave(form);
   };
@@ -741,54 +667,24 @@ function UserModal({
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
           <h3 className={styles.modalTitle}>Add {roleLabel}</h3>
-          <button className={styles.closeBtn} onClick={onClose}>
-            <Close fontSize="small" />
-          </button>
+          <button className={styles.closeBtn} onClick={onClose}><Close fontSize="small" /></button>
         </div>
         <div className={styles.modalBody}>
           {displayError && <p className={styles.errorMsg}>{displayError}</p>}
-
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>
-              Full Name <span className={styles.required}>*</span>
-            </label>
-            <input
-              className={styles.input}
-              value={form.fullName}
-              onChange={(e) => handleChange("fullName", e.target.value)}
-              placeholder="e.g. Ahmad Khalil"
-            />
+            <label className={styles.label}>Full Name <span className={styles.required}>*</span></label>
+            <input className={styles.input} value={form.fullName} onChange={(e) => handleChange("fullName", e.target.value)} placeholder="e.g. Ahmad Khalil" />
           </div>
-
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>
-              Username <span className={styles.required}>*</span>
-            </label>
-            <input
-              className={styles.input}
-              value={form.userName}
-              onChange={(e) => handleChange("userName", e.target.value)}
-              placeholder="e.g. ahmad.khalil"
-            />
+            <label className={styles.label}>Username <span className={styles.required}>*</span></label>
+            <input className={styles.input} value={form.userName} onChange={(e) => handleChange("userName", e.target.value)} placeholder="e.g. ahmad.khalil" />
           </div>
-
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>
-              Email <span className={styles.required}>*</span>
-            </label>
-            <input
-              className={styles.input}
-              type="email"
-              value={form.email}
-              onChange={(e) => handleChange("email", e.target.value)}
-              placeholder="e.g. ahmad@ptuk.edu.ps"
-            />
+            <label className={styles.label}>Email <span className={styles.required}>*</span></label>
+            <input className={styles.input} type="email" value={form.email} onChange={(e) => handleChange("email", e.target.value)} placeholder="e.g. ahmad@ptuk.edu.ps" />
           </div>
-
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>
-              Password <span className={styles.required}>*</span>
-            </label>
+            <label className={styles.label}>Password <span className={styles.required}>*</span></label>
             <div className={styles.passwordWrapper}>
               <input
                 className={styles.input}
@@ -798,88 +694,39 @@ function UserModal({
                 placeholder="Min 8 characters"
                 style={{ paddingRight: "42px" }}
               />
-              <button
-                type="button"
-                className={styles.eyeBtn}
-                onClick={() => setShowPass((p) => !p)}
-              >
-                {showPass ? (
-                  <Visibility fontSize="small" sx={{ color: "#888" }} />
-                ) : (
-                  <VisibilityOff fontSize="small" sx={{ color: "#888" }} />
-                )}
+              <button type="button" className={styles.eyeBtn} onClick={() => setShowPass((p) => !p)}>
+                {showPass
+                  ? <Visibility fontSize="small" sx={{ color: "#888" }} />
+                  : <VisibilityOff fontSize="small" sx={{ color: "#888" }} />}
               </button>
             </div>
           </div>
-
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>
-              {ID_LABEL[form.role] || "ID"}{" "}
-              <span className={styles.required}>*</span>
-            </label>
-            <input
-              className={styles.input}
-              value={form.number}
-              onChange={(e) => handleChange("number", e.target.value)}
-              placeholder="e.g. 1201234"
-            />
+            <label className={styles.label}>{ID_LABEL[form.role] || "ID"} <span className={styles.required}>*</span></label>
+            <input className={styles.input} value={form.number} onChange={(e) => handleChange("number", e.target.value)} placeholder="e.g. 1201234" />
           </div>
-
           {["supervisor", "examiner", "coordinator"].includes(form.role) && (
             <div className={styles.fieldGroup}>
-              <label className={styles.label}>
-                Department <span className={styles.required}>*</span>
-              </label>
-              <input
-                className={styles.input}
-                value={form.department}
-                onChange={(e) => handleChange("department", e.target.value)}
-                placeholder="e.g. Computer Science"
-              />
+              <label className={styles.label}>Department <span className={styles.required}>*</span></label>
+              <input className={styles.input} value={form.department} onChange={(e) => handleChange("department", e.target.value)} placeholder="e.g. Computer Science" />
             </div>
           )}
-
           {form.role === "student" && (
             <>
               <div className={styles.fieldGroup}>
-                <label className={styles.label}>
-                  College <span className={styles.required}>*</span>
-                </label>
-                <input
-                  className={styles.input}
-                  value={form.college}
-                  onChange={(e) => handleChange("college", e.target.value)}
-                  placeholder="e.g. Engineering"
-                />
+                <label className={styles.label}>College <span className={styles.required}>*</span></label>
+                <input className={styles.input} value={form.college} onChange={(e) => handleChange("college", e.target.value)} placeholder="e.g. Engineering" />
               </div>
               <div className={styles.fieldGroup}>
-                <label className={styles.label}>
-                  Major <span className={styles.required}>*</span>
-                </label>
-                <input
-                  className={styles.input}
-                  value={form.major}
-                  onChange={(e) => handleChange("major", e.target.value)}
-                  placeholder="e.g. Computer Science"
-                />
+                <label className={styles.label}>Major <span className={styles.required}>*</span></label>
+                <input className={styles.input} value={form.major} onChange={(e) => handleChange("major", e.target.value)} placeholder="e.g. Computer Science" />
               </div>
             </>
           )}
         </div>
-
         <div className={styles.modalFooter}>
-          <button
-            className={styles.cancelBtn}
-            onClick={onClose}
-            disabled={saveLoading}
-          >
-            Cancel
-          </button>
-          <button
-            className={styles.saveBtn}
-            onClick={handleSave}
-            disabled={saveLoading}
-          >
+          <button className={styles.cancelBtn} onClick={onClose} disabled={saveLoading}>Cancel</button>
+          <button className={styles.saveBtn} onClick={handleSave} disabled={saveLoading}>
             {saveLoading ? "Saving..." : `Add ${roleLabel}`}
           </button>
         </div>

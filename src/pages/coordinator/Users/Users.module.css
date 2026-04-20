@@ -655,7 +655,194 @@
 .confirmDeleteBtn:hover {
   opacity: 0.88;
 }
+/* ─── Supervisors Grid ─────────────────────────── */
+.supervisorsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
+.supervisorCard {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px 24px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.supervisorCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.supervisorAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #C0441A, #e8673d);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.supervisorCardName {
+  font-size: 15px;
+  font-weight: 700;
+  color: #101828;
+  margin: 0 0 4px;
+}
+
+.groupCountBadge {
+  font-size: 12px;
+  font-weight: 500;
+  color: #4A5565;
+  background: #f0f0f0;
+  padding: 2px 10px;
+  border-radius: 99px;
+}
+
+.noGroupsText {
+  font-size: 13px;
+  color: #aaa;
+  padding: 4px 0;
+  margin: 0;
+}
+
+.groupsList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.groupChipCard {
+  background: #fafafa;
+  border: 1.5px solid #f0f0f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.groupChipCard:hover {
+  border-color: #C0441A;
+  background: #fff0ed;
+}
+
+.groupChipTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.groupChipName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #101828;
+}
+
+.groupChipStatus {
+  font-size: 11px;
+  font-weight: 500;
+  background: #e8f4fd;
+  color: #1e40af;
+  padding: 2px 8px;
+  border-radius: 99px;
+  white-space: nowrap;
+}
+
+.groupChipProject {
+  font-size: 12px;
+  color: #4A5565;
+}
+
+.groupChipStudents {
+  font-size: 12px;
+  color: #888;
+}
+
+/* ─── Group Detail Modal ───────────────────────── */
+.groupDetailGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.groupDetailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.groupDetailLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+  display: block;
+}
+
+.groupDetailValue {
+  font-size: 14px;
+  color: #101828;
+  font-weight: 500;
+  margin: 0;
+}
+
+.studentsDetailList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.studentDetailCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #fafafa;
+  border-radius: 10px;
+  border: 1px solid #f0f0f0;
+}
+
+.studentDetailAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e8f4fd;
+  color: #1e40af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.studentDetailName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #101828;
+  margin: 0 0 2px;
+}
+
+.studentDetailNum {
+  font-size: 12px;
+  color: #888;
+  margin: 0;
+}
 @media (max-width: 768px) {
   .filtersBox {
     flex-direction: column;
