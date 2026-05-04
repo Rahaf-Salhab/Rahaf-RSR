@@ -30,11 +30,11 @@ import ExaminerEvaluationForms from "./pages/examiner/EvaluationForms/ExaminerEv
 import SupervisorEvaluationForms from "./pages/supervisor/EvaluationForms/SupervisorEvaluationForms";
 import SupervisorGroups from "./pages/supervisor/Groups/SupervisorGroups";
 import GroupDetails from "./pages/supervisor/Groups/GroupDetails";
-import StudentGrades from "./pages/student/Grades/StudentGrades";
+ import StudentGrades from "./pages/student/Grades/StudentGrades";
+ import Tasks from "./pages/supervisor/Tasks/Tasks";
 
 import Profile from "./pages/profile/Profile";
 
-import ProtectedRouter from "./components/protectedRouter/ProtectedRouter";
 import DashboardProtectedRouter from "./components/protectedRouter/DashboardProtectedRouter";
 
 const routes = createBrowserRouter([
@@ -79,11 +79,12 @@ const routes = createBrowserRouter([
     children: [
       { index: true, element: <SupervisorHome /> },
       { path: "home", element: <SupervisorHome /> },
+      { path: "tasks", element: <Tasks /> },
       { path: "groups", element: <SupervisorGroups /> },
+      { path: "groups/:groupId", element: <GroupDetails /> },
       { path: "evaluation-forms", element: <SupervisorEvaluationForms /> },
       { path: "profile", element: <Profile /> },
-      { path: "groups/:groupId", element: <GroupDetails /> }
-    ],
+     ],
   },
 
   // Coordinator
