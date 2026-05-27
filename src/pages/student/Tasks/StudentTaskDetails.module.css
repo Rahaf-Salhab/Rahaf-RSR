@@ -1,0 +1,498 @@
+.page {
+  min-height: 100vh;
+  background: #f7f8fb;
+  padding: 32px;
+}
+
+
+
+/*______________________________________Main cards____________________________________*/
+.detailsCard {
+  background: linear-gradient(180deg, #ffffff, #fcfcfc);
+  border: 2px solid #f0eeee;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+}
+
+.versionsCard {
+  margin-top: 20px;
+  background: #ffffff;
+  border: 1px solid #ece7e3;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(14, 24, 40, 0.035);
+}
+
+.versionsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.versionsHeader h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.versionsHeader p {
+  margin: 6px 0 0;
+  color: #5A544F;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.versionsCount {
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: #fff4ef;
+  color: #c2410c;
+  border: 1px solid #fed7c7;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.submissionSection {
+  margin-top: 0;
+}
+
+/*________________________________Versions____________________________*/
+.newVersionNotice {
+  margin-top: 18px;
+  padding: 18px 20px;
+  border: 1px solid #fed7c7;
+  border-left: 4px solid #c34c18;
+  border-radius: 16px;
+  background: #fffaf7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  box-shadow: 0 6px 18px rgba(196, 76, 24, 0.06);
+}
+
+.newVersionText h3 {
+  margin: 0;
+  color: #9a3412;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.newVersionText p {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+/*___________________________________Task header_______________________________*/
+.taskHeader {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.taskTitleRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.taskTitle {
+  margin: 0;
+  color: #111827;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.taskTitleWithStatus {
+  margin-top: 7px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.description {
+  margin-top: 8px;
+  color: #5A544F;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.fileIcon {
+  background-color: #f4f2f1;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: 0.25s ease;
+}
+
+
+.fileIcon svg {
+  width: 27px;
+  height: 27px;
+  color: #C34C18;
+}
+
+/* submission task box*/
+.submittedFileRow {
+  margin-top: 10px;
+  margin-left: 68px;
+  padding: 9px 13px;
+  border: 1px solid #eeeeee;
+  border-radius: 12px;
+  background: #ffffff;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(14, 24, 40, 0.018);
+}
+
+.submittedFileRow:hover {
+  box-shadow: 0 6px 16px rgba(14, 24, 40, 0.04);
+}
+
+.taskSubmissionFile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.taskFileSmallIcon {
+  color: #5A544F;
+  font-size: 13.7px;
+  font-weight: 400;
+}
+
+/* Task file section */
+.taskFile {
+  margin-top: 18px;
+  margin-left: 68px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.taskFileSmallIcon {
+  color: #5A544F;
+  font-size: 13.7px;
+  font-weight: 400;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.taskFileSimpleLink {
+  color: #374151;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.taskFileSimpleLink:hover {
+  text-decoration: underline;
+  color: #9a3412;
+}
+
+/* Task info boxes */
+.taskMetaList {
+  margin-top: 17px;
+  margin-left: 68px;
+  padding-top: 18px;
+  border-top: 1px solid #eeeeee;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  gap: 34px;
+  flex-wrap: wrap;
+  max-width: none;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #5A544F;
+  font-size: 14px;
+  font-weight: 300;
+  min-width: 0;
+}
+
+.metaItem span:last-child {
+  white-space: nowrap;
+}
+
+.metaLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.metaIcon {
+  width: 16px !important;
+  height: 16px !important;
+  color: #5A544F;
+  flex-shrink: 0;
+}
+
+/*_____________________________Submission section________________________________*/
+.submissionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.submissionItem {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+/*___________________________________Submission box___________________________________*/
+.submissionBox {
+  border: 1px solid #e8e2de;
+  border-left: 4px solid #c34c18;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 12px 18px 12px 22px;
+  box-shadow: 0 5px 18px rgba(14, 24, 40, 0.035);
+  transition: 0.2s ease;
+}
+
+.submissionBox:hover {
+  box-shadow: 0 10px 26px rgba(14, 24, 40, 0.065);
+}
+
+.submissionBox.oldVersionBox {
+  background: #fbfbfb;
+  border-left-color: #d8d8d8;
+  box-shadow: 0 2px 10px rgba(14, 24, 40, 0.018);
+}
+
+.submissionBox.oldVersionBox .fileIcon {
+  background: #f3f0ee;
+  color: #c85a2a;
+  opacity: 0.75;
+}
+
+.submissionBox.oldVersionBox .taskTitle {
+  color: #575d68;
+}
+
+.submissionBox.oldVersionBox .metaItem {
+  color: #6b7280;
+}
+
+.submissionBox.oldVersionBox .taskFileSimpleLink {
+  color: #374151;
+  opacity: 0.9;
+}
+
+.submissionBox.oldVersionBox .taskFileSimpleLink:hover {
+  color: #c85a2a;
+  text-decoration: underline;
+}
+
+.submissionBox.oldVersionBox .submittedFileRow {
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(14, 24, 40, 0.012);
+}
+
+/* Status badge base */
+.statusBadge {
+  padding: 2px 15px;
+  border-radius: 999px;
+  border: 1px solid;
+  font-size: 12px;
+  font-weight: 510;
+}
+
+.latestBadge {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.approvedStatus {
+  background: #DCFCE7;
+  color: #016630;
+  border-color: #B9F8CF;
+}
+
+.rejectedStatus {
+  background: #ffe4e4;
+  color: #dc2626;
+  border-color: #f8b4b4;
+}
+
+.pendingStatus {
+  background: #FEF3C6;
+  color: #973C00;
+  border-color: #FEE685;
+}
+
+/* Submission info */
+.submissionInfo {
+  margin-top: -14px;
+  margin-left: 68px;
+  padding-top: 10px;
+  border-top: 1px solid #eeeeee;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 18px;
+  align-items: center;
+  color: #5A544F;
+  font-weight: 400;
+}
+
+/* Empty submission */
+.emptySubmission {
+  margin-top: 18px;
+  border: 2px dashed #d8d8d8;
+  border-radius: 18px;
+  padding: 34px;
+  text-align: center;
+  background: #fcfcfc;
+  width: 100%;
+}
+
+.submitBtn {
+  border: none;
+  background: linear-gradient(135deg, #c43d13, #a8320f);
+  color: #ffffff;
+  padding: 13px 28px;
+  border-radius: 13px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.submitBtn:hover {
+  transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 1000px) {
+  .submissionInfo {
+    grid-template-columns: 1fr;
+  }
+
+  .taskHeader {
+    flex-direction: column;
+  }
+
+
+  .statusBadge {
+    .statusBadge {
+      padding: 4px 11px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 14px;
+  }
+
+  .taskTitle {
+    font-size: 20px;
+  }
+
+  .detailsCard {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .taskTitleRow {
+    gap: 12px;
+  }
+
+  .fileIcon {
+    width: 46px;
+    height: 46px;
+  }
+
+  .taskMetaList,
+  .taskFile,
+  .submissionInfo {
+    margin-left: 0;
+  }
+
+  .submissionBox {
+    padding: 18px 16px;
+  }
+
+  .taskSubmissionFile {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: start;
+    gap: 8px;
+  }
+
+  .taskFileSmallIcon {
+    white-space: nowrap;
+  }
+
+  .taskFileSimpleLink {
+    display: block;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    line-height: 1.5;
+  }
+
+  .versionsHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .newVersionNotice {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .newVersionText {
+    width: 100%;
+  }
+
+  .newVersionNotice :global(button) {
+    width: 100%;
+  }
+}

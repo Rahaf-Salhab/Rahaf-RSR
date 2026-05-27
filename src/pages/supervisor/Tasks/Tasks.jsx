@@ -1,13 +1,31 @@
 import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate} from "react-router-dom";
 import api from "../../../api/axiosInstance";
 import styles from "./SupervisorTasks.module.css";
 
-import {Add,Search,Edit,HourglassEmpty,CheckCircle,Close,Assignment,AttachFile,InsertDriveFile,ExpandMore,
-  ExpandLess,People,} from "@mui/icons-material";
+import {
+  Add,
+  Search,
+  Edit,
+  HourglassEmpty,
+  CheckCircle,
+  Close,
+  Assignment,
+  AttachFile,
+  InsertDriveFile,
+  ExpandMore,
+  ExpandLess,
+  People,
+} from "@mui/icons-material";
 
 function TaskModal({
-  task,groupId,onClose,onSave,loading,error,onClearError,
+  task,
+  groupId,
+  onClose,
+  onSave,
+  loading,
+  error,
+  onClearError,
 }) {
   const isEdit = !!task?.taskId;
 
@@ -19,17 +37,14 @@ function TaskModal({
     SupervisorNotes: task?.supervisorNotes || "",
   });
 
-  const [selectedFile, setSelectedFile] =useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
 
-  const [localError, setLocalError] =useState("");
+  const [localError, setLocalError] = useState("");
 
   const fileInputRef = useRef(null);
   const displayError = error || localError;
 
-  const handleChange = (
-    field,
-    value
-  ) => {
+  const handleChange = (field, value) => {
     setForm((prev) => ({
       ...prev,
       [field]: value,
@@ -45,45 +60,29 @@ function TaskModal({
     if (!file) return;
 
     setSelectedFile(file);
-    handleChange(
-      "TaskFileURL",
-      file.name
-    );
+    handleChange("TaskFileURL", file.name);
   };
 
   const handleRemoveFile = () => {
     setSelectedFile(null);
 
-    handleChange(
-      "TaskFileURL",
-      ""
-    );
+    handleChange("TaskFileURL", "");
 
     if (fileInputRef.current) {
-      fileInputRef.current.value =
-        "";
+      fileInputRef.current.value = "";
     }
   };
   const handleSave = () => {
     if (!form.Title.trim()) {
-      setLocalError(
-        "Title is required."
-      );
+      setLocalError("Title is required.");
       return;
     }
     if (!form.DeadLine) {
-      setLocalError(
-        "Deadline is required."
-      );
+      setLocalError("Deadline is required.");
       return;
     }
     setLocalError("");
-    onSave(
-      form,
-      groupId,
-      task?.taskId,
-      selectedFile
-    );
+    onSave(form, groupId, task?.taskId, selectedFile);
   };
 
   return (
@@ -92,69 +91,41 @@ function TaskModal({
         {/* Header */}
         <div className={styles.modalHeader}>
           <h3 className={styles.modalTitle}>
-            {isEdit
-              ? "Edit Task"
-              : "Add Task"}
+            {isEdit ? "Edit Task" : "Add Task"}
           </h3>
 
-          <button
-            className={styles.closeBtn}
-            onClick={onClose}
-          >
+          <button className={styles.closeBtn} onClick={onClose}>
             <Close fontSize="small" />
           </button>
         </div>
 
         {/* Body */}
         <div className={styles.modalBody}>
-          {displayError && (
-            <p className={styles.errorMsg}>
-              {displayError}
-            </p>
-          )}
+          {displayError && <p className={styles.errorMsg}>{displayError}</p>}
 
           {/* Title */}
           <div className={styles.fieldGroup}>
             <label className={styles.label}>
-              Title{" "}
-              <span
-                className={
-                  styles.required
-                }
-              >
-                *
-              </span>
+              Title <span className={styles.required}>*</span>
             </label>
 
             <input
               className={styles.input}
               value={form.Title}
-              onChange={(e) =>
-                handleChange(
-                  "Title",
-                  e.target.value
-                )
-              }
+              onChange={(e) => handleChange("Title", e.target.value)}
               placeholder="Task title..."
             />
           </div>
 
           {/* Description */}
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>
-              Description
-            </label>
+            <label className={styles.label}>Description</label>
 
             <textarea
               className={styles.textarea}
               rows={3}
               value={form.Description}
-              onChange={(e) =>
-                handleChange(
-                  "Description",
-                  e.target.value
-                )
-              }
+              onChange={(e) => handleChange("Description", e.target.value)}
               placeholder="Task description..."
             />
           </div>
@@ -162,34 +133,20 @@ function TaskModal({
           {/* Deadline */}
           <div className={styles.fieldGroup}>
             <label className={styles.label}>
-              Deadline{" "}
-              <span
-                className={
-                  styles.required
-                }
-              >
-                *
-              </span>
+              Deadline <span className={styles.required}>*</span>
             </label>
 
             <input
               type="date"
               className={styles.input}
               value={form.DeadLine}
-              onChange={(e) =>
-                handleChange(
-                  "DeadLine",
-                  e.target.value
-                )
-              }
+              onChange={(e) => handleChange("DeadLine", e.target.value)}
             />
           </div>
 
           {/* File Upload */}
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>
-              Task File
-            </label>
+            <label className={styles.label}>Task File</label>
 
             <input
               ref={fileInputRef}
@@ -198,68 +155,41 @@ function TaskModal({
                 display: "none",
               }}
               accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.txt,.png,.jpg,.jpeg"
-              onChange={
-                handleFileChange
-              }
+              onChange={handleFileChange}
             />
 
-            {!selectedFile &&
-            !form.TaskFileURL ? (
+            {!selectedFile && !form.TaskFileURL ? (
               <button
                 type="button"
-                className={
-                  styles.uploadBtn
-                }
-                onClick={() =>
-                  fileInputRef.current?.click()
-                }
+                className={styles.uploadBtn}
+                onClick={() => fileInputRef.current?.click()}
               >
                 <AttachFile fontSize="small" />
                 Upload File
               </button>
             ) : (
-              <div
-                className={
-                  styles.filePreview
-                }
-              >
+              <div className={styles.filePreview}>
                 <InsertDriveFile
                   style={{
-                    color:
-                      "#C0441A",
+                    color: "#C0441A",
                     fontSize: 20,
                     flexShrink: 0,
                   }}
                 />
 
                 {/* FILE NAME ONLY */}
-                <span
-                  className={
-                    styles.fileName
-                  }
-                >
+                <span className={styles.fileName}>
                   {selectedFile
-                    ? selectedFile.name.replace(
-                        /\.[^/.]+$/,
-                        ""
-                      )
-                    : form.TaskFileURL
-                        ?.split("/")
+                    ? selectedFile.name.replace(/\.[^/.]+$/, "")
+                    : form.TaskFileURL?.split("/")
                         .pop()
-                        ?.replace(
-                          /\.[^/.]+$/,
-                          ""
-                        )}
+                        ?.replace(/\.[^/.]+$/, "")}
                 </span>
 
                 <button
                   type="button"
-                  className={
-                    styles.removeFileBtn
-                  }
-                  onClick={
-                    handleRemoveFile
-                  }
+                  className={styles.removeFileBtn}
+                  onClick={handleRemoveFile}
                 >
                   <Close fontSize="small" />
                 </button>
@@ -269,22 +199,13 @@ function TaskModal({
 
           {/* Notes */}
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>
-              Supervisor Notes
-            </label>
+            <label className={styles.label}>Supervisor Notes</label>
 
             <textarea
               className={styles.textarea}
               rows={2}
-              value={
-                form.SupervisorNotes
-              }
-              onChange={(e) =>
-                handleChange(
-                  "SupervisorNotes",
-                  e.target.value
-                )
-              }
+              value={form.SupervisorNotes}
+              onChange={(e) => handleChange("SupervisorNotes", e.target.value)}
               placeholder="Notes..."
             />
           </div>
@@ -293,9 +214,7 @@ function TaskModal({
         {/* Footer */}
         <div className={styles.modalFooter}>
           <button
-            className={
-              styles.cancelBtn
-            }
+            className={styles.cancelBtn}
             onClick={onClose}
             disabled={loading}
           >
@@ -307,11 +226,7 @@ function TaskModal({
             onClick={handleSave}
             disabled={loading}
           >
-            {loading
-              ? "Saving..."
-              : isEdit
-              ? "Save Changes"
-              : "Add Task"}
+            {loading ? "Saving..." : isEdit ? "Save Changes" : "Add Task"}
           </button>
         </div>
       </div>
@@ -322,33 +237,23 @@ function TaskModal({
 export default function SupervisorTasks() {
   const navigate = useNavigate();
 
-  const [groupsWithTasks, setGroupsWithTasks] =
-    useState([]);
+  const [groupsWithTasks, setGroupsWithTasks] = useState([]);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [search, setSearch] =
-    useState("");
+  const [search, setSearch] = useState("");
 
-  const [
-    expandedGroupId,
-    setExpandedGroupId,
-  ] = useState(null);
+  const [expandedGroupId, setExpandedGroupId] = useState(null);
 
-  const [taskModal, setTaskModal] =
-    useState(null);
+  const [taskModal, setTaskModal] = useState(null);
 
-  const [
-    selectedGroupId,
-    setSelectedGroupId,
-  ] = useState(null);
+  const [selectedGroupId, setSelectedGroupId] = useState(null);
 
-  const [taskLoading, setTaskLoading] =
-    useState(false);
+  const [taskLoading, setTaskLoading] = useState(false);
 
-  const [taskError, setTaskError] =
-    useState("");
+  const [taskError, setTaskError] = useState("");
+
+
 
   useEffect(() => {
     fetchData();
@@ -358,41 +263,29 @@ export default function SupervisorTasks() {
     setLoading(true);
 
     try {
-      const groupsRes =
-        await api.get(
-          "/Group/groups-supervisor"
-        );
+      const groupsRes = await api.get("/Group/groups-supervisor");
 
-      const groups =
-        groupsRes.data?.groups || [];
+      const groups = groupsRes.data?.groups || [];
 
-      const groupsWithTasksData =
-        await Promise.all(
-          groups.map(async (g) => {
-            try {
-              const tasksRes =
-                await api.get(
-                  `/Task/tasks-group/${g.groupId}`
-                );
+      const groupsWithTasksData = await Promise.all(
+        groups.map(async (g) => {
+          try {
+            const tasksRes = await api.get(`/Task/tasks-group/${g.groupId}`);
 
-              return {
-                ...g,
-                tasks:
-                  tasksRes.data
-                    ?.tasks || [],
-              };
-            } catch {
-              return {
-                ...g,
-                tasks: [],
-              };
-            }
-          })
-        );
-
-      setGroupsWithTasks(
-        groupsWithTasksData
+            return {
+              ...g,
+              tasks: tasksRes.data?.tasks || [],
+            };
+          } catch {
+            return {
+              ...g,
+              tasks: [],
+            };
+          }
+        }),
       );
+
+      setGroupsWithTasks(groupsWithTasksData);
     } catch (err) {
       console.error(err);
     } finally {
@@ -400,71 +293,40 @@ export default function SupervisorTasks() {
     }
   };
 
-  const handleSaveTask = async (
-    form,
-    groupId,
-    taskId,
-    file
-  ) => {
+  const handleSaveTask = async (form, groupId, taskId, file) => {
     setTaskLoading(true);
 
     setTaskError("");
 
     try {
-      const formData =
-        new FormData();
+      const formData = new FormData();
 
-      formData.append(
-        "Title",
-        form.Title
-      );
+      formData.append("Title", form.Title);
 
-      formData.append(
-        "Description",
-        form.Description || ""
-      );
+      formData.append("Description", form.Description || "");
 
-      formData.append(
-        "DeadLine",
-        `${form.DeadLine}T00:00:00`
-      );
+      formData.append("DeadLine", `${form.DeadLine}T00:00:00`);
 
-      formData.append(
-        "SupervisorNotes",
-        form.SupervisorNotes || ""
-      );
+      formData.append("SupervisorNotes", form.SupervisorNotes || "");
 
       if (file) {
-        formData.append(
-          "TaskFileURL",
-          file
-        );
+        formData.append("TaskFileURL", file);
       }
 
       if (taskId) {
         // EDIT
-        await api.patch(
-          `/Task/${groupId}/tasks/${taskId}`,
-          formData,
-          {
-            headers: {
-              "Content-Type":
-                "multipart/form-data",
-            },
-          }
-        );
+        await api.patch(`/Task/${groupId}/tasks/${taskId}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
       } else {
         // CREATE
-        await api.post(
-          `/Task/create/${groupId}`,
-          formData,
-          {
-            headers: {
-              "Content-Type":
-                "multipart/form-data",
-            },
-          }
-        );
+        await api.post(`/Task/create/${groupId}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
       }
 
       await fetchData();
@@ -475,93 +337,50 @@ export default function SupervisorTasks() {
     } catch (err) {
       console.error(err);
 
-      const data =
-        err.response?.data;
+      const data = err.response?.data;
 
       if (data?.message) {
-        setTaskError(
-          data.message
-        );
+        setTaskError(data.message);
       } else if (data?.errors) {
-        setTaskError(
-          Object.values(
-            data.errors
-          )
-            .flat()
-            .join(" ")
-        );
+        setTaskError(Object.values(data.errors).flat().join(" "));
       } else {
-        setTaskError(
-          "Something went wrong."
-        );
+        setTaskError("Something went wrong.");
       }
     } finally {
       setTaskLoading(false);
     }
   };
 
-
   const formatDate = (d) => {
     if (!d) return "-";
 
-    return new Date(
-      d
-    ).toLocaleDateString(
-      "en-US",
-      {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      }
-    );
+    return new Date(d).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   };
 
-  const isOverdue = (deadline) =>
-    deadline &&
-    new Date(deadline) <
-      new Date();
+  const isOverdue = (deadline) => deadline && new Date(deadline) < new Date();
 
-  const filteredGroups =
-    groupsWithTasks.filter(
-      (g) =>
-        g.groupName
-          ?.toLowerCase()
-          .includes(
-            search.toLowerCase()
-          ) ||
-        g.projectName
-          ?.toLowerCase()
-          .includes(
-            search.toLowerCase()
-          )
-    );
+  const filteredGroups = groupsWithTasks.filter(
+    (g) =>
+      g.groupName?.toLowerCase().includes(search.toLowerCase()) ||
+      g.projectName?.toLowerCase().includes(search.toLowerCase()),
+  );
 
-  const totalTasks =
-    groupsWithTasks.reduce(
-      (sum, g) =>
-        sum +
-        (g.tasks?.length || 0),
-      0
-    );
+  const totalTasks = groupsWithTasks.reduce(
+    (sum, g) => sum + (g.tasks?.length || 0),
+    0,
+  );
 
-  const completedTasks =
-    groupsWithTasks.reduce(
-      (sum, g) =>
-        sum +
-        (g.tasks?.filter(
-          (t) =>
-            t.isCompleted
-        ).length || 0),
-      0
-    );
-
+  const completedTasks = groupsWithTasks.reduce(
+    (sum, g) => sum + (g.tasks?.filter((t) => t.isCompleted).length || 0),
+    0,
+  );
 
   if (loading) {
-    return (
-      <div className={styles.loading}>
-        Loading...
-      </div>
-    );
+    return <div className={styles.loading}>Loading...</div>;
   }
 
   /* =========================================================
@@ -572,13 +391,10 @@ export default function SupervisorTasks() {
       {/* Header */}
       <div className={styles.pageHeader}>
         <div>
-          <h1 className={styles.pageTitle}>
-            Tasks
-          </h1>
+          <h1 className={styles.pageTitle}>Tasks</h1>
 
           <p className={styles.pageSubtitle}>
-            Manage tasks for all your
-            groups
+            Manage tasks for all your groups
           </p>
         </div>
       </div>
@@ -589,27 +405,21 @@ export default function SupervisorTasks() {
           <div
             className={styles.statIcon}
             style={{
-              background:
-                "#e0f2fe",
+              background: "#e0f2fe",
             }}
           >
             <Assignment
               style={{
                 fontSize: 20,
-                color:
-                  "#0369a1",
+                color: "#0369a1",
               }}
             />
           </div>
 
           <div>
-            <p className={styles.statValue}>
-              {totalTasks}
-            </p>
+            <p className={styles.statValue}>{totalTasks}</p>
 
-            <p className={styles.statLabel}>
-              Total Tasks
-            </p>
+            <p className={styles.statLabel}>Total Tasks</p>
           </div>
         </div>
 
@@ -617,27 +427,21 @@ export default function SupervisorTasks() {
           <div
             className={styles.statIcon}
             style={{
-              background:
-                "#f0fdf4",
+              background: "#f0fdf4",
             }}
           >
             <CheckCircle
               style={{
                 fontSize: 20,
-                color:
-                  "#22c55e",
+                color: "#22c55e",
               }}
             />
           </div>
 
           <div>
-            <p className={styles.statValue}>
-              {completedTasks}
-            </p>
+            <p className={styles.statValue}>{completedTasks}</p>
 
-            <p className={styles.statLabel}>
-              Completed
-            </p>
+            <p className={styles.statLabel}>Completed</p>
           </div>
         </div>
 
@@ -645,28 +449,21 @@ export default function SupervisorTasks() {
           <div
             className={styles.statIcon}
             style={{
-              background:
-                "#fef3e2",
+              background: "#fef3e2",
             }}
           >
             <HourglassEmpty
               style={{
                 fontSize: 20,
-                color:
-                  "#f59e0b",
+                color: "#f59e0b",
               }}
             />
           </div>
 
           <div>
-            <p className={styles.statValue}>
-              {totalTasks -
-                completedTasks}
-            </p>
+            <p className={styles.statValue}>{totalTasks - completedTasks}</p>
 
-            <p className={styles.statLabel}>
-              Pending
-            </p>
+            <p className={styles.statLabel}>Pending</p>
           </div>
         </div>
       </div>
@@ -674,18 +471,13 @@ export default function SupervisorTasks() {
       {/* Search */}
       <div className={styles.filtersBox}>
         <div className={styles.searchWrapper}>
-          <Search
-            className={styles.searchIcon}
-            fontSize="small"
-          />
+          <Search className={styles.searchIcon} fontSize="small" />
 
           <input
             type="text"
             placeholder="Search groups..."
             value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
+            onChange={(e) => setSearch(e.target.value)}
             className={styles.searchInput}
           />
         </div>
@@ -706,89 +498,41 @@ export default function SupervisorTasks() {
       ) : (
         <div className={styles.groupsList}>
           {filteredGroups.map((g) => {
-            const isExpanded =
-              expandedGroupId ===
-              g.groupId;
+            const isExpanded = expandedGroupId === g.groupId;
 
             return (
-              <div
-                key={g.groupId}
-                className={
-                  styles.groupSection
-                }
-              >
+              <div key={g.groupId} className={styles.groupSection}>
                 {/* Group Row */}
-                <div
-                  className={
-                    styles.groupRow
-                  }
-                >
-                  <div
-                    className={
-                      styles.groupLeft
-                    }
-                  >
-                    <div
-                      className={
-                        styles.groupAvatar
-                      }
-                    >
+                <div className={styles.groupRow}>
+                  <div className={styles.groupLeft}>
+                    <div className={styles.groupAvatar}>
                       <People
                         style={{
                           fontSize: 18,
-                          color:
-                            "#C0441A",
+                          color: "#C0441A",
                         }}
                       />
                     </div>
 
                     <div>
-                      <h3
-                        className={
-                          styles.groupName
-                        }
-                      >
-                        {g.groupName}
-                      </h3>
+                      <h3 className={styles.groupName}>{g.groupName}</h3>
 
-                      <p
-                        className={
-                          styles.groupProject
-                        }
-                      >
-                        {g.projectName}
-                      </p>
+                      <p className={styles.groupProject}>{g.projectName}</p>
                     </div>
                   </div>
 
-                  <div
-                    className={
-                      styles.groupRight
-                    }
-                  >
-                    <span
-                      className={
-                        styles.taskCount
-                      }
-                    >
-                      {g.tasks?.length ||
-                        0}{" "}
-                      tasks
+                  <div className={styles.groupRight}>
+                    <span className={styles.taskCount}>
+                      {g.tasks?.length || 0} tasks
                     </span>
 
                     {/* ADD TASK */}
                     <button
-                      className={
-                        styles.addTaskBtn
-                      }
+                      className={styles.addTaskBtn}
                       onClick={() => {
-                        setTaskError(
-                          ""
-                        );
+                        setTaskError("");
 
-                        setSelectedGroupId(
-                          g.groupId
-                        );
+                        setSelectedGroupId(g.groupId);
 
                         setTaskModal({});
                       }}
@@ -799,13 +543,9 @@ export default function SupervisorTasks() {
 
                     {/* DETAILS */}
                     <button
-                      className={
-                        styles.detailsBtn
-                      }
+                      className={styles.detailsBtn}
                       onClick={() =>
-                        navigate(
-                          `/supervisor/groups/${g.groupId}`
-                        )
+                        navigate(`/supervisor/groups/${g.groupId}`)
                       }
                     >
                       Details
@@ -813,15 +553,9 @@ export default function SupervisorTasks() {
 
                     {/* EXPAND */}
                     <button
-                      className={
-                        styles.toggleBtn
-                      }
+                      className={styles.toggleBtn}
                       onClick={() =>
-                        setExpandedGroupId(
-                          isExpanded
-                            ? null
-                            : g.groupId
-                        )
+                        setExpandedGroupId(isExpanded ? null : g.groupId)
                       }
                     >
                       {isExpanded ? (
@@ -835,186 +569,100 @@ export default function SupervisorTasks() {
 
                 {/* TASKS */}
                 {isExpanded && (
-                  <div
-                    className={
-                      styles.tasksContainer
-                    }
-                  >
-                    {g.tasks?.length ===
-                    0 ? (
-                      <div
-                        className={
-                          styles.emptyTasks
-                        }
-                      >
+                  <div className={styles.tasksContainer}>
+                    {g.tasks?.length === 0 ? (
+                      <div className={styles.emptyTasks}>
                         <HourglassEmpty
                           style={{
                             fontSize: 32,
-                            color:
-                              "#ddd",
+                            color: "#ddd",
                           }}
                         />
 
-                        <p>
-                          No tasks yet
-                          for this
-                          group.
-                        </p>
+                        <p>No tasks yet for this group.</p>
                       </div>
                     ) : (
-                      <div
-                        className={
-                          styles.tasksList
-                        }
-                      >
-                        {g.tasks.map(
-                          (t, i) => (
-                            <div
-                              key={
-                                t.taskId ||
-                                i
-                              }
-                              className={`${styles.taskItem} ${
-                                isOverdue(
-                                  t.deadLine
-                                ) &&
-                                !t.isCompleted
-                                  ? styles.taskOverdue
-                                  : ""
-                              }`}
-                            >
-                              <div
-                                className={
-                                  styles.taskLeft
-                                }
-                              >
-                                <div
-                                  className={
-                                    styles.taskIcon
-                                  }
-                                >
-                                  {t.isCompleted ? (
-                                    <CheckCircle
-                                      style={{
-                                        color:
-                                          "#22c55e",
-                                        fontSize: 20,
-                                      }}
-                                    />
-                                  ) : (
-                                    <HourglassEmpty
-                                      style={{
-                                        color:
-                                          "#f59e0b",
-                                        fontSize: 20,
-                                      }}
-                                    />
-                                  )}
-                                </div>
-
-                                <div>
-                                  <p
-                                    className={
-                                      styles.taskTitle
-                                    }
-                                  >
-                                    {
-                                      t.title
-                                    }
-                                  </p>
-
-                                  {t.description && (
-                                    <p
-                                      className={
-                                        styles.taskDesc
-                                      }
-                                    >
-                                      {
-                                        t.description
-                                      }
-                                    </p>
-                                  )}
-
-                                  {t.supervisorNotes && (
-                                    <p
-                                      className={
-                                        styles.taskNotes
-                                      }
-                                    >
-                                      📝{" "}
-                                      {
-                                        t.supervisorNotes
-                                      }
-                                    </p>
-                                  )}
-
-                                  <p
-                                    className={
-                                      styles.taskDeadline
-                                    }
-                                  >
-                                    Deadline:{" "}
-                                    {formatDate(
-                                      t.deadLine
-                                    )}
-
-                                    {isOverdue(
-                                      t.deadLine
-                                    ) &&
-                                      !t.isCompleted && (
-                                        <span
-                                          className={
-                                            styles.overdueBadge
-                                          }
-                                        >
-                                          Overdue
-                                        </span>
-                                      )}
-                                  </p>
-
-                                  {t.taskFileURL && (
-                                    <a
-                                      href={
-                                        t.taskFileURL
-                                      }
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className={
-                                        styles.taskFile
-                                      }
-                                    >
-                                      📎
-                                      View
-                                      File
-                                    </a>
-                                  )}
-                                </div>
+                      <div className={styles.tasksList}>
+                        {g.tasks.map((t, i) => (
+                          <div
+                            key={t.taskId || i}
+                            className={`${styles.taskItem} ${
+                              isOverdue(t.deadLine) && !t.isCompleted
+                                ? styles.taskOverdue
+                                : ""
+                            }`}
+                          >
+                            <div className={styles.taskLeft}>
+                              <div className={styles.taskIcon}>
+                                {t.isCompleted ? (
+                                  <CheckCircle
+                                    style={{
+                                      color: "#22c55e",
+                                      fontSize: 20,
+                                    }}
+                                  />
+                                ) : (
+                                  <HourglassEmpty
+                                    style={{
+                                      color: "#f59e0b",
+                                      fontSize: 20,
+                                    }}
+                                  />
+                                )}
                               </div>
 
-                              {/* EDIT */}
-                              <button
-                                className={
-                                  styles.editTaskBtn
-                                }
-                                onClick={() => {
-                                  setTaskError(
-                                    ""
-                                  );
+                              <div>
+                                <p className={styles.taskTitle}>{t.title}</p>
 
-                                  setSelectedGroupId(
-                                    g.groupId
-                                  );
+                                {t.description && (
+                                  <p className={styles.taskDesc}>
+                                    {t.description}
+                                  </p>
+                                )}
 
-                                  setTaskModal(
-                                    t
-                                  );
-                                }}
-                              >
-                                <Edit fontSize="small" />
-                              </button>
+                                {t.supervisorNotes && (
+                                  <p className={styles.taskNotes}>
+                                    📝 {t.supervisorNotes}
+                                  </p>
+                                )}
+
+                                <p className={styles.taskDeadline}>
+                                  Deadline: {formatDate(t.deadLine)}
+                                  {isOverdue(t.deadLine) && !t.isCompleted && (
+                                    <span className={styles.overdueBadge}>
+                                      Overdue
+                                    </span>
+                                  )}
+                                </p>
+
+                                {t.taskFileURL && (
+                                  <a
+                                    href={t.taskFileURL}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className={styles.taskFile}
+                                  >
+                                    📎 View File
+                                  </a>
+                                )}
+                              </div>
                             </div>
-                          )
-                        )}
+
+                            {/* EDIT */}
+                            <button
+                              className={styles.editTaskBtn}
+                              onClick={() => {
+                                setTaskError("");
+
+                                setSelectedGroupId(g.groupId);
+
+                                setTaskModal(t);
+                              }}
+                            >
+                              <Edit fontSize="small" />
+                            </button>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -1026,28 +674,23 @@ export default function SupervisorTasks() {
       )}
 
       {/* MODAL */}
-      {taskModal &&
-        selectedGroupId && (
-          <TaskModal
-            task={taskModal}
-            groupId={selectedGroupId}
-            onClose={() => {
-              setTaskModal(null);
+      {taskModal && selectedGroupId && (
+        <TaskModal
+          task={taskModal}
+          groupId={selectedGroupId}
+          onClose={() => {
+            setTaskModal(null);
 
-              setSelectedGroupId(
-                null
-              );
+            setSelectedGroupId(null);
 
-              setTaskError("");
-            }}
-            onSave={handleSaveTask}
-            loading={taskLoading}
-            error={taskError}
-            onClearError={() =>
-              setTaskError("")
-            }
-          />
-        )}
+            setTaskError("");
+          }}
+          onSave={handleSaveTask}
+          loading={taskLoading}
+          error={taskError}
+          onClearError={() => setTaskError("")}
+        />
+      )}
     </div>
   );
 }

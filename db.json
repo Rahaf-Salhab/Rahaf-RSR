@@ -75,6 +75,31 @@
       "createdAt": "2026-02-15T10:00:00Z"
     }
   ],
+
+
+
+  "students": [
+  {
+    "id": "7",
+    "studentNumber": "092456",
+    "fullName": "Rahaf Alawneh",
+    "groupId": "1772889606299"
+  },
+  {
+    "id": "1772365854849",
+    "studentNumber": "09875456",
+    "fullName": "Alaa Yasin",
+    "groupId": "1772889606299"
+  },
+  {
+    "id": "1772365639808",
+    "studentNumber": "20222567",
+    "fullName": "Eman Shtawi",
+    "groupId": "1772889606299"
+  }
+],
+
+
   "groups": [
     {
       "id": "1772889606299",
@@ -281,7 +306,58 @@
       "createdAt": "2026-03-07T13:24:46.107Z"
     }
   ],
-  "tasks": [],
+  
+
+"tasks": [
+  {
+    "id": "t1",
+    "taskId": "30bce25c-d275-48d1-9f52-1b1d0facf7e0",
+    "groupId": "1772889606299",
+    "title": "Complete Literature Review",
+    "description": "Review and summarize at least 20 academic papers related to graduation projects management.",
+    "supervisorNotes": "Focus on systems similar to PTUK graduation project platforms.",
+    "createdAt": "2026-05-01T09:46:43",
+    "deadLine": "2026-05-20T00:00:00",
+    "taskFileURL": "http://rsr.tryasp.net/files/Tasks/a529283b.pdf",
+    "supervisorName": "Rahaf Salhab",
+    "status": "In Progress",
+    "priority": "High Priority",
+    "progress": 65
+  },
+  {
+    "id": "t2",
+    "taskId": "8d7ca8de-19a7-4af3-8357-6d3862b942ba",
+    "groupId": "1772889606299",
+    "title": "System Sequence Diagram",
+    "description": "Create the system sequence diagram for the selected scenario.",
+    "supervisorNotes": "Only PDF files are allowed for submission.",
+    "createdAt": "2026-05-10T15:30:55",
+    "deadLine": "2026-05-15T00:00:00",
+    "taskFileURL": "http://rsr.tryasp.net/files/Tasks/bb497ca.pdf",
+    "supervisorName": "Rahaf Salhab",
+    "status": "Pending",
+    "priority": "High Priority",
+    "progress": 0
+  },
+  {
+    "id": "t3",
+    "taskId": "d9024e04-9016-4150-9b5b-9987981b581d",
+    "groupId": "1772889606299",
+    "title": "Database Schema Design",
+    "description": "Design the main database tables and relationships for the project.",
+    "supervisorNotes": "Make sure the relationships are clear.",
+    "createdAt": "2026-05-11T10:00:00",
+    "deadLine": "2026-06-01T00:00:00",
+    "taskFileURL": "",
+    "supervisorName": "Rahaf Salhab",
+    "status": "Pending",
+    "priority": "Normal",
+    "progress": 0
+  }
+],
+
+
+
   "schedule": [],
   "notifications": [],
   "archive": [
@@ -384,4 +460,7 @@
       "grade": "Excellent"
     }
   ]
+  
+
+  
 }

@@ -12,6 +12,8 @@ import ResetPassword from "./pages/resetPassword/ResetPassword";
 import UnAuthorized from "./unAuthorized/UnAuthorized";
 
 import StudentHome from "./pages/student/StudentHome";
+import StudentTasks from "./pages/student/Tasks/StudentTasks";
+import StudentTaskDetails from "./pages/student/Tasks/StudentTaskDetails";
 import SupervisorHome from "./pages/supervisor/SupervisorHome";
 import CoordinatorHome from "./pages/coordinator/CoordinatorHome";
 import ExaminerHome from "./pages/examiner/ExaminerHome";
@@ -30,8 +32,9 @@ import ExaminerEvaluationForms from "./pages/examiner/EvaluationForms/ExaminerEv
 import SupervisorEvaluationForms from "./pages/supervisor/EvaluationForms/SupervisorEvaluationForms";
 import SupervisorGroups from "./pages/supervisor/Groups/SupervisorGroups";
 import GroupDetails from "./pages/supervisor/Groups/GroupDetails";
- import StudentGrades from "./pages/student/Grades/StudentGrades";
- import Tasks from "./pages/supervisor/Tasks/Tasks";
+import StudentGrades from "./pages/student/Grades/StudentGrades";
+import TaskSubmissions from "./pages/supervisor/Tasks/TaskSubmissions";
+import Tasks from "./pages/supervisor/Tasks/Tasks";
 
 import Profile from "./pages/profile/Profile";
 
@@ -65,6 +68,8 @@ const routes = createBrowserRouter([
       { path: "home", element: <StudentHome /> },
       { path: "grades", element: <StudentGrades /> },
       { path: "profile", element: <Profile /> },
+      { path: "tasks", element: <StudentTasks /> },// Main tasks page showing all tasks for the student's group
+      {path: "tasks/:taskId", element: <StudentTaskDetails />}, // Detais page for a specific task
     ],
   },
 
@@ -84,7 +89,8 @@ const routes = createBrowserRouter([
       { path: "groups/:groupId", element: <GroupDetails /> },
       { path: "evaluation-forms", element: <SupervisorEvaluationForms /> },
       { path: "profile", element: <Profile /> },
-     ],
+      { path: "groups/:groupId/tasks/:taskId/submissions", element: <TaskSubmissions />,},// Page that displays submissions for a specific task inside a specific group
+    ],
   },
 
   // Coordinator

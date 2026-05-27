@@ -181,6 +181,7 @@ export default function SupervisorGroups() {
 
                         const res = await api.get(`/Groups/group/${g.groupId}`);
                         const groupData = res.data?.group;
+                        
 
                         // نجيب أرقام الطلاب الموجودين اصلا في الجروب الحالي
                         const currentStudentNumbers =
@@ -188,10 +189,9 @@ export default function SupervisorGroups() {
                             String(s.studentNumber).trim(),
                           ) || [];
 
-                        // نحولهم إلى ids من قائمة students الأساسية
+                        //  IDS تحويل أرقام الطلاب إلى 
                         const currentStudentIds = currentStudentNumbers
                           .map((studentNumber) => {
-                            //
                             const matchedStudent = students.find(
                               (student) =>
                                 String(student.studentNumber).trim() ===

@@ -198,6 +198,18 @@
 
 .taskFile:hover { text-decoration: underline; }
 
+.viewSubmissionBtn {
+  padding: 9px 15px;
+  background: #F4F2EF;
+  color: #1A0F0F;
+  border: none;
+  border-radius: 8px;
+  font-size: 13.7px;
+  font-weight: 520;
+  cursor: pointer;
+}
+.viewSubmissionBtn:hover { background: #C0441A; color: #fff; }
+
 .editTaskBtn {
   width: 32px;
   height: 32px;
