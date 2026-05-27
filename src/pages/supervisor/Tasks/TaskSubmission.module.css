@@ -1,0 +1,573 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.page {
+  display: flex;
+  flex-direction: column;
+
+  font-family: 'Inter', sans-serif;
+}
+.submissionsPage {
+  padding: 0 32px 32px;
+  background: #f7f8fb;
+  min-height: 100vh;
+}
+
+.submissionsHeader {
+  margin-bottom: 10px;
+  transform: translateY(-25px);
+}
+
+.submissionsTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #101828;
+  margin: 0;
+}
+
+.submissionsSubtitle {
+  font-size: 14px;
+  color: #4A5565;
+  margin-top: 8px;
+}
+
+/* Main card: task info + submissions in one rectangle */
+.taskSubmissionCard {
+  background: #ffffff;
+  border: 1px solid #eaecf0;
+  border-radius: 18px;
+  padding: 28px 30px;
+  box-shadow: 0 8px 20px rgba(16, 24, 40, 0.05);
+}
+
+.divider {
+  height: 1px;
+  background: #eaecf0;
+  margin: 22px 0;
+}
+
+.taskInfoSection {
+  margin-bottom: 22px;
+}
+
+.taskNameLine {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+
+
+.taskTitleValue {
+  color: #475467;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.taskDescValue{
+  color: #475467;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.statusBadge {
+
+    padding: 2px 15px;
+    border-radius: 999px;
+    border: 1px solid;
+    font-size: 12px;
+    font-weight: 510;
+  
+}
+
+.statusApproved {
+  background: #DCFCE7;
+  color: #016630;
+  border-color: #B9F8CF;
+}
+
+.statusRejected {
+  background: #ffe4e4;
+  color: #dc2626;
+  border-color: #f8b4b4;
+}
+
+.statusSubmitted {
+  background: #f3f4f6;
+  color: #6b7280;
+  border-color: #d1d5db;
+}
+
+.submissionBox {
+  padding: 24px;
+  border: 1px solid #eef0f4;
+  border-left: 4px solid #c34c18;
+  border-radius: 18px;
+  background: #fbfcfd;
+  box-shadow: 0 6px 24px rgba(16, 24, 40, 0.10);
+}
+
+.noSubmissionsBox {
+  color: #667085;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 8px 0;
+}
+
+.submissionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* One submission row inside the main card */
+.submissionLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.submissionInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.submissionMeta {
+  margin: 3px 0;
+  color: #667085;
+  font-size: 14px;
+}
+
+.fileIcon {
+  background-color: #8D74691A;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: 0.25s ease;
+  transform: translateY(-12px);
+}
+
+.fileIcon svg {
+  width: 28px;
+  height: 28px;
+  color: #C34C18;
+}
+
+.fileLink {
+  color: #C34C18;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.fileLink:hover {
+  text-decoration: underline;
+}
+.statusApproved {
+  background: #DCFCE7;
+  color: #016630;
+}
+
+.statusRejected {
+  background: #FFE4E4;
+  color: #DC2626;
+}
+
+.statusSubmitted {
+  background: #F3F4F6;
+  color: #6B7280;
+}
+
+.approveBtn {
+    min-width: 145px;
+  border: #A4F4CF;
+  padding: 13px 31px;
+  border-radius: 999px;
+  background: #D0FAE5;
+  color: #006045;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.approveBtn:hover {
+  background: #76ab91;
+  color: #ffffff;
+}
+
+.rejectBtn {
+    min-width: 145px;
+  border: none;
+  padding: 13px 40px;
+  border-radius: 999px;
+  background: #f6e8e8;
+  color: #C34C18;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.rejectBtn:hover {
+  background: #d05b29;
+  color: #ffffff;
+}
+
+/* الصف العلوي داخل كارد التسليم: معلومات التسليم + أزرار التقييم */
+.submissionTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+}
+
+/* أزرار Approve / Reject */
+.submissionActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* صندوق الكومينت الذي يظهر تحت أزرار التقييم */
+.reviewBox {
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #f9fafb;
+  border: 1px solid #eaecf0;
+  width: 100%;
+}
+
+.reviewLabel {
+  display: block;
+  font-size: 14px;
+  font-weight: 800;
+  color: #101828;
+  margin-bottom: 8px;
+}
+
+.required {
+  color: #b42318;
+}
+
+.reviewTextarea {
+  width: 100%;
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 14px;
+  color: #101828;
+  resize: vertical;
+  outline: none;
+  font-family: inherit;
+  background: #ffffff;
+}
+
+.reviewTextarea:focus {
+  border-color: #c0441a;
+  box-shadow: 0 0 0 3px rgba(192, 68, 26, 0.12);
+}
+
+.reviewError {
+  color: #b42318;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 8px 0 0;
+}
+
+.reviewActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.cancelReviewBtn {
+  border: 1px solid #d0d5dd;
+  background: #ffffff;
+  color: #344054;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.cancelReviewBtn:hover {
+  background: #f9fafb;
+}
+
+.submitReviewBtn {
+  border: none;
+  background: #c0441a;
+  color: #ffffff;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.submitReviewBtn:hover:not(:disabled) {
+  background: #9f3414;
+}
+
+.submitReviewBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.discussionInsideBox {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #eef0f4;
+}
+.submissionVersionRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.versionBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #475467;
+  font-size: 12px;
+  font-weight: 800;
+  border: 1px solid #e5e7eb;
+}
+
+.reviewedBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  border: 1px solid transparent;
+}
+
+.reviewedApproved {
+  background: #dcfce7;
+  color: #016630;
+  border-color: #b9f8cf;
+}
+
+.reviewedRejected {
+  background: #ffe4e4;
+  color: #dc2626;
+  border-color: #f8b4b4;
+}
+
+.reviewedSubmissionBox {
+  background: #fffefe;
+  border-left-width: 5px;
+}
+.submissionVersionRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.versionBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #475467;
+  font-size: 12px;
+  font-weight: 800;
+  border: 1px solid #e5e7eb;
+}
+
+.reviewedBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  border: 1px solid transparent;
+}
+
+.reviewedApproved {
+  background: #dcfce7;
+  color: #016630;
+  border-color: #b9f8cf;
+}
+
+.reviewedRejected {
+  background: #ffe4e4;
+  color: #dc2626;
+  border-color: #f8b4b4;
+}
+
+.reviewedSubmissionBox {
+  background: #fffefe;
+  border-left-width: 5px;
+}
+.latestBadge {
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: #fff4ef;
+  color: #c2410c;
+  border: 1px solid #fed7c7;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.approvedStatus {
+  background: #dcfce7;
+  color: #016630;
+  border-color: #b9f8cf;
+}
+
+.rejectedStatus {
+  background: #ffe4e4;
+  color: #dc2626;
+  border-color: #f8b4b4;
+}
+
+.pendingStatus {
+  background: #fef3c7;
+  color: #973c00;
+  border-color: #fee685;
+}
+
+.pendingVersionBox {
+  background: #fffaf7;
+  border-left-color: #c34c18;
+  box-shadow: 0 12px 30px rgba(196, 76, 24, 0.12);
+}
+
+.oldVersionBox {
+  background: #fbfbfb;
+  border-left-color: #d8d8d8;
+  box-shadow: 0 3px 12px rgba(14, 24, 40, 0.025);
+  opacity: 0.82;
+}
+
+.oldVersionBox:hover {
+  opacity: 1;
+}
+
+.oldVersionBox .fileIcon {
+  opacity: 0.7;
+}
+
+/* Responsive */
+@media (max-width: 1150px) {
+  .submissionsPage {
+    padding: 0 20px 28px;
+  }
+
+  .taskSubmissionCard {
+    padding: 24px;
+  }
+
+  .submissionBox {
+    padding: 22px;
+  }
+
+  .submissionTop {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .submissionLeft {
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .submissionActions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .rejectBtn,
+  .approveBtn {
+    min-width: 150px;
+  }
+}
+
+@media (max-width: 768px) {
+  .submissionsPage {
+    padding: 20px;
+  }
+
+  .taskSubmissionCard {
+    padding: 20px;
+  }
+
+  .submissionBox {
+    padding: 18px;
+  }
+
+  .submissionLeft {
+    gap: 14px;
+  }
+
+  .fileIcon {
+    width: 48px;
+    height: 48px;
+    transform: translateY(0);
+  }
+
+  .fileIcon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .submissionActions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .rejectBtn,
+  .approveBtn {
+    flex: 1;
+    min-width: 130px;
+  }
+
+  .reviewActions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 520px) {
+  .submissionLeft {
+    flex-direction: column;
+  }
+
+  .submissionActions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .rejectBtn,
+  .approveBtn {
+    width: 100%;
+  }
+
+  .taskNameLine {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .taskDescriptionBlock {
+    flex-direction: column;
+    gap: 2px;
+  }
+}

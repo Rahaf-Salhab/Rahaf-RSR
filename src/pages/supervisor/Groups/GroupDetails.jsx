@@ -3,8 +3,15 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../../../api/axiosInstance";
 import styles from "./GroupDetails.module.css";
 import {
-  ArrowBack, Add, Edit, School,
-  Assignment, CheckCircle, HourglassEmpty, Close, AttachFile,
+  ArrowBack,
+  Add,
+  Edit,
+  School,
+  Assignment,
+  CheckCircle,
+  HourglassEmpty,
+  Close,
+  AttachFile,
 } from "@mui/icons-material";
 
 const STATUS_COLORS = {
@@ -28,7 +35,7 @@ function TaskModal({ task, onClose, onSave, loading, error, onClearError }) {
   const displayError = error || localError;
 
   const handleChange = (field, value) => {
-    setForm(p => ({ ...p, [field]: value }));
+    setForm((p) => ({ ...p, [field]: value }));
     setLocalError("");
     onClearError();
   };
@@ -53,8 +60,14 @@ function TaskModal({ task, onClose, onSave, loading, error, onClearError }) {
   };
 
   const handleSave = () => {
-    if (!form.Title.trim()) { setLocalError("Title is required."); return; }
-    if (!form.DeadLine) { setLocalError("Deadline is required."); return; }
+    if (!form.Title.trim()) {
+      setLocalError("Title is required.");
+      return;
+    }
+    if (!form.DeadLine) {
+      setLocalError("Deadline is required.");
+      return;
+    }
     setLocalError("");
     onSave(form, selectedFile);
   };
@@ -63,42 +76,87 @@ function TaskModal({ task, onClose, onSave, loading, error, onClearError }) {
     <div className={styles.modalOverlay}>
       <div className={styles.modal}>
         <div className={styles.modalHeader}>
-          <h3 className={styles.modalTitle}>{isEdit ? "Edit Task" : "Add Task"}</h3>
-          <button className={styles.closeBtn} onClick={onClose}><Close fontSize="small" /></button>
+          <h3 className={styles.modalTitle}>
+            {isEdit ? "Edit Task" : "Add Task"}
+          </h3>
+          <button className={styles.closeBtn} onClick={onClose}>
+            <Close fontSize="small" />
+          </button>
         </div>
         <div className={styles.modalBody}>
           {displayError && <p className={styles.errorMsg}>{displayError}</p>}
 
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>Title <span className={styles.required}>*</span></label>
-            <input className={styles.input} value={form.Title} onChange={e => handleChange("Title", e.target.value)} placeholder="e.g. Submit project proposal" />
+            <label className={styles.label}>
+              Title <span className={styles.required}>*</span>
+            </label>
+            <input
+              className={styles.input}
+              value={form.Title}
+              onChange={(e) => handleChange("Title", e.target.value)}
+              placeholder="e.g. Submit project proposal"
+            />
           </div>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>Description <span className={styles.optional}>(optional)</span></label>
-            <textarea className={styles.textarea} rows={3} value={form.Description} onChange={e => handleChange("Description", e.target.value)} placeholder="Task description..." />
+            <label className={styles.label}>
+              Description <span className={styles.optional}>(optional)</span>
+            </label>
+            <textarea
+              className={styles.textarea}
+              rows={3}
+              value={form.Description}
+              onChange={(e) => handleChange("Description", e.target.value)}
+              placeholder="Task description..."
+            />
           </div>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>Deadline <span className={styles.required}>*</span></label>
-            <input type="date" className={styles.input} value={form.DeadLine} onChange={e => handleChange("DeadLine", e.target.value)} />
+            <label className={styles.label}>
+              Deadline <span className={styles.required}>*</span>
+            </label>
+            <input
+              type="date"
+              className={styles.input}
+              value={form.DeadLine}
+              onChange={(e) => handleChange("DeadLine", e.target.value)}
+            />
           </div>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>Task File <span className={styles.optional}>(optional)</span></label>
-            <input ref={fileInputRef} type="file" style={{ display: "none" }} onChange={handleFileChange} />
+            <label className={styles.label}>
+              Task File <span className={styles.optional}>(optional)</span>
+            </label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              style={{ display: "none" }}
+              onChange={handleFileChange}
+            />
 
             {!selectedFile && !form.TaskFileURL ? (
-              <button type="button" className={styles.uploadBtn} onClick={() => fileInputRef.current?.click()}>
+              <button
+                type="button"
+                className={styles.uploadBtn}
+                onClick={() => fileInputRef.current?.click()}
+              >
                 <AttachFile fontSize="small" /> Upload File
               </button>
             ) : (
               <div className={styles.filePreview}>
-                <AttachFile style={{ color: "#C0441A", fontSize: 18, flexShrink: 0 }} />
+                <AttachFile
+                  style={{ color: "#C0441A", fontSize: 18, flexShrink: 0 }}
+                />
                 <span className={styles.fileName}>
-                  {selectedFile ? selectedFile.name : getFileName(form.TaskFileURL)}
+                  {selectedFile
+                    ? selectedFile.name
+                    : getFileName(form.TaskFileURL)}
                 </span>
-                <button type="button" className={styles.removeFileBtn} onClick={handleRemoveFile}>
+                <button
+                  type="button"
+                  className={styles.removeFileBtn}
+                  onClick={handleRemoveFile}
+                >
                   <Close fontSize="small" />
                 </button>
               </div>
@@ -106,13 +164,32 @@ function TaskModal({ task, onClose, onSave, loading, error, onClearError }) {
           </div>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>Supervisor Notes <span className={styles.optional}>(optional)</span></label>
-            <textarea className={styles.textarea} rows={2} value={form.SupervisorNotes} onChange={e => handleChange("SupervisorNotes", e.target.value)} placeholder="Notes for students..." />
+            <label className={styles.label}>
+              Supervisor Notes{" "}
+              <span className={styles.optional}>(optional)</span>
+            </label>
+            <textarea
+              className={styles.textarea}
+              rows={2}
+              value={form.SupervisorNotes}
+              onChange={(e) => handleChange("SupervisorNotes", e.target.value)}
+              placeholder="Notes for students..."
+            />
           </div>
         </div>
         <div className={styles.modalFooter}>
-          <button className={styles.cancelBtn} onClick={onClose} disabled={loading}>Cancel</button>
-          <button className={styles.saveBtn} onClick={handleSave} disabled={loading}>
+          <button
+            className={styles.cancelBtn}
+            onClick={onClose}
+            disabled={loading}
+          >
+            Cancel
+          </button>
+          <button
+            className={styles.saveBtn}
+            onClick={handleSave}
+            disabled={loading}
+          >
             {loading ? "Saving..." : isEdit ? "Save Changes" : "Add Task"}
           </button>
         </div>
@@ -122,7 +199,7 @@ function TaskModal({ task, onClose, onSave, loading, error, onClearError }) {
 }
 
 export default function GroupDetails() {
-  const { groupId } = useParams();
+  const { groupId } = useParams();// من الرابط الحاليGroupId بنجيب ال 
   const navigate = useNavigate();
 
   const [group, setGroup] = useState(null);
@@ -132,7 +209,9 @@ export default function GroupDetails() {
   const [taskLoading, setTaskLoading] = useState(false);
   const [taskError, setTaskError] = useState("");
 
-  useEffect(() => { fetchData(); }, [groupId]);
+  useEffect(() => {
+    fetchData();
+  }, [groupId]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -142,7 +221,7 @@ export default function GroupDetails() {
         api.get(`/Task/tasks-group/${groupId}`),
       ]);
       const groups = groupsRes.data?.groups || [];
-      const found = groups.find(g => g.groupId === groupId);
+      const found = groups.find((g) => g.groupId === groupId);
       setGroup(found || null);
       setTasks(tasksRes.data?.tasks || []);
     } catch (err) {
@@ -164,9 +243,13 @@ export default function GroupDetails() {
       if (file) formData.append("TaskFileURL", file);
 
       if (taskModal?.taskId) {
-        await api.patch(`/Task/${groupId}/tasks/${taskModal.taskId}`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        await api.patch(
+          `/Task/${groupId}/tasks/${taskModal.taskId}`,
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          },
+        );
       } else {
         await api.post(`/Task/create/${groupId}`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
@@ -181,9 +264,17 @@ export default function GroupDetails() {
     }
   };
 
+ const handleViewSubmissions = (taskId) => {// لما يضغط على عرض التسليمات بيروح لصفحة التسليمات الخاصة بالمهمة هاي
+    navigate(`/supervisor/groups/${groupId}/tasks/${taskId}/submissions`);//  عشان الصفحة الجديدة تعرف لأي جروب واي تاسك نجيب التسليمات TasKId وحطينا UseParamsمن GroupIdجبنا 
+  };
+
   const formatDate = (d) => {
     if (!d) return "-";
-    return new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+    return new Date(d).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   };
 
   const getFileName = (url) => {
@@ -203,7 +294,10 @@ export default function GroupDetails() {
       {/* Header */}
       <div className={styles.pageHeader}>
         <div className={styles.headerLeft}>
-          <button className={styles.backBtn} onClick={() => navigate("/supervisor/groups")}>
+          <button
+            className={styles.backBtn}
+            onClick={() => navigate("/supervisor/groups")}
+          >
             <ArrowBack fontSize="small" /> Back
           </button>
           <div>
@@ -211,7 +305,10 @@ export default function GroupDetails() {
             <p className={styles.pageSubtitle}>{group.projectName}</p>
           </div>
         </div>
-        <span className={styles.statusBadge} style={{ background: status.bg, color: status.color }}>
+        <span
+          className={styles.statusBadge}
+          style={{ background: status.bg, color: status.color }}
+        >
           {group.projectStatus}
         </span>
       </div>
@@ -249,7 +346,9 @@ export default function GroupDetails() {
         <div className={styles.studentsGrid}>
           {group.students?.map((s, i) => (
             <div key={i} className={styles.studentCard}>
-              <div className={styles.studentAvatar}>{s.fullName?.charAt(0)?.toUpperCase()}</div>
+              <div className={styles.studentAvatar}>
+                {s.fullName?.charAt(0)?.toUpperCase()}
+              </div>
               <div>
                 <p className={styles.studentName}>{s.fullName}</p>
                 <p className={styles.studentNumber}>#{s.studentNumber}</p>
@@ -267,7 +366,13 @@ export default function GroupDetails() {
         <div className={styles.cardTitleRow}>
           <Assignment fontSize="small" style={{ color: "#C0441A" }} />
           <h3 className={styles.cardTitle}>Tasks</h3>
-          <button className={styles.addTaskBtn} onClick={() => { setTaskError(""); setTaskModal({}); }}>
+          <button
+            className={styles.addTaskBtn}
+            onClick={() => {
+              setTaskError("");
+              setTaskModal({});
+            }}
+          >
             <Add fontSize="small" /> Add Task
           </button>
         </div>
@@ -279,22 +384,29 @@ export default function GroupDetails() {
           </div>
         ) : (
           <div className={styles.tasksList}>
-            {tasks.map(t => (
+            {tasks.map((t) => (
               <div
                 key={t.taskId}
                 className={`${styles.taskItem} ${isOverdue(t.deadLine) && !t.isCompleted ? styles.taskOverdue : ""}`}
               >
                 <div className={styles.taskLeft}>
                   <div className={styles.taskIcon}>
-                    {t.isCompleted
-                      ? <CheckCircle style={{ color: "#22c55e", fontSize: 20 }} />
-                      : <HourglassEmpty style={{ color: "#f59e0b", fontSize: 20 }} />
-                    }
+                    {t.isCompleted ? (
+                      <CheckCircle style={{ color: "#22c55e", fontSize: 20 }} />
+                    ) : (
+                      <HourglassEmpty
+                        style={{ color: "#f59e0b", fontSize: 20 }}
+                      />
+                    )}
                   </div>
                   <div>
                     <p className={styles.taskTitle}>{t.title}</p>
-                    {t.description && <p className={styles.taskDesc}>{t.description}</p>}
-                    {t.supervisorNotes && <p className={styles.taskNotes}>📝 {t.supervisorNotes}</p>}
+                    {t.description && (
+                      <p className={styles.taskDesc}>{t.description}</p>
+                    )}
+                    {t.supervisorNotes && (
+                      <p className={styles.taskNotes}>📝 {t.supervisorNotes}</p>
+                    )}
                     <p className={styles.taskDeadline}>
                       Deadline: {formatDate(t.deadLine)}
                       {isOverdue(t.deadLine) && !t.isCompleted && (
@@ -302,13 +414,30 @@ export default function GroupDetails() {
                       )}
                     </p>
                     {t.taskFileURL && (
-                      <a href={t.taskFileURL} target="_blank" rel="noreferrer" className={styles.taskFile}>
+                      <a
+                        href={t.taskFileURL}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={styles.taskFile}
+                      >
                         📎 {getFileName(t.taskFileURL)}
                       </a>
                     )}
                   </div>
                 </div>
-                <button className={styles.editTaskBtn} onClick={() => { setTaskError(""); setTaskModal(t); }}>
+                <button
+                  className={styles.viewSubmissionBtn}
+                  onClick={() => handleViewSubmissions(t.taskId)}// 
+                >
+                  View Submission
+                </button> {/* Opens the submissions page for this specific task */}
+                <button
+                  className={styles.editTaskBtn}
+                  onClick={() => {
+                    setTaskError("");
+                    setTaskModal(t);
+                  }}
+                >
                   <Edit fontSize="small" />
                 </button>
               </div>
@@ -320,7 +449,10 @@ export default function GroupDetails() {
       {taskModal && (
         <TaskModal
           task={taskModal}
-          onClose={() => { setTaskModal(null); setTaskError(""); }}
+          onClose={() => {
+            setTaskModal(null);
+            setTaskError("");
+          }}
           onSave={handleSaveTask}
           loading={taskLoading}
           error={taskError}

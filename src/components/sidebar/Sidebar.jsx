@@ -29,7 +29,6 @@ const sidebarConfig = {
     { label: "Dashboard",        icon: <Dashboard />,  path: "/supervisor/home" },
     { label: "Groups",           icon: <People />,     path: "/supervisor/groups" },
     { label: "Tasks",            icon: <Task />,       path: "/supervisor/tasks" },
-    { label: "Submissions",      icon: <Folder />,     path: "/supervisor/submissions" },
     { label: "Thesis Review",    icon: <MenuBook />,   path: "/supervisor/thesis-review" },
     { label: "Evaluation Forms", icon: <RateReview />, path: "/supervisor/evaluation-forms" },
     { label: "Archive",          icon: <Archive />,    path: "/supervisor/archive" },
@@ -38,9 +37,11 @@ const sidebarConfig = {
   student: [
     { label: "Dashboard", icon: <Dashboard />, path: "/student/home" },
     { label: "My Project", icon: <Folder />,   path: "/student/project" },
+    { label: "Tasks",     icon: <Task />,      path: "/student/tasks" },
     { label: "Grades",    icon: <Grade />,     path: "/student/grades" },
     { label: "Schedule",  icon: <Schedule />,  path: "/student/schedule" },
     { label: "Profile",   icon: <Person />,    path: "/student/profile" },
+    
   ],
 };
 
