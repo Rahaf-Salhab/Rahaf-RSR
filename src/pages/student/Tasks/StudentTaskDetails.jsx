@@ -7,24 +7,35 @@ import AttachFileIcon from "@mui/icons-material/AttachFile";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import NotesIcon from "@mui/icons-material/Notes";
 import PersonIcon from "@mui/icons-material/Person";
-import NumbersIcon from "@mui/icons-material/Numbers";
 import CommentIcon from "@mui/icons-material/Comment";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import StudentSubmissionActions from "./StudentSubmissionActions";
 import styles from "./StudentTaskDetails.module.css";
 
 export default function StudentTaskDetails() {
+  // نأخذ taskId من الرابط حتى نجيب تفاصيل التاسك المطلوبة
   const { taskId } = useParams();
+
+  // state لتخزين بيانات التاسك الراجعة من الباك
   const [task, setTask] = useState(null);
+
+  //  للتحكم بحالة تحميل البيانات
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // نخزن id التسليم اللي الطالب فاتح عليه وضع التعديل
+  // إذا null يعني ما في أي نسخة مفتوحة للتعديل
   const [editingSubmissionId, setEditingSubmissionId] = useState(null);
 
+  // دالة تجيب تفاصيل التاسك من الباك حسب taskId
   const fetchTaskDetails = async () => {
     try {
       setLoading(true);
       setError("");
+
       const res = await api.get(`/Task/task-id/${taskId}`);
+
+      // الباك برجع بيانات التاسك داخل res.data.task
       setTask(res.data.task);
     } catch (err) {
       setError("Failed to load task details.");
@@ -32,38 +43,40 @@ export default function StudentTaskDetails() {
       setLoading(false);
     }
   };
+
+  // أول ما الصفحة تفتح أو يتغير taskId، نجيب تفاصيل التاسك
   useEffect(() => {
     fetchTaskDetails();
   }, [taskId]);
+
   const formatDate = (data) => {
-    //To format the date
     if (!data) return "-";
     return new Date(data).toLocaleDateString();
   };
+
+  // دالة تجهيز رابط ملف التاسك
+  // لأن الباك يرجع taskFileURL أحيانًا كاسم ملف فقط وليس رابط كامل
   const getTaskFileUrl = (fileName) => {
     if (!fileName) return "";
 
-    // لو الرابط راجع كامل من الباك
+    // إذا الرابط كامل، نرجعه زي ما هو
     if (fileName.startsWith("http://") || fileName.startsWith("https://")) {
       return fileName;
     }
 
-    // حسب رابط التسليم عندك، الملفات موجودة داخل /files/Tasks
+    // إذا الراجع اسم ملف فقط، نركب عليه مسار الملفات من السيرفر
     return `http://rsr.tryasp.net/files/Tasks/${fileName.replace(/^\/+/, "")}`;
   };
 
-  const submissions = task?.taskSubmissions || []; // كل النسخ الراجعة من الباك
+  // كل نسخ التسليم الراجعة من الباك
+  const submissions = task?.taskSubmissions || [];
 
-  const sortedSubmissions = [...submissions].sort((a, b) => {
-    const versionDiff = (b.versionNumber || 0) - (a.versionNumber || 0);
+  // ترتيب النسخ من الأحدث للأقدم
+  const sortedSubmissions = [...submissions].sort(
+    (a, b) => b.versionNumber - a.versionNumber,
+  );
 
-    if (versionDiff !== 0) {
-      return versionDiff;
-    }
-
-    return new Date(b.submittedAt || 0) - new Date(a.submittedAt || 0);
-  });
-
+  // أحدث نسخة هي أول عنصر بعد الترتيب
   const latestSubmission = sortedSubmissions[0];
 
   if (loading) {
@@ -73,13 +86,15 @@ export default function StudentTaskDetails() {
   if (error) {
     return <div>{error}</div>;
   }
+
+  // في حال ما رجعت بيانات التاسك
   if (!task) {
-    //if there's no task
-    return <div>Task notfound.</div>;
+    return <div>Task not found.</div>;
   }
 
   return (
     <div className={styles.page}>
+      {/* كارد تفاصيل التاسك الأساسية */}
       <div className={styles.detailsCard}>
         <div className={styles.taskHeader}>
           <div className={styles.taskTitleRow}>
@@ -97,6 +112,7 @@ export default function StudentTaskDetails() {
           </div>
         </div>
 
+        {/* معلومات التاسك: تاريخ الإنشاء، deadline، ملاحظات المشرف */}
         <div className={styles.taskMetaList}>
           <div className={styles.metaItem}>
             <span className={styles.metaLabel}>
@@ -111,9 +127,10 @@ export default function StudentTaskDetails() {
               <CalendarTodayIcon className={styles.metaIcon} />
               Due:
             </span>
-            <span>{formatDate(task.deadLine || task.deadline)}</span>
+            <span>{formatDate(task.deadLine)}</span>
           </div>
 
+          {/* نعرض ملاحظات المشرف فقط إذا موجودة */}
           {task.supervisorNotes && (
             <div className={styles.metaItem}>
               <span className={styles.metaLabel}>
@@ -125,6 +142,7 @@ export default function StudentTaskDetails() {
           )}
         </div>
 
+        {/* ملف التاسك الأصلي إذا موجود */}
         {task.taskFileURL && (
           <div className={styles.taskFile}>
             <span className={styles.taskFileSmallIcon}>
@@ -144,6 +162,7 @@ export default function StudentTaskDetails() {
         )}
       </div>
 
+      {/* كارد نسخ التسليم */}
       <div className={styles.versionsCard}>
         <div className={styles.versionsHeader}>
           <div>
@@ -151,6 +170,7 @@ export default function StudentTaskDetails() {
             <p>Review your submitted versions and supervisor feedback.</p>
           </div>
 
+          {/* عدد النسخ الموجودة */}
           <span className={styles.versionsCount}>
             {sortedSubmissions.length}{" "}
             {sortedSubmissions.length === 1 ? "Version" : "Versions"}
@@ -158,10 +178,14 @@ export default function StudentTaskDetails() {
         </div>
 
         <div className={styles.submissionSection}>
+          {/* إذا في تسليمات، نعرض النسخ */}
           {task.taskSubmissions && task.taskSubmissions.length > 0 ? (
             <div className={styles.submissionsList}>
               {sortedSubmissions.map((submission, index) => {
+                // رقم النسخة المعروض بالواجهة
                 const displayVersion = sortedSubmissions.length - index;
+
+                // نحدد هل هاي أحدث نسخة أم لا
                 const isLatestSubmission =
                   submission.taskSubmissionId ===
                   latestSubmission?.taskSubmissionId;
@@ -176,6 +200,7 @@ export default function StudentTaskDetails() {
                         !isLatestSubmission ? styles.oldVersionBox : ""
                       }`}
                     >
+                      {/* Header النسخة: رقم النسخة، latest badge، status */}
                       <div className={styles.taskHeader}>
                         <div className={styles.taskTitleRow}>
                           <div className={styles.fileIcon}>
@@ -187,12 +212,17 @@ export default function StudentTaskDetails() {
                               <h3 className={styles.taskTitle}>
                                 Version {displayVersion}
                               </h3>
-                              {isLatestSubmission && (
-                                <span className={styles.latestBadge}>
-                                  Latest Version
-                                </span>
-                              )}
 
+                              {/* تظهر فقط على أحدث نسخة */}
+                              {/* تظهر فقط إذا كانت أحدث نسخة وكان في أكثر من نسخة */}
+                              {isLatestSubmission &&
+                                sortedSubmissions.length > 1 && (
+                                  <span className={styles.latestBadge}>
+                                    Latest Version
+                                  </span>
+                                )}
+
+                              {/* لون الحالة حسب قيمة status الراجعة من الباك */}
                               <span
                                 className={`${styles.statusBadge} ${
                                   submission.status === "Approved"
@@ -202,22 +232,24 @@ export default function StudentTaskDetails() {
                                       : styles.pendingStatus
                                 }`}
                               >
-                                {submission.status || "Submitted"}
+                                {submission.status}
                               </span>
                             </div>
                           </div>
                         </div>
                       </div>
 
+                      {/* معلومات التسليم */}
                       <div className={styles.submissionInfo}>
                         <div className={styles.metaItem}>
                           <span className={styles.metaLabel}>
                             <PersonIcon className={styles.metaIcon} />
                             Submitted by:
                           </span>
-                          <span>{submission.studentName || "-"}</span>
+                          <span>{submission.studentName}</span>
                         </div>
 
+                        {/* ملاحظات الطالب تظهر فقط إذا موجودة */}
                         {submission.studentNotes && (
                           <div className={styles.metaItem}>
                             <span className={styles.metaLabel}>
@@ -236,6 +268,7 @@ export default function StudentTaskDetails() {
                           <span>{formatDate(submission.submittedAt)}</span>
                         </div>
 
+                        {/* تاريخ المراجعة يظهر فقط إذا المشرف راجع التسليم */}
                         {submission.reviewedAt && (
                           <div className={styles.metaItem}>
                             <span className={styles.metaLabel}>
@@ -246,9 +279,14 @@ export default function StudentTaskDetails() {
                           </div>
                         )}
                       </div>
-                      {/*  هنا بنعرض الملف اللي تم تسليمه لو في ملف، وبنمرر له الارسال الحالي والدوال اللي بتتحكم في حالة تحرير الارسال عشان يقدر يعرض نموذج التحرير لما يضغط على زر التحرير  */}
+
+                      {/* 
+                        إذا النسخة ليست في وضع التعديل:
+                        نعرض ملف التسليم وأزرار التحكم مثل edit/delete
+                      */}
                       {editingSubmissionId !== submission.taskSubmissionId && (
                         <div className={styles.submittedFileRow}>
+                          {/* ملف التسليم يظهر فقط إذا موجود */}
                           {submission.taskSubmissionURL && (
                             <div className={styles.taskSubmissionFile}>
                               <span className={styles.taskFileSmallIcon}>
@@ -269,6 +307,12 @@ export default function StudentTaskDetails() {
                             </div>
                           )}
 
+                          {/* 
+                            كومبوننت أزرار التسليم:
+                            - تعديل
+                            - حذف
+                            - أو إخفاء الأزرار حسب حالة التسليم
+                          */}
                           <StudentSubmissionActions
                             submission={submission}
                             refreshTaskDetails={fetchTaskDetails}
@@ -284,7 +328,11 @@ export default function StudentTaskDetails() {
                         </div>
                       )}
 
-                      {/* لما يكون الارسال في حالة تحرير بنعرض نموذج التحرير اللي هو نفس نموذج الارسال بس مع بيانات الارسال الحالي  */}
+                      {/* 
+                           كومبوننت إجراءات التسليم:
+                           نمرر له بيانات النسخة الحالية، ودالة تحديث البيانات بعد أي تعديل/حذف،
+                           ونحدد هل النسخة هي الأحدث، ونربط معه فتح/إغلاق وضع التعديل
+                       */}
                       {editingSubmissionId === submission.taskSubmissionId && (
                         <StudentSubmissionActions
                           submission={submission}
@@ -295,7 +343,8 @@ export default function StudentTaskDetails() {
                           startInEditMode={true}
                         />
                       )}
-                      {/* هنا بنعرض نموذج النقاش الخاص بالتسليم، بنمرر له التسليم والدالة اللي بتحدث تفاصيل المهمة بعد اي تغيير بالارسال او الحذف  */}
+
+                      {/* نقاش التسليم الخاص بهذه النسخة */}
                       <SubmissionDiscussion
                         submission={submission}
                         formatDate={formatDate}
@@ -306,7 +355,11 @@ export default function StudentTaskDetails() {
                   </div>
                 );
               })}
-              {/*Submit New Version يظهر زر تسليم Rejected  اذا الحالة  */}
+
+              {/* 
+                زر Submit New Version يظهر فقط إذا أحدث نسخة مرفوضة
+                حتى الطالب يقدر يرفع نسخة جديدة بعد الرفض
+              */}
               {latestSubmission?.status === "Rejected" && (
                 <div className={styles.newVersionNotice}>
                   <div className={styles.newVersionText}>
@@ -327,6 +380,10 @@ export default function StudentTaskDetails() {
               )}
             </div>
           ) : (
+            /*
+              إذا ما في أي تسليم سابق:
+              نعرض نموذج التسليم الأول
+            */
             <StudentSubmissionActions
               task={task}
               refreshTaskDetails={fetchTaskDetails}

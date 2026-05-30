@@ -1,11 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-.page {
-  display: flex;
-  flex-direction: column;
-
-  font-family: 'Inter', sans-serif;
-}
 .submissionsPage {
   padding: 0 32px 32px;
   background: #f7f8fb;
@@ -80,23 +73,6 @@
   
 }
 
-.statusApproved {
-  background: #DCFCE7;
-  color: #016630;
-  border-color: #B9F8CF;
-}
-
-.statusRejected {
-  background: #ffe4e4;
-  color: #dc2626;
-  border-color: #f8b4b4;
-}
-
-.statusSubmitted {
-  background: #f3f4f6;
-  color: #6b7280;
-  border-color: #d1d5db;
-}
 
 .submissionBox {
   padding: 24px;
@@ -166,24 +142,10 @@
 .fileLink:hover {
   text-decoration: underline;
 }
-.statusApproved {
-  background: #DCFCE7;
-  color: #016630;
-}
-
-.statusRejected {
-  background: #FFE4E4;
-  color: #DC2626;
-}
-
-.statusSubmitted {
-  background: #F3F4F6;
-  color: #6B7280;
-}
 
 .approveBtn {
-    min-width: 145px;
-  border: #A4F4CF;
+  min-width: 145px;
+  border: 1px solid #A4F4CF;
   padding: 13px 31px;
   border-radius: 999px;
   background: #D0FAE5;
@@ -324,11 +286,20 @@
   padding-top: 14px;
   border-top: 1px solid #eef0f4;
 }
+
 .submissionVersionRow {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
   margin-bottom: 14px;
+}
+
+.submissionBadgesLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .versionBadge {
@@ -343,77 +314,6 @@
   border: 1px solid #e5e7eb;
 }
 
-.reviewedBadge {
-  display: inline-flex;
-  align-items: center;
-  padding: 5px 12px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 800;
-  border: 1px solid transparent;
-}
-
-.reviewedApproved {
-  background: #dcfce7;
-  color: #016630;
-  border-color: #b9f8cf;
-}
-
-.reviewedRejected {
-  background: #ffe4e4;
-  color: #dc2626;
-  border-color: #f8b4b4;
-}
-
-.reviewedSubmissionBox {
-  background: #fffefe;
-  border-left-width: 5px;
-}
-.submissionVersionRow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.versionBadge {
-  display: inline-flex;
-  align-items: center;
-  padding: 5px 12px;
-  border-radius: 999px;
-  background: #f3f4f6;
-  color: #475467;
-  font-size: 12px;
-  font-weight: 800;
-  border: 1px solid #e5e7eb;
-}
-
-.reviewedBadge {
-  display: inline-flex;
-  align-items: center;
-  padding: 5px 12px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 800;
-  border: 1px solid transparent;
-}
-
-.reviewedApproved {
-  background: #dcfce7;
-  color: #016630;
-  border-color: #b9f8cf;
-}
-
-.reviewedRejected {
-  background: #ffe4e4;
-  color: #dc2626;
-  border-color: #f8b4b4;
-}
-
-.reviewedSubmissionBox {
-  background: #fffefe;
-  border-left-width: 5px;
-}
 .latestBadge {
   padding: 7px 14px;
   border-radius: 999px;
@@ -564,10 +464,5 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
-  }
-
-  .taskDescriptionBlock {
-    flex-direction: column;
-    gap: 2px;
   }
 }

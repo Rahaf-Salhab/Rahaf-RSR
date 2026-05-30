@@ -17,20 +17,49 @@ export default function StudentSubmissionActions({
   submitButtonText = "Submit Task",
   compact = false,
 }) {
-  const [showSubmitForm, setShowSubmitForm] = useState(false); //to show the submission form when the student clicks "Submit Task" button, and hide it when they cancel or after submission
-  const [submitFile, setSubmitFile] = useState(null); //to store the file that the student selects for submission
-  const [studentNotes, setStudentNotes] = useState(""); //to store the notes that the student enters for the submission
-  const [submitting, setSubmitting] = useState(false); //to indicate whether the submission is in progress, used to disable the submit button and show a loading state  (من خلاله بنعرف اذا عملية الارسال شغالة ام لا)
+  // للتحكم بفتح وإغلاق فورم إضافة تسليم جديد
+  const [showSubmitForm, setShowSubmitForm] = useState(false);
+
+  // لتخزين الملف الذي يختاره الطالب عند التسليم الجديد
+  const [submitFile, setSubmitFile] = useState(null);
+
+  // لتخزين ملاحظات الطالب في التسليم الجديد
+  const [studentNotes, setStudentNotes] = useState("");
+
+  // لمعرفة إذا كانت عملية الإرسال شغالة، حتى نعطل الزر ونظهر Loading
+  const [submitting, setSubmitting] = useState(false);
+
+  // لتخزين رسالة الخطأ الخاصة بإضافة تسليم جديد
   const [submitError, setSubmitError] = useState("");
-  const [deleting, setDeleting] = useState(false); //to indicate whether the deletion is in progress
+
+  // لمعرفة إذا كانت عملية الحذف شغالة
+  const [deleting, setDeleting] = useState(false);
+
+  // لتخزين رسالة الخطأ الخاصة بالحذف
   const [deleteError, setDeleteError] = useState("");
-  const [showDeleteModal, setShowDeleteModal] = useState(false); //to control the visibility of the delete confirmation modal
-  const [showEditForm, setShowEditForm] = useState(startInEditMode); //to control the visibility of the edit form, initialized with startInEditMode prop to allow starting in edit mode if needed
-  const [editFile, setEditFile] = useState(null); //to store the new file
-  const [editNotes, setEditNotes] = useState(submission?.studentNotes || ""); //to store the new notes, initialized with the existing notes if available
-  const [updating, setUpdating] = useState(false); //to indicate whether the update is in progress
+
+  // للتحكم بفتح وإغلاق نافذة تأكيد الحذف
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  // للتحكم بفتح وإغلاق فورم تعديل التسليم
+  const [showEditForm, setShowEditForm] = useState(startInEditMode);
+
+  // لتخزين الملف الجديد إذا اختاره الطالب أثناء التعديل
+  const [editFile, setEditFile] = useState(null);
+
+  // لتخزين الملاحظات أثناء التعديل، ونبدأها بالملاحظات القديمة إن وجدت
+  const [editNotes, setEditNotes] = useState(submission?.studentNotes || "");
+
+  // لمعرفة إذا كانت عملية التعديل شغالة
+  const [updating, setUpdating] = useState(false);
+
+  // لتخزين رسالة الخطأ الخاصة بالتعديل
   const [updateError, setUpdateError] = useState("");
-  const [showCurrentFile, setShowCurrentFile] = useState(true); //to control whether to show the current file name in the edit form (when true) or the new selected file name (when false)
+
+  // للتحكم بعرض الملف الحالي داخل فورم التعديل
+  const [showCurrentFile, setShowCurrentFile] = useState(true);
+
+  // إغلاق فورم الإضافة وتنظيف القيم
   const closeSubmitModal = () => {
     setShowSubmitForm(false);
     setSubmitFile(null);
@@ -38,25 +67,34 @@ export default function StudentSubmissionActions({
     setSubmitError("");
   };
 
-  const closeEditModal = () => {
+  // تنظيف فورم التعديل بدون استدعاء onEditCancel
+  // نستخدمها بعد نجاح التعديل حتى لا يعتبرها النظام Cancel
+  const resetEditForm = () => {
     setShowEditForm(false);
     setEditFile(null);
     setShowCurrentFile(true);
     setEditNotes(submission?.studentNotes || "");
     setUpdateError("");
+  };
+
+  // إغلاق فورم التعديل عند الضغط على Cancel أو X
+  const closeEditModal = () => {
+    resetEditForm();
     onEditCancel?.();
   };
-  const handleSubmitTask = async (e) => {
-    e.preventDefault(); //to prevent the default reload
 
+  // إرسال تسليم جديد للباك
+  const handleSubmitTask = async (e) => {
+    e.preventDefault();
+
+    // لا نسمح بالإرسال بدون ملف
     if (!submitFile) {
-      //Submitبفحص اذا الطالب اختار ملف قبل ما يعملٍ
       setSubmitError("Please select a file.");
       return;
     }
 
+    // taskId ضروري لأنه يحدد لأي task سيتم إرسال التسليم
     if (!task?.taskId) {
-      //يفحص ال taskId اذا موجود قبل ما يرسل الطلب، لانه ضروري لعملية الارسال
       setSubmitError("Task id is missing.");
       return;
     }
@@ -65,15 +103,19 @@ export default function StudentSubmissionActions({
       setSubmitting(true);
       setSubmitError("");
 
-      const formData = new FormData(); //FormData(because we need to send a file)
-      formData.append("TaskSubmission", submitFile); //(TaskSubmission)ارسال ملف للباك باسم الحقل الذي يتوقعه
+      // نستخدم FormData لأن الطلب يحتوي على ملف
+      const formData = new FormData();
+
+      // اسم الحقل لازم يطابق الاسم المتوقع من الباك
+      formData.append("TaskSubmission", submitFile);
       formData.append("StudentNotes", studentNotes);
 
       await api.post(
         `/TaskSubmission/tasks/${task.taskId}/submissions`,
         formData,
-      ); //FormData الي هو ال body ارسال ارابط للباك وال
+      );
 
+      // بعد نجاح الإرسال نغلق الفورم ونحدث تفاصيل التاسك
       closeSubmitModal();
       refreshTaskDetails();
     } catch (err) {
@@ -83,8 +125,9 @@ export default function StudentSubmissionActions({
     }
   };
 
-  //__________________________________Delete Action_________________________________________
+  // حذف التسليم الحالي
   const handleDeleteSubmission = async () => {
+    // التأكد من وجود id الخاص بالتسليم قبل الحذف
     if (!submission?.taskSubmissionId) {
       setDeleteError("Submission id is missing.");
       return;
@@ -97,8 +140,10 @@ export default function StudentSubmissionActions({
       await api.delete(
         `/TaskSubmission/Delete/SubmissionId/${submission.taskSubmissionId}`,
       );
+
+      // بعد الحذف نغلق المودال ونحدث تفاصيل التاسك
       setShowDeleteModal(false);
-      refreshTaskDetails(); //بعد الحذف بنحدث تفاصيل المهمة لنعكس التغيير
+      refreshTaskDetails();
     } catch (err) {
       setDeleteError(
         err.response?.data?.message || "Failed to delete submission.",
@@ -108,28 +153,38 @@ export default function StudentSubmissionActions({
     }
   };
 
-  //__________________________________Edit Action_________________________________________
+  // تعديل التسليم الحالي
   const handleUpdateSubmission = async (e) => {
     e.preventDefault();
 
+    // التأكد من وجود id الخاص بالتسليم قبل التعديل
     if (!submission?.taskSubmissionId) {
-      //نتأكد من وجود ال submissionId قبل محاولة التحديث، لانه ضروري لعملية التحديث
       setUpdateError("Submission id is missing.");
       return;
     }
+
     try {
       setUpdating(true);
       setUpdateError("");
+
+      // نستخدم FormData لأن الطالب قد يرفع ملف جديد أثناء التعديل
       const formData = new FormData();
+
+      // إذا اختار الطالب ملف جديد نرسله، وإذا لم يختر يبقى الملف القديم كما هو
       if (editFile) {
         formData.append("TaskSubmission", editFile);
-      } //اذا الطالب اختار ملف جديد للتعديل بنضيفه لل formData اما اذا ما اختار بنترك الملف القديم بدون تغيير
+      }
+
+      // الملاحظات يتم إرسالها في كل الحالات سواء تغير الملف أو لا
       formData.append("StudentNotes", editNotes);
+
       await api.patch(
         `/TaskSubmission/submission/${submission.taskSubmissionId}`,
         formData,
       );
-      closeEditModal();
+
+      // بعد نجاح التعديل نغلق الفورم ونحدث البيانات
+      resetEditForm();
       refreshTaskDetails();
       onEditDone?.();
     } catch (err) {
@@ -140,27 +195,32 @@ export default function StudentSubmissionActions({
       setUpdating(false);
     }
   };
-  //اذا في تسليم موجود بنعرض خيارات الحذف، اذا ما في بنعرض زر الارسال (استدعاء)
+
+  // إذا كان يوجد submission، نعرض أزرار التعديل والحذف فقط حسب الشروط
   if (submission) {
+    // لا نعرض الأزرار إلا على آخر نسخة فقط
     if (!isLatestSubmission) {
-      //
       return null;
     }
-    // ما بنعرض ازرار الحذف والتعديلSubmitted  هون اذا حالته مش
+
+    // لا نعرض أزرار التعديل والحذف إذا كان التسليم مقيم Approved أو Rejected
     if (submission.status !== "Submitted") {
       return null;
     }
-    //اذا التسليم موجود وما تم مراجعته بنعرض زر الحذف
+
     return (
       <div className={styles.actionsAndEditWrapper}>
+        {/* أزرار التعديل والحذف تظهر فقط عندما لا يكون فورم التعديل مفتوح */}
         {!showEditForm && (
           <div className={styles.submissionActions}>
             {deleteError && <p className={styles.actionError}>{deleteError}</p>}
 
+            {/* زر تعديل التسليم */}
             <button
               type="button"
               className={styles.iconEditBtn}
               onClick={() => {
+                onEditStart?.();
                 setShowEditForm(true);
                 setEditNotes(submission?.studentNotes || "");
                 setEditFile(null);
@@ -173,6 +233,7 @@ export default function StudentSubmissionActions({
               <EditIcon fontSize="small" />
             </button>
 
+            {/* زر فتح نافذة تأكيد الحذف */}
             <button
               type="button"
               className={styles.iconDeleteBtn}
@@ -185,13 +246,14 @@ export default function StudentSubmissionActions({
           </div>
         )}
 
-        {/* Edit Submission Form */}
+        {/* مودال تعديل التسليم */}
         {showEditForm && (
           <div className={styles.modalOverlay}>
             <div className={styles.submissionModal}>
               <div className={styles.modalHeader}>
                 <h3 className={styles.modalTitle}>Edit Submission</h3>
 
+                {/* إغلاق فورم التعديل */}
                 <button
                   type="button"
                   className={styles.modalCloseBtn}
@@ -201,17 +263,15 @@ export default function StudentSubmissionActions({
                   ×
                 </button>
               </div>
+
               <form
                 className={styles.submitForm}
                 onSubmit={handleUpdateSubmission}
               >
-                {/*نموذج تعديل التسليم، مشابه لنموذج الارسال */}
                 <div className={styles.formGroup}>
-                  <label>
-                    Task Submission File{" "}
-                    <span className={styles.optionalText}></span>
-                  </label>
+                  <label>Task Submission File </label>
 
+                  {/* عرض الملف الحالي إذا لم يختر الطالب ملف جديد */}
                   {showCurrentFile &&
                   !editFile &&
                   submission.taskSubmissionURL ? (
@@ -220,11 +280,13 @@ export default function StudentSubmissionActions({
                         <span className={styles.inlineFileIcon}>
                           <AttachFileIcon fontSize="small" />
                         </span>
+
                         <span className={styles.currentFileName}>
                           {submission.taskSubmissionURL.split("/").pop()}
                         </span>
                       </div>
 
+                      {/* إخفاء الملف الحالي حتى يظهر input اختيار ملف جديد */}
                       <button
                         type="button"
                         className={styles.clearFileBtn}
@@ -238,6 +300,7 @@ export default function StudentSubmissionActions({
                       </button>
                     </div>
                   ) : editFile ? (
+                    // عرض اسم الملف الجديد الذي اختاره الطالب
                     <div className={styles.fileInputLikeBox}>
                       <div className={styles.currentFileInfo}>
                         <span className={styles.inlineFileIcon}>
@@ -249,6 +312,7 @@ export default function StudentSubmissionActions({
                         </span>
                       </div>
 
+                      {/* إزالة الملف الجديد المختار والرجوع لاختيار ملف آخر */}
                       <button
                         type="button"
                         className={styles.clearFileBtn}
@@ -262,18 +326,20 @@ export default function StudentSubmissionActions({
                       </button>
                     </div>
                   ) : (
+                    // اختيار ملف جديد عند التعديل
                     <input
                       type="file"
                       accept=".pdf"
                       className={styles.fileInput}
                       onChange={(e) => {
-                        setEditFile(e.target.files[0]);
+                        setEditFile(e.target.files?.[0] || null);
                         setShowCurrentFile(false);
                       }}
                     />
                   )}
                 </div>
 
+                {/* ملاحظات الطالب أثناء التعديل */}
                 <div className={styles.formGroup}>
                   <label>
                     Student Notes{" "}
@@ -291,7 +357,8 @@ export default function StudentSubmissionActions({
                 {updateError && (
                   <p className={styles.submitError}>{updateError}</p>
                 )}
-                {/*  cancel button */}
+
+                {/* أزرار إلغاء أو حفظ التعديل */}
                 <div className={styles.submitActions}>
                   <button
                     type="button"
@@ -315,6 +382,7 @@ export default function StudentSubmissionActions({
           </div>
         )}
 
+        {/* مودال تأكيد حذف التسليم */}
         {showDeleteModal && (
           <div className={styles.modalOverlay}>
             <div className={styles.confirmModal}>
@@ -327,6 +395,7 @@ export default function StudentSubmissionActions({
               )}
 
               <div className={styles.modalActions}>
+                {/* إلغاء الحذف وإغلاق المودال */}
                 <button
                   type="button"
                   className={styles.modalCancelBtn}
@@ -339,6 +408,7 @@ export default function StudentSubmissionActions({
                   Cancel
                 </button>
 
+                {/* تنفيذ عملية الحذف */}
                 <button
                   type="button"
                   className={styles.modalDeleteBtn}
@@ -355,83 +425,93 @@ export default function StudentSubmissionActions({
     );
   }
 
- //اذا ما في تسليم بنعرض زر الارسال
-return (
-  <div className={compact ? styles.compactSubmission : styles.emptySubmission}>
-    <button
-      type="button"
-      className={styles.submitBtn}
-      onClick={() => setShowSubmitForm(true)}
+  // إذا لا يوجد submission، نعرض زر إرسال تسليم جديد
+  return (
+    <div
+      className={compact ? styles.compactSubmission : styles.emptySubmission}
     >
-      {submitButtonText}
-    </button>
+      {/* زر فتح فورم إضافة تسليم جديد */}
+      <button
+        type="button"
+        className={styles.submitBtn}
+        onClick={() => setShowSubmitForm(true)}
+      >
+        {submitButtonText}
+      </button>
 
-    {showSubmitForm && (
-      <div className={styles.modalOverlay}>
-        <div className={styles.submissionModal}>
-          <div className={styles.modalHeader}>
-            <h3 className={styles.modalTitle}>{submitButtonText}</h3>
+      {/* مودال إضافة تسليم جديد */}
+      {showSubmitForm && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.submissionModal}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>{submitButtonText}</h3>
 
-            <button
-              type="button"
-              className={styles.modalCloseBtn}
-              onClick={closeSubmitModal}
-              disabled={submitting}
-            >
-              ×
-            </button>
-          </div>
-
-          <form className={styles.submitForm} onSubmit={handleSubmitTask}>
-            <div className={styles.formGroup}>
-              <label>Upload File</label>
-
-              <input
-                type="file"
-                accept=".pdf"
-                className={styles.fileInput}
-                onChange={(e) => setSubmitFile(e.target.files[0])}
-              />
-            </div>
-
-            <div className={styles.formGroup}>
-              <label>
-                Student Notes{" "}
-                <span className={styles.optionalText}>(Optional)</span>
-              </label>
-
-              <textarea
-                value={studentNotes}
-                onChange={(e) => setStudentNotes(e.target.value)}
-                placeholder="Write your notes..."
-                className={styles.notesTextarea}
-              />
-            </div>
-
-            {submitError && <p className={styles.submitError}>{submitError}</p>}
-
-            <div className={styles.submitActions}>
+              {/* إغلاق فورم الإضافة */}
               <button
                 type="button"
-                className={styles.cancelBtn}
+                className={styles.modalCloseBtn}
                 onClick={closeSubmitModal}
                 disabled={submitting}
               >
-                Cancel
-              </button>
-
-              <button
-                type="submit"
-                className={styles.submitBtn}
-                disabled={submitting}
-              >
-                {submitting ? "Submitting..." : "Submit"}
+                ×
               </button>
             </div>
-          </form>
+
+            <form className={styles.submitForm} onSubmit={handleSubmitTask}>
+              {/* اختيار ملف التسليم */}
+              <div className={styles.formGroup}>
+                <label>Upload File</label>
+
+                <input
+                  type="file"
+                  accept=".pdf"
+                  className={styles.fileInput}
+                  onChange={(e) => setSubmitFile(e.target.files?.[0] || null)}
+                />
+              </div>
+
+              {/* ملاحظات الطالب، اختيارية */}
+              <div className={styles.formGroup}>
+                <label>
+                  Student Notes{" "}
+                  <span className={styles.optionalText}>(Optional)</span>
+                </label>
+
+                <textarea
+                  value={studentNotes}
+                  onChange={(e) => setStudentNotes(e.target.value)}
+                  placeholder="Write your notes..."
+                  className={styles.notesTextarea}
+                />
+              </div>
+
+              {submitError && (
+                <p className={styles.submitError}>{submitError}</p>
+              )}
+
+              {/* أزرار إلغاء أو إرسال التسليم */}
+              <div className={styles.submitActions}>
+                <button
+                  type="button"
+                  className={styles.cancelBtn}
+                  onClick={closeSubmitModal}
+                  disabled={submitting}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  className={styles.submitBtn}
+                  disabled={submitting}
+                >
+                  {submitting ? "Submitting..." : "Submit"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
-    )}
-  </div>
-);
+      )}
+    </div>
+  );
 }
