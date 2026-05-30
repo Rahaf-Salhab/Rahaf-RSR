@@ -312,7 +312,8 @@
 
 
 .actionsAndEditWrapper {
-  display: contents;
+  display: flex;
+  align-items: center;
 }
 /* ___________________________Confirmation delete Modal_____________________ */
 .modalOverlay {
@@ -343,7 +344,7 @@
 }
 
 .confirmModal p {
-  margin: -4px;
+  margin: 0;
   color: #5A544F;
   font-size: 16px;
   line-height: 1.6;
