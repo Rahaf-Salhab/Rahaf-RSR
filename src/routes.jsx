@@ -13,6 +13,7 @@ import UnAuthorized from "./unAuthorized/UnAuthorized";
 
 import StudentHome from "./pages/student/StudentHome";
 import StudentTasks from "./pages/student/Tasks/StudentTasks";
+import StudentThesis from "./pages/student/Thesis/StudentThesis";
 import StudentTaskDetails from "./pages/student/Tasks/StudentTaskDetails";
 import SupervisorHome from "./pages/supervisor/SupervisorHome";
 import CoordinatorHome from "./pages/coordinator/CoordinatorHome";
@@ -35,6 +36,8 @@ import GroupDetails from "./pages/supervisor/Groups/GroupDetails";
 import StudentGrades from "./pages/student/Grades/StudentGrades";
 import TaskSubmissions from "./pages/supervisor/Tasks/TaskSubmissions";
 import Tasks from "./pages/supervisor/Tasks/Tasks";
+import SupervisorThesis from "./pages/supervisor/Thesis/SupervisorThesis";
+import ThesisDetails from "./pages/supervisor/Thesis/ThesisDetails";
 
 import Profile from "./pages/profile/Profile";
 
@@ -68,8 +71,9 @@ const routes = createBrowserRouter([
       { path: "home", element: <StudentHome /> },
       { path: "grades", element: <StudentGrades /> },
       { path: "profile", element: <Profile /> },
-      { path: "tasks", element: <StudentTasks /> },// Main tasks page showing all tasks for the student's group
-      {path: "tasks/:taskId", element: <StudentTaskDetails />}, // Detais page for a specific task
+      { path: "tasks", element: <StudentTasks /> }, // Main tasks page showing all tasks for the student's group
+      { path: "thesis", element: <StudentThesis /> },
+      { path: "tasks/:taskId", element: <StudentTaskDetails /> }, // Detais page for a specific task
     ],
   },
 
@@ -87,9 +91,16 @@ const routes = createBrowserRouter([
       { path: "tasks", element: <Tasks /> },
       { path: "groups", element: <SupervisorGroups /> },
       { path: "groups/:groupId", element: <GroupDetails /> },
+      { path: "thesis", element: <SupervisorThesis /> },
+      { path: "thesis/:groupId", element: <ThesisDetails /> },
       { path: "evaluation-forms", element: <SupervisorEvaluationForms /> },
+      { path: "archive", element: <ArchiveSemesters /> },
+      { path: "archive/:semesterId", element: <ArchivedThesis /> },
       { path: "profile", element: <Profile /> },
-      { path: "groups/:groupId/tasks/:taskId/submissions", element: <TaskSubmissions />,},// Page that displays submissions for a specific task inside a specific group
+      {
+        path: "groups/:groupId/tasks/:taskId/submissions",
+        element: <TaskSubmissions />,
+      }, // Page that displays submissions for a specific task inside a specific group
     ],
   },
 
