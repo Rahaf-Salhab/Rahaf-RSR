@@ -31,6 +31,7 @@ export default function StudentThesis() {
       }
 
       const groupRes = await api.get(`/Group/my-group/${studentId}`);
+      console.log("FULL GROUP RESPONSE:", groupRes.data);
 
       console.log("group response:", groupRes.data);
 

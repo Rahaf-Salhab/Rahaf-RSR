@@ -1,21 +1,17 @@
 import { useEffect, useState } from "react";
-import { mockApi as api } from "../../../api/axiosInstance";
+import api from "../../../api/axiosInstance";
 import styles from "./ExaminationTimetable.module.css";
 import {
   Add, Search, Edit, Delete, Close,
-  CalendarMonth, AccessTime, Room, People,
-  Publish, SaveAlt
+  CalendarMonth, Room, People, SaveAlt
 } from "@mui/icons-material";
-
-const STATUS_OPTIONS = ["All", "draft", "published"];
 
 export default function ExaminationTimetable() {
   const [timetable, setTimetable] = useState([]);
-  const [users, setUsers] = useState([]);
+  const [examiners, setExaminers] = useState([]);
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
   const [modal, setModal] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
 
@@ -24,21 +20,21 @@ export default function ExaminationTimetable() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // 🔴 MOCK
-      const [timetableRes, usersRes, groupsRes] = await Promise.all([
-        api.get("/examinationTimetable"),
-        api.get("/users"),
-        api.get("/groups"),
+      const [examinersRes, groupsRes] = await Promise.all([
+        api.get("/User/examiners"),
+        api.get("/Groups/groups-coordinater"),
       ]);
-      setTimetable(timetableRes.data);
-      setUsers(usersRes.data);
-      setGroups(groupsRes.data);
-      // ✅ REAL
-      // const [timetableRes, usersRes, groupsRes] = await Promise.all([
-      //   api.get("/examination-timetable"),
-      //   api.get("/admin/users"),
-      //   api.get("/admin/groups"),
-      // ]);
+
+      setExaminers(examinersRes.data?.examiners || []);
+
+      const allSupervisors = groupsRes.data?.allSupervisorsWithGroups || [];
+      const flatGroups = [];
+      allSupervisors.forEach(supervisor => {
+        (supervisor.groups || []).forEach(group => {
+          flatGroups.push({ ...group, supervisorName: supervisor.supervisorName });
+        });
+      });
+      setGroups(flatGroups);
     } catch (err) {
       console.error(err);
     } finally {
@@ -46,19 +42,12 @@ export default function ExaminationTimetable() {
     }
   };
 
-  const filtered = timetable.filter(t => {
-    const matchSearch =
-      t.groupName.toLowerCase().includes(search.toLowerCase()) ||
-      t.projectTitle.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === "All" || t.status === statusFilter;
-    return matchSearch && matchStatus;
-  });
-
-  const getUserName = (id) => users.find(u => u.id === id)?.name || "-";
+  const getExaminerName = (id) =>
+    examiners.find(e => e.id === id)?.fullName || id;
 
   const handleDelete = async (id) => {
     try {
-      await api.delete(`/examinationTimetable/${id}`);
+      await api.delete(`/Schedule/remove-schedule/scheduleId/${id}`);
       setTimetable(prev => prev.filter(t => t.id !== id));
       setDeleteId(null);
     } catch (err) { console.error(err); }
@@ -66,36 +55,49 @@ export default function ExaminationTimetable() {
 
   const handleSave = async (data) => {
     try {
+      const payload = {
+        GroupId: data.groupId,
+        Date: data.date ? new Date(data.date).toISOString() : "",
+        Location: data.location,
+        Notes: data.notes || "",
+        ExaminersIds: data.examiners,
+      };
+
       if (data.id) {
-        await api.put(`/examinationTimetable/${data.id}`, data);
-        setTimetable(prev => prev.map(t => t.id === data.id ? data : t));
+        await api.patch(`/Schedule/update-schedule/${data.id}`, payload);
+        setTimetable(prev => prev.map(t => t.id === data.id ? { ...t, ...data } : t));
       } else {
-        const newItem = { ...data, id: Date.now().toString() };
-        const res = await api.post("/examinationTimetable", newItem);
-        setTimetable(prev => [...prev, res.data]);
+        const res = await api.post("/Schedule/create-schedule", payload);
+        setTimetable(prev => [...prev, {
+          ...res.data,
+          groupName: data.groupName,
+          supervisorName: data.supervisorName,
+          location: data.location,
+          notes: data.notes,
+          date: data.date,
+          examiners: data.examiners,
+        }]);
       }
       setModal(null);
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleStatusChange = async (item, newStatus) => {
-    const updated = { ...item, status: newStatus };
-    try {
-      await api.put(`/examinationTimetable/${item.id}`, updated);
-      setTimetable(prev => prev.map(t => t.id === item.id ? updated : t));
-    } catch (err) { console.error(err); }
-  };
+  const filtered = timetable.filter(t =>
+    t.groupName?.toLowerCase().includes(search.toLowerCase()) ||
+    t.projectName?.toLowerCase().includes(search.toLowerCase()) ||
+    t.location?.toLowerCase().includes(search.toLowerCase())
+  );
 
   const emptyForm = {
-    groupId: "", groupName: "", projectTitle: "",
-    date: "", time: "", duration: 60,
-    room: "", building: "", supervisorId: "",
-    examiners: [], status: "draft"
+    groupId: "", groupName: "", supervisorName: "",
+    date: "", location: "", notes: "",
+    examiners: [],
   };
 
   return (
     <div className={styles.page}>
-      {/* Header */}
       <div className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>Examination Timetable</h1>
@@ -106,32 +108,19 @@ export default function ExaminationTimetable() {
         </button>
       </div>
 
-      {/* Filters */}
       <div className={styles.filtersBox}>
         <div className={styles.searchWrapper}>
           <Search className={styles.searchIcon} fontSize="small" />
           <input
             type="text"
-            placeholder="Search by group or project..."
+            placeholder="Search by group or location..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className={styles.searchInput}
           />
         </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className={styles.filterSelect}
-        >
-          {STATUS_OPTIONS.map(s => (
-            <option key={s} value={s}>
-              {s === "All" ? "All Status" : s.charAt(0).toUpperCase() + s.slice(1)}
-            </option>
-          ))}
-        </select>
       </div>
 
-      {/* Cards */}
       {loading ? (
         <div className={styles.loading}>Loading...</div>
       ) : filtered.length === 0 ? (
@@ -149,12 +138,7 @@ export default function ExaminationTimetable() {
               <div className={styles.cardHeader}>
                 <div className={styles.cardHeaderLeft}>
                   <h3 className={styles.groupName}>{t.groupName}</h3>
-                  <p className={styles.projectTitle}>{t.projectTitle}</p>
-                </div>
-                <div className={styles.cardHeaderRight}>
-                  <span className={`${styles.statusBadge} ${t.status === "published" ? styles.published : styles.draft}`}>
-                    {t.status.charAt(0).toUpperCase() + t.status.slice(1)}
-                  </span>
+                  <p className={styles.projectTitle}>{t.projectName}</p>
                 </div>
               </div>
 
@@ -164,80 +148,66 @@ export default function ExaminationTimetable() {
                     <CalendarMonth fontSize="small" className={styles.infoIcon} />
                     <div>
                       <p className={styles.infoLabel}>Date</p>
-                      <p className={styles.infoValue}>{t.date}</p>
-                    </div>
-                  </div>
-                  <div className={styles.infoItem}>
-                    <AccessTime fontSize="small" className={styles.infoIcon} />
-                    <div>
-                      <p className={styles.infoLabel}>Time</p>
-                      <p className={styles.infoValue}>{t.time} ({t.duration} min)</p>
+                      <p className={styles.infoValue}>
+                        {t.date ? new Date(t.date).toLocaleString() : "-"}
+                      </p>
                     </div>
                   </div>
                   <div className={styles.infoItem}>
                     <Room fontSize="small" className={styles.infoIcon} />
                     <div>
-                      <p className={styles.infoLabel}>Room</p>
-                      <p className={styles.infoValue}>{t.room}</p>
-                    </div>
-                  </div>
-                  <div className={styles.infoItem}>
-                    <Room fontSize="small" className={styles.infoIcon} />
-                    <div>
-                      <p className={styles.infoLabel}>Building</p>
-                      <p className={styles.infoValue}>{t.building}</p>
+                      <p className={styles.infoLabel}>Location</p>
+                      <p className={styles.infoValue}>{t.location || "-"}</p>
                     </div>
                   </div>
                   <div className={styles.infoItem}>
                     <People fontSize="small" className={styles.infoIcon} />
                     <div>
                       <p className={styles.infoLabel}>Supervisor</p>
-                      <p className={styles.infoValue}>{getUserName(t.supervisorId)}</p>
+                      <p className={styles.infoValue}>{t.supervisorName || "-"}</p>
                     </div>
                   </div>
+                  {t.notes && (
+                    <div className={styles.infoItem}>
+                      <div>
+                        <p className={styles.infoLabel}>Notes</p>
+                        <p className={styles.infoValue}>{t.notes}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className={styles.examinersSection}>
                   <p className={styles.examinersLabel}>Examination Committee</p>
                   <div className={styles.examinersList}>
-                    {t.examiners.map(eid => (
+                    {(t.examinersIds || t.examiners || []).map(eid => (
                       <span key={eid} className={styles.examinerChip}>
-                        {getUserName(eid)}
+                        {getExaminerName(eid)}
                       </span>
                     ))}
                   </div>
                 </div>
               </div>
 
-              {/* Card Actions */}
               <div className={styles.cardFooter}>
                 <button
-                  className={styles.draftBtn}
-                  onClick={() => handleStatusChange(t, "draft")}
-                  disabled={t.status === "draft"}
-                  title="Save as Draft"
-                >
-                  <SaveAlt fontSize="small" /> Save as Draft
-                </button>
-                <button
                   className={styles.editActionBtn}
-                  onClick={() => setModal(t)}
-                  title="Edit"
+                  onClick={() => setModal({
+                    id: t.id,
+                    groupId: t.groupId,
+                    groupName: t.groupName,
+                    supervisorName: t.supervisorName,
+                    date: t.date ? t.date.slice(0, 16) : "",
+                    location: t.location || "",
+                    notes: t.notes || "",
+                    examiners: t.examinersIds || t.examiners || [],
+                  })}
                 >
                   <Edit fontSize="small" /> Edit
                 </button>
                 <button
-                  className={styles.publishBtn}
-                  onClick={() => handleStatusChange(t, "published")}
-                  disabled={t.status === "published"}
-                  title="Publish"
-                >
-                  <Publish fontSize="small" /> Publish
-                </button>
-                <button
                   className={styles.deleteBtn}
                   onClick={() => setDeleteId(t.id)}
-                  title="Delete"
                 >
                   <Delete fontSize="small" />
                 </button>
@@ -247,18 +217,16 @@ export default function ExaminationTimetable() {
         </div>
       )}
 
-      {/* Modal */}
       {modal && (
         <TimetableModal
           data={modal}
-          users={users}
+          examiners={examiners}
           groups={groups}
           onClose={() => setModal(null)}
           onSave={handleSave}
         />
       )}
 
-      {/* Delete Confirm */}
       {deleteId && (
         <div className={styles.modalOverlay}>
           <div className={styles.confirmModal}>
@@ -276,24 +244,21 @@ export default function ExaminationTimetable() {
 }
 
 // ── Timetable Modal ─────────────────────────────────────────────────
-function TimetableModal({ data, users, groups, onClose, onSave }) {
+function TimetableModal({ data, examiners, groups, onClose, onSave }) {
   const [form, setForm] = useState({ ...data });
   const [error, setError] = useState("");
 
-  const supervisors = users.filter(u => u.role === "supervisor");
-  const examiners = users.filter(u => u.role === "examiner");
-
   const handleGroupChange = (groupId) => {
-    const group = groups.find(g => g.id === groupId);
+    const group = groups.find(g => g.groupId === groupId);
     if (group) {
       setForm(prev => ({
         ...prev,
-        groupId: group.id,
-        groupName: group.name,
-        supervisorId: group.supervisorId || "",
+        groupId: group.groupId,
+        groupName: group.groupName,
+        supervisorName: group.supervisorName || "",
       }));
     } else {
-      setForm(prev => ({ ...prev, groupId: "", groupName: "" }));
+      setForm(prev => ({ ...prev, groupId: "", groupName: "", supervisorName: "" }));
     }
     setError("");
   };
@@ -308,23 +273,16 @@ function TimetableModal({ data, users, groups, onClose, onSave }) {
   };
 
   const validate = () => {
-    if (!form.groupId || !form.projectTitle.trim() || !form.date ||
-      !form.time || !form.room.trim() || !form.building.trim() ||
-      !form.supervisorId || form.examiners.length === 0) {
-      setError("All fields are required and at least one examiner must be selected.");
+    if (!form.groupId || !form.date || !form.location?.trim() || form.examiners.length === 0) {
+      setError("Group, Date, Location, and at least one examiner are required.");
       return false;
     }
     return true;
   };
 
-  const handleSaveDraft = () => {
+  const handleSubmit = () => {
     if (!validate()) return;
-    onSave({ ...form, status: "draft" });
-  };
-
-  const handlePublish = () => {
-    if (!validate()) return;
-    onSave({ ...form, status: "published" });
+    onSave(form);
   };
 
   return (
@@ -332,102 +290,76 @@ function TimetableModal({ data, users, groups, onClose, onSave }) {
       <div className={styles.modal}>
         <div className={styles.modalHeader}>
           <h3 className={styles.modalTitle}>{data.id ? "Edit Schedule" : "Add Schedule"}</h3>
-          <button className={styles.closeBtn} onClick={onClose}><Close fontSize="small" /></button>
+          <button className={styles.closeBtn} onClick={onClose}>
+            <Close fontSize="small" />
+          </button>
         </div>
         <div className={styles.modalBody}>
           {error && <p className={styles.errorMsg}>{error}</p>}
 
-          <div className={styles.modalRow}>
-            <div className={styles.fieldGroup}>
-              <label className={styles.label}>Group <span className={styles.required}>*</span></label>
-              <select
-                className={styles.select}
-                value={form.groupId}
-                onChange={(e) => handleGroupChange(e.target.value)}
-              >
-                <option value="">Select Group</option>
-                {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
-              </select>
-            </div>
-            <div className={styles.fieldGroup}>
-              <label className={styles.label}>Duration (min)</label>
-              <input
-                type="number"
-                className={styles.input}
-                value={form.duration}
-                onChange={(e) => setForm({ ...form, duration: Number(e.target.value) })}
-                min={15}
-                step={15}
-              />
-            </div>
-          </div>
-
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>Project Title <span className={styles.required}>*</span></label>
-            <input
-              className={styles.input}
-              value={form.projectTitle}
-              onChange={(e) => { setForm({ ...form, projectTitle: e.target.value }); setError(""); }}
-              placeholder="e.g. AI-Powered Learning System"
-            />
-          </div>
-
-          <div className={styles.modalRow}>
-            <div className={styles.fieldGroup}>
-              <label className={styles.label}>Date <span className={styles.required}>*</span></label>
-              <input
-                type="date"
-                className={styles.input}
-                value={form.date}
-                onChange={(e) => { setForm({ ...form, date: e.target.value }); setError(""); }}
-              />
-            </div>
-            <div className={styles.fieldGroup}>
-              <label className={styles.label}>Time <span className={styles.required}>*</span></label>
-              <input
-                type="time"
-                className={styles.input}
-                value={form.time}
-                onChange={(e) => { setForm({ ...form, time: e.target.value }); setError(""); }}
-              />
-            </div>
-          </div>
-
-          <div className={styles.modalRow}>
-            <div className={styles.fieldGroup}>
-              <label className={styles.label}>Room <span className={styles.required}>*</span></label>
-              <input
-                className={styles.input}
-                value={form.room}
-                onChange={(e) => { setForm({ ...form, room: e.target.value }); setError(""); }}
-                placeholder="e.g. A301"
-              />
-            </div>
-            <div className={styles.fieldGroup}>
-              <label className={styles.label}>Building <span className={styles.required}>*</span></label>
-              <input
-                className={styles.input}
-                value={form.building}
-                onChange={(e) => { setForm({ ...form, building: e.target.value }); setError(""); }}
-                placeholder="e.g. Engineering Building"
-              />
-            </div>
-          </div>
-
-          <div className={styles.fieldGroup}>
-            <label className={styles.label}>Supervisor <span className={styles.required}>*</span></label>
+            <label className={styles.label}>Group <span className={styles.required}>*</span></label>
             <select
               className={styles.select}
-              value={form.supervisorId}
-              onChange={(e) => { setForm({ ...form, supervisorId: e.target.value }); setError(""); }}
+              value={form.groupId}
+              onChange={(e) => handleGroupChange(e.target.value)}
             >
-              <option value="">Select Supervisor</option>
-              {supervisors.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              <option value="">Select Group</option>
+              {groups.map(g => (
+                <option key={g.groupId} value={g.groupId}>
+                  {g.groupName} — {g.supervisorName}
+                </option>
+              ))}
             </select>
           </div>
 
+          {form.supervisorName && (
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>Supervisor</label>
+              <input
+                className={styles.input}
+                value={form.supervisorName}
+                disabled
+                style={{ background: "#f5f5f5", color: "#888" }}
+              />
+            </div>
+          )}
+
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>Examination Committee <span className={styles.required}>*</span></label>
+            <label className={styles.label}>Date & Time <span className={styles.required}>*</span></label>
+            <input
+              type="datetime-local"
+              className={styles.input}
+              value={form.date}
+              onChange={(e) => { setForm({ ...form, date: e.target.value }); setError(""); }}
+            />
+          </div>
+
+          <div className={styles.fieldGroup}>
+            <label className={styles.label}>Location <span className={styles.required}>*</span></label>
+            <input
+              className={styles.input}
+              value={form.location}
+              onChange={(e) => { setForm({ ...form, location: e.target.value }); setError(""); }}
+              placeholder="e.g. H002"
+            />
+          </div>
+
+          <div className={styles.fieldGroup}>
+            <label className={styles.label}>Notes</label>
+            <textarea
+              className={styles.textarea}
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              placeholder="Optional notes..."
+              rows={3}
+            />
+          </div>
+
+          <div className={styles.fieldGroup}>
+            <label className={styles.label}>
+              Examination Committee <span className={styles.required}>*</span>
+            </label>
             <div className={styles.checkList}>
               {examiners.map(e => (
                 <label key={e.id} className={styles.checkLabel}>
@@ -436,7 +368,10 @@ function TimetableModal({ data, users, groups, onClose, onSave }) {
                     checked={form.examiners.includes(e.id)}
                     onChange={() => handleExaminerToggle(e.id)}
                   />
-                  <span>{e.name}</span>
+                  <span>{e.fullName}</span>
+                  <span style={{ fontSize: 12, color: "#888", marginLeft: 6 }}>
+                    — {e.department}
+                  </span>
                 </label>
               ))}
             </div>
@@ -445,11 +380,8 @@ function TimetableModal({ data, users, groups, onClose, onSave }) {
 
         <div className={styles.modalFooter}>
           <button className={styles.cancelBtn} onClick={onClose}>Cancel</button>
-          <button className={styles.modalDraftBtn} onClick={handleSaveDraft}>
-            <SaveAlt fontSize="small" /> Save as Draft
-          </button>
-          <button className={styles.modalPublishBtn} onClick={handlePublish}>
-            <Publish fontSize="small" /> Publish
+          <button className={styles.modalPublishBtn} onClick={handleSubmit}>
+            <SaveAlt fontSize="small" /> {data.id ? "Update" : "Save"}
           </button>
         </div>
       </div>
