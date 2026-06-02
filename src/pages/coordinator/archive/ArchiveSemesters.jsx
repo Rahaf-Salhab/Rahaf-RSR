@@ -60,9 +60,10 @@ export default function ArchiveSemesters() {
   }, [semesters, searchTerm]);// Use useMemo to avoid unnecessary filtering on every render
 
   const handleSemesterClick = (semester) => {
-    const semesterId = semester.semesterId;
-    navigate(`/coordinator/archive/${semesterId}`);
-  };
+  navigate(`${semester.semesterId}`, {
+    state: { semester },
+  });
+};
 
   return (
     <div className={styles.page}>

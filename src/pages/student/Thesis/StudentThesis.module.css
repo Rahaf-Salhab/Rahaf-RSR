@@ -1,0 +1,443 @@
+.page {
+  padding: 24px;
+  background: #fafafa;
+  min-height: 100vh;
+}
+
+.header {
+  margin-bottom: 22px;
+}
+
+.header h1 {
+  margin: 0;
+  color: #111827;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.header p {
+  margin: 8px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.supervisorThesisCard,
+.uploadCard,
+.versionsCard {
+  background: #ffffff;
+  border: 1px solid #e7e7e7;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 22px;
+}
+
+.supervisorThesisCard {
+  border-left: 4px solid #c74916;
+}
+
+.cardTitle {
+  color: #111827;
+  font-size: 14px;
+  font-weight: 800;
+  margin-bottom: 18px;
+}
+
+.supervisorContent {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #fbfbfb;
+  border: 1px solid #eeeeee;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.supervisorFileIcon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #fff1ed;
+  color: #c74916;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.supervisorInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.supervisorInfo h3 {
+  margin: 0 0 8px;
+  color: #111827;
+  font-size: 15px;
+  font-weight: 800;
+  word-break: break-word;
+}
+
+.supervisorMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.metaDot {
+  color: #9ca3af;
+  font-weight: 700;
+}
+.versionActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.viewBtn,
+.updateBtn {
+  text-decoration: none;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13.7px;
+  font-weight: 510;
+  transition: 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.viewBtn{
+   border: 1px solid #1A0F0F1A;
+  background: #F4F2EF;
+  color: #1A0F0F;
+}
+.viewBtn:hover {
+  background: #d8d6d6;
+}
+.updateBtn{
+  border: 1px solid #8749491a;
+  background-color: #c74916;
+  color: #ffffff;
+  cursor: pointer;
+  
+}
+
+.updateBtn:hover {
+  background-color: #ae3c0e;
+  color: #ffffff;
+}
+
+.disabledUpdateBtn {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.uploadBox {
+  border: 2px dashed #dddddd;
+  border-radius: 16px;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  cursor: pointer;
+  transition: 0.2s ease;
+  padding: 30px 0 30px 0;
+}
+
+.uploadBox:hover {
+  border-color: #c74916;
+  background: #fffaf7;
+}
+
+.uploadIconCircle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #fff1ed;
+  color: #c74916;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.uploadBox p {
+  margin: 8px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.uploadBox p span {
+  color: #c74916;
+  font-weight: 800;
+}
+
+.uploadBox small {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.selectFileBtn {
+  margin-top: 8px;
+  border: none;
+  background: #c74916;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.emptyVersions {
+  border: 1px dashed #dddddd;
+  border-radius: 12px;
+  padding: 22px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.versionItem {
+  border: 1px solid #eeeeee;
+  border-radius: 12px;
+  padding: 16px;
+  background: #ffffff;
+}
+
+/*______________________UPLOAD THESIS FILE____________________*/
+.hiddenFileInput {
+  display: none;
+}
+
+.uploadText {
+  color: #c74916;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.selectedFileName {
+  margin-top: 8px;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 700;
+  max-width: 100%;
+  word-break: break-word;
+}
+
+.addError {
+  margin-top: 8px;
+  color: #c0392b;
+  background: #fff1ed;
+  border: 1px solid #f5b5a3;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.disabledSelectFileBtn {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/*__________________________ STUDENT THESIS VERSIONS_________________________*/
+.versionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.versionItem {
+  border: 1px solid #eeeeee;
+  border-radius: 14px;
+  padding: 22px 24px;
+  background: #ffffff;
+}
+
+.versionMainRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.versionHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.versionFileIcon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  background: #f4eeee;
+  color: #c74916;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.versionFileIcon svg {
+  font-size: 27px;
+}
+
+.versionInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.versionInfo h4 {
+  margin: 0 0 6px;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 800;
+  word-break: break-word;
+}
+
+.versionTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 7px;
+}
+
+.versionTitleRow h4 {
+  margin: 0;
+  color: #1A0F0F;
+  font-size: 15px;
+  font-weight: 510;
+  word-break: break-word;
+}
+
+.reviewedBadge {
+  background: #f0d8ff;
+  color: #8b2be2;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.versionMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  color: #5A544F;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.smallBtn {
+  border: 1px solid #dedede;
+  background: #ffffff;
+  color: #111827;
+  text-decoration: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: 0.2s ease;
+  white-space: nowrap;
+}
+
+.smallBtn:hover {
+  background: #f6f6f6;
+  border-color: #c74916;
+  color: #c74916;
+}
+
+.frozenBadge {
+  background: #eef2ff;
+  color: #4338ca;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+/*________________________SUPERVISOR FEEDBACK______________________*/
+.feedbackBox {
+ margin-top: 16px;
+  background: #F6F6F6;
+  border-left: 4px solid #C34C18;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.feedbackTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.feedbackTitle {
+  margin: 0;
+  font-size: 13.7px;
+  font-weight: 510;
+  color: #1A0F0F;
+}
+
+.feedbackMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.feedbackText {
+  margin: 0;
+  font-size: 13.6px;
+  font-weight: 400;
+  color: #5A544F;
+  line-height: 1.6;
+}
+
+.feedbackBox strong {
+  color: #111827;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.feedbackBox p {
+  margin: 7px 0 0;
+  color: #555;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.approvedBadge {
+  background: #ecfdf3;
+  color: #027a48;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.rejectedBadge {
+  background: #fff1f3;
+  color: #b42318;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
