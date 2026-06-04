@@ -1,45 +1,40 @@
 import { useEffect, useState } from "react";
-import { mockApi as api } from "../../../api/axiosInstance";
+import api from "../../../api/axiosInstance";
 import styles from "./FinalGrades.module.css";
 import {
   Search, CheckCircle, HourglassEmpty,
   Publish, SaveAlt, Grade
 } from "@mui/icons-material";
 
-const STATUS_OPTIONS = ["All", "draft", "published"];
+const STATUS_OPTIONS = ["All", "Draft", "Published"];
 
 export default function FinalGrades() {
   const [groups, setGroups] = useState([]);
-  const [grades, setGrades] = useState([]);
   const [finalGrades, setFinalGrades] = useState([]);
-  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [generatingId, setGeneratingId] = useState(null);
 
   useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      // 🔴 MOCK
-      const [groupsRes, gradesRes, finalGradesRes, usersRes] = await Promise.all([
-        api.get("/groups"),
-        api.get("/grades"),
-        api.get("/finalGrades"),
-        api.get("/users"),
+      const [groupsRes, finalGradesRes] = await Promise.all([
+        api.get("/Groups/groups-coordinater"),
+        api.get("/Coordinator/EvaluationForms/final-results"),
       ]);
-      setGroups(groupsRes.data);
-      setGrades(gradesRes.data);
-      setFinalGrades(finalGradesRes.data);
-      setUsers(usersRes.data);
-      // ✅ REAL
-      // const [groupsRes, gradesRes, finalGradesRes, usersRes] = await Promise.all([
-      //   api.get("/admin/groups"),
-      //   api.get("/admin/grades"),
-      //   api.get("/admin/final-grades"),
-      //   api.get("/admin/users"),
-      // ]);
+
+      const allSupervisors = groupsRes.data?.allSupervisorsWithGroups || [];
+      const flatGroups = [];
+      allSupervisors.forEach(supervisor => {
+        (supervisor.groups || []).forEach(group => {
+          flatGroups.push({ ...group, supervisorName: supervisor.supervisorName });
+        });
+      });
+      setGroups(flatGroups);
+      setFinalGrades(finalGradesRes.data || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -47,80 +42,54 @@ export default function FinalGrades() {
     }
   };
 
-  const getUserName = (id) => users.find(u => String(u.id) === String(id))?.name || "-";
+  const getFinalGrade = (groupId) =>
+    finalGrades.find(f => String(f.groupId) === String(groupId)) || null;
 
-  const getGroupGrades = (groupId) => {
-    const supervisorGrades = grades.filter(g =>
-      String(g.groupId) === String(groupId) && g.role === "supervisor"
-    );
-    const examinerGrades = grades.filter(g =>
-      String(g.groupId) === String(groupId) && g.role === "examiner"
-    );
-    const supervisorTotal = supervisorGrades.reduce((sum, g) => sum + (g.total || 0), 0);
-    const examinerTotal = examinerGrades.reduce((sum, g) => sum + (g.total || 0), 0);
-    return { supervisorTotal, examinerTotal, finalGrade: supervisorTotal + examinerTotal };
-  };
-
-  const hasAllGrades = (groupId) => {
-    const supervisorGrades = grades.filter(g =>
-      String(g.groupId) === String(groupId) && g.role === "supervisor"
-    );
-    const examinerGrades = grades.filter(g =>
-      String(g.groupId) === String(groupId) && g.role === "examiner"
-    );
-    return supervisorGrades.length > 0 && examinerGrades.length > 0;
-  };
-
-  const getFinalGradeStatus = (groupId) => {
-    const fg = finalGrades.find(f => String(f.groupId) === String(groupId));
-    return fg?.status || "draft";
-  };
-
-  const getFinalGradeId = (groupId) => {
-    return finalGrades.find(f => String(f.groupId) === String(groupId))?.id;
-  };
-
-  const handleStatusChange = async (group, newStatus) => {
-    const { supervisorTotal, examinerTotal, finalGrade } = getGroupGrades(group.id);
-    const existingId = getFinalGradeId(group.id);
-
-    const data = {
-      groupId: group.id,
-      groupName: group.name,
-      supervisorTotal,
-      examinerTotal,
-      finalGrade,
-      status: newStatus,
-    };
-
+  const handleGenerate = async (groupId) => {
+    setGeneratingId(groupId);
     try {
-      // 🔴 MOCK
-      if (existingId) {
-        await api.put(`/finalGrades/${existingId}`, { ...data, id: existingId });
-        setFinalGrades(prev => prev.map(f =>
-          String(f.id) === String(existingId) ? { ...data, id: existingId } : f
-        ));
-      } else {
-        const newItem = { ...data, id: Date.now().toString() };
-        await api.post("/finalGrades", newItem);
-        setFinalGrades(prev => [...prev, newItem]);
-      }
-      // ✅ REAL
-      // if (existingId) await api.put(`/admin/final-grades/${existingId}`, data);
-      // else await api.post("/admin/final-grades", data);
+      await api.post(`/Coordinator/EvaluationForms/final-grade/${groupId}`);
+      await fetchData();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setGeneratingId(null);
+    }
+  };
+
+  const handlePublish = async (groupId) => {
+    const fg = getFinalGrade(groupId);
+    if (!fg) return;
+    try {
+      await api.post(`/Coordinator/EvaluationForms/final-grade/publish/${groupId}`);
+      await fetchData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDraft = async (groupId) => {
+    const fg = getFinalGrade(groupId);
+    if (!fg) return;
+    try {
+      await api.post(`/Coordinator/EvaluationForms/final-grade/draft/${groupId}`);
+      await fetchData();
     } catch (err) {
       console.error(err);
     }
   };
 
   const filtered = groups.filter(g => {
-    const matchSearch = g.name.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === "All" || getFinalGradeStatus(g.id) === statusFilter;
+    const fg = getFinalGrade(g.groupId);
+    const matchSearch = g.groupName?.toLowerCase().includes(search.toLowerCase());
+    const matchStatus = statusFilter === "All" ||
+      (fg?.status?.toLowerCase() === statusFilter.toLowerCase()) ||
+      (!fg && statusFilter === "Draft");
     return matchSearch && matchStatus;
   });
 
-  const publishedCount = groups.filter(g => getFinalGradeStatus(g.id) === "published").length;
-  const draftCount = groups.filter(g => getFinalGradeStatus(g.id) === "draft").length;
+  const publishedCount = finalGrades.filter(f => f.status?.toLowerCase() === "published").length;
+  const draftCount = finalGrades.filter(f => f.status?.toLowerCase() === "draft").length;
 
   return (
     <div className={styles.page}>
@@ -164,7 +133,7 @@ export default function FinalGrades() {
         >
           {STATUS_OPTIONS.map(s => (
             <option key={s} value={s}>
-              {s === "All" ? "All Status" : s.charAt(0).toUpperCase() + s.slice(1)}
+              {s === "All" ? "All Status" : s}
             </option>
           ))}
         </select>
@@ -194,77 +163,90 @@ export default function FinalGrades() {
             </thead>
             <tbody>
               {filtered.map((group, i) => {
-                const { supervisorTotal, examinerTotal, finalGrade } = getGroupGrades(group.id);
-                const status = getFinalGradeStatus(group.id);
-                const hasGrades = supervisorTotal > 0 || examinerTotal > 0;
-                const canPublish = hasAllGrades(group.id);
-                const isPublished = status === "published";
-                const canDraft = canPublish && !isPublished;
+                const fg = getFinalGrade(group.groupId);
+                const isPublished = fg?.status?.toLowerCase() === "published";
+                const isDraft = fg?.status?.toLowerCase() === "draft";
 
                 return (
-                  <tr key={group.id} className={isPublished ? styles.publishedRow : ""}>
+                  <tr key={group.groupId} className={isPublished ? styles.publishedRow : ""}>
                     <td className={styles.num}>{i + 1}</td>
                     <td>
                       <div className={styles.groupCell}>
-                        <div className={styles.groupAvatar}>{group.name.charAt(0)}</div>
-                        <span className={styles.groupName}>{group.name}</span>
+                        <div className={styles.groupAvatar}>
+                          {group.groupName?.charAt(0).toUpperCase()}
+                        </div>
+                        <span className={styles.groupName}>{group.groupName}</span>
                       </div>
                     </td>
-                    <td className={styles.supervisorCell}>{getUserName(group.supervisorId)}</td>
+                    <td className={styles.supervisorCell}>
+                      {fg?.supervisorName || group.supervisorName || "-"}
+                    </td>
                     <td>
-                      {supervisorTotal > 0 ? (
-                        <span className={styles.gradeValue}>{supervisorTotal}</span>
+                      {fg ? (
+                        <span className={styles.gradeValue}>{fg.supervisorGrade}</span>
                       ) : (
                         <span className={styles.noGrade}>Not submitted</span>
                       )}
                     </td>
                     <td>
-                      {examinerTotal > 0 ? (
-                        <span className={styles.gradeValue}>{examinerTotal}</span>
+                      {fg ? (
+                        <span className={styles.gradeValue}>{fg.examinerGrade}</span>
                       ) : (
                         <span className={styles.noGrade}>Not submitted</span>
                       )}
                     </td>
                     <td>
-                      <span className={`${styles.finalGrade} ${hasGrades ? styles.finalGradeActive : ""}`}>
-                        {finalGrade} pts
-                      </span>
+                      {fg ? (
+                        <span className={`${styles.finalGrade} ${styles.finalGradeActive}`}>
+                          {fg.finalGrade} pts
+                        </span>
+                      ) : (
+                        <span className={styles.noGrade}>-</span>
+                      )}
                     </td>
                     <td>
-                      <span className={`${styles.statusBadge} ${isPublished ? styles.published : styles.draft}`}>
-                        {isPublished ? (
-                          <><CheckCircle fontSize="small" /> Published</>
-                        ) : (
-                          <><HourglassEmpty fontSize="small" /> Draft</>
-                        )}
-                      </span>
+                      {fg ? (
+                        <span className={`${styles.statusBadge} ${isPublished ? styles.published : styles.draft}`}>
+                          {isPublished ? (
+                            <><CheckCircle fontSize="small" /> Published</>
+                          ) : (
+                            <><HourglassEmpty fontSize="small" /> Draft</>
+                          )}
+                        </span>
+                      ) : (
+                        <span className={`${styles.statusBadge} ${styles.draft}`}>
+                          <HourglassEmpty fontSize="small" /> No Grade
+                        </span>
+                      )}
                     </td>
                     <td>
                       <div className={styles.actions}>
-                        <button
-                          className={styles.draftBtn}
-                          onClick={() => handleStatusChange(group, "draft")}
-                          disabled={!canDraft}
-                          title={
-                            isPublished ? "Already published" :
-                            !canPublish ? "Waiting for supervisor and examiner grades" :
-                            "Save as Draft"
-                          }
-                        >
-                          <SaveAlt fontSize="small" /> Draft
-                        </button>
-                        <button
-                          className={styles.publishBtn}
-                          onClick={() => handleStatusChange(group, "published")}
-                          disabled={isPublished || !canPublish}
-                          title={
-                            isPublished ? "Already published" :
-                            !canPublish ? "Waiting for supervisor and examiner grades" :
-                            "Publish"
-                          }
-                        >
-                          <Publish fontSize="small" /> Publish
-                        </button>
+                        {!fg ? (
+                          <button
+                            className={styles.publishBtn}
+                            onClick={() => handleGenerate(group.groupId)}
+                            disabled={generatingId === group.groupId}
+                          >
+                            {generatingId === group.groupId ? "Generating..." : "Generate"}
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              className={styles.draftBtn}
+                              onClick={() => handleDraft(group.groupId)}
+                              disabled={isDraft}
+                            >
+                              <SaveAlt fontSize="small" /> Draft
+                            </button>
+                            <button
+                              className={styles.publishBtn}
+                              onClick={() => handlePublish(group.groupId)}
+                              disabled={isPublished}
+                            >
+                              <Publish fontSize="small" /> Publish
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>

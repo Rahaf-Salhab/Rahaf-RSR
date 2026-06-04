@@ -7,6 +7,8 @@
   min-height: 100vh;
   font-family: 'Inter', sans-serif;
   background: #f5f6fa;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 .main {
@@ -15,12 +17,18 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-width: 0;
+  max-width: calc(100% - 220px);
+  overflow-x: hidden;
 }
 
 .content {
   flex: 1;
   padding: 24px;
   overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .overlay {
@@ -32,7 +40,10 @@
 }
 
 @media (max-width: 768px) {
-  .main { margin-left: 0; }
+  .main { 
+    margin-left: 0; 
+    max-width: 100%;
+  }
   .overlay { display: block; }
   .content { padding: 16px; }
 }

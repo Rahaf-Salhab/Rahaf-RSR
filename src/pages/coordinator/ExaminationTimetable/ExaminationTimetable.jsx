@@ -20,10 +20,26 @@ export default function ExaminationTimetable() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [examinersRes, groupsRes] = await Promise.all([
+      const [schedulesRes, examinersRes, groupsRes] = await Promise.all([
+        api.get("/Schedule/all-schedules"),
         api.get("/User/examiners"),
         api.get("/Groups/groups-coordinater"),
       ]);
+
+      const schedules = (schedulesRes.data?.result || []).map(s => ({
+        id: s.scheduleId,
+        groupId: s.groupId,
+        groupName: s.groupName,
+        projectName: s.projectName,
+        supervisorName: s.supervisorName,
+        date: s.date,
+        location: s.location,
+        notes: s.notes,
+        examiners: s.examiners || [],
+        students: s.students || [],
+        thesisURL: s.thesisURL,
+      }));
+      setTimetable(schedules);
 
       setExaminers(examinersRes.data?.examiners || []);
 
@@ -41,9 +57,6 @@ export default function ExaminationTimetable() {
       setLoading(false);
     }
   };
-
-  const getExaminerName = (id) =>
-    examiners.find(e => e.id === id)?.fullName || id;
 
   const handleDelete = async (id) => {
     try {
@@ -65,20 +78,11 @@ export default function ExaminationTimetable() {
 
       if (data.id) {
         await api.patch(`/Schedule/update-schedule/${data.id}`, payload);
-        setTimetable(prev => prev.map(t => t.id === data.id ? { ...t, ...data } : t));
       } else {
-        const res = await api.post("/Schedule/create-schedule", payload);
-        setTimetable(prev => [...prev, {
-          ...res.data,
-          groupName: data.groupName,
-          supervisorName: data.supervisorName,
-          location: data.location,
-          notes: data.notes,
-          date: data.date,
-          examiners: data.examiners,
-        }]);
+        await api.post("/Schedule/create-schedule", payload);
       }
       setModal(null);
+      fetchData();
     } catch (err) {
       console.error(err);
     }
@@ -153,6 +157,7 @@ export default function ExaminationTimetable() {
                       </p>
                     </div>
                   </div>
+
                   <div className={styles.infoItem}>
                     <Room fontSize="small" className={styles.infoIcon} />
                     <div>
@@ -160,6 +165,7 @@ export default function ExaminationTimetable() {
                       <p className={styles.infoValue}>{t.location || "-"}</p>
                     </div>
                   </div>
+
                   <div className={styles.infoItem}>
                     <People fontSize="small" className={styles.infoIcon} />
                     <div>
@@ -167,6 +173,17 @@ export default function ExaminationTimetable() {
                       <p className={styles.infoValue}>{t.supervisorName || "-"}</p>
                     </div>
                   </div>
+
+                  {t.students?.length > 0 && (
+                    <div className={styles.infoItem}>
+                      <People fontSize="small" className={styles.infoIcon} />
+                      <div>
+                        <p className={styles.infoLabel}>Students</p>
+                        <p className={styles.infoValue}>{t.students.join(", ")}</p>
+                      </div>
+                    </div>
+                  )}
+
                   {t.notes && (
                     <div className={styles.infoItem}>
                       <div>
@@ -175,14 +192,30 @@ export default function ExaminationTimetable() {
                       </div>
                     </div>
                   )}
+
+                  {t.thesisURL && (
+                    <div className={styles.infoItem}>
+                      <div>
+                        <p className={styles.infoLabel}>Thesis</p>
+                        <a
+                          href={t.thesisURL}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{ fontSize: 13, color: "#C0441A" }}
+                        >
+                          View Thesis
+                        </a>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className={styles.examinersSection}>
                   <p className={styles.examinersLabel}>Examination Committee</p>
                   <div className={styles.examinersList}>
-                    {(t.examinersIds || t.examiners || []).map(eid => (
-                      <span key={eid} className={styles.examinerChip}>
-                        {getExaminerName(eid)}
+                    {(t.examiners || []).map((name, i) => (
+                      <span key={i} className={styles.examinerChip}>
+                        {name}
                       </span>
                     ))}
                   </div>
@@ -200,7 +233,7 @@ export default function ExaminationTimetable() {
                     date: t.date ? t.date.slice(0, 16) : "",
                     location: t.location || "",
                     notes: t.notes || "",
-                    examiners: t.examinersIds || t.examiners || [],
+                    examiners: t.examinerIds || [],
                   })}
                 >
                   <Edit fontSize="small" /> Edit
@@ -243,7 +276,6 @@ export default function ExaminationTimetable() {
   );
 }
 
-// ── Timetable Modal ─────────────────────────────────────────────────
 function TimetableModal({ data, examiners, groups, onClose, onSave }) {
   const [form, setForm] = useState({ ...data });
   const [error, setError] = useState("");

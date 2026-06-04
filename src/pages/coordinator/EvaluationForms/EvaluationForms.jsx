@@ -39,17 +39,15 @@ export default function EvaluationForms() {
   const [viewForm, setViewForm] = useState(null);
   const [viewOnly, setViewOnly] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
   const [publishingId, setPublishingId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
-  const dropdownRef = useRef(null);
 
-  useEffect(() => {
-    fetchForms();
-  }, []);
+  useEffect(() => { fetchForms(); }, []);
 
   useEffect(() => {
     const handler = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+      if (!e.target.closest(`.${styles.dropdownWrapper}`)) {
         setOpenDropdown(null);
       }
     };
@@ -63,10 +61,7 @@ export default function EvaluationForms() {
       const res = await api.get("/Coordinator/EvaluationForms");
       const normalized = (res.data || [])
         .filter(f => f.status !== 3 && f.status !== "3")
-        .map(f => ({
-          ...f,
-          status: normalizeStatus(f.status),
-        }));
+        .map(f => ({ ...f, status: normalizeStatus(f.status) }));
       setForms(normalized);
     } catch (err) {
       console.error(err);
@@ -75,11 +70,19 @@ export default function EvaluationForms() {
     }
   };
 
+  const handleMenuClick = (e, id) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setDropdownPos({
+      top: rect.bottom + window.scrollY + 4,
+      left: rect.right + window.scrollX - 150,
+    });
+    setOpenDropdown(openDropdown === id ? null : id);
+  };
+
   const handleDelete = async (id) => {
     setDeletingId(id);
     try {
       const form = forms.find(f => f.id === id);
-      // لو published، حولها لـ draft أول ثم احذفها
       if (form?.status === "published") {
         await api.post(`/Coordinator/EvaluationForms/${id}/draft`, {});
       }
@@ -98,9 +101,7 @@ export default function EvaluationForms() {
     setOpenDropdown(null);
     try {
       await api.post(`/Coordinator/EvaluationForms/${id}/publish`, {});
-      setForms(prev =>
-        prev.map(f => f.id === id ? { ...f, status: "published" } : f)
-      );
+      setForms(prev => prev.map(f => f.id === id ? { ...f, status: "published" } : f));
     } catch (err) {
       console.error(err);
     } finally {
@@ -112,10 +113,7 @@ export default function EvaluationForms() {
     setOpenDropdown(null);
     try {
       const res = await api.get(`/Coordinator/EvaluationForms/${f.id}`);
-      const formData = {
-        ...res.data,
-        status: normalizeStatus(res.data.status),
-      };
+      const formData = { ...res.data, status: normalizeStatus(res.data.status) };
       setViewForm(formData);
       setViewOnly(viewOnlyMode);
     } catch (err) {
@@ -220,62 +218,71 @@ export default function EvaluationForms() {
                   </td>
                   <td className={styles.date}>{timeAgo(f.createdAt)}</td>
                   <td>
-                    <div className={styles.dropdownWrapper} ref={openDropdown === f.id ? dropdownRef : null}>
+                    <div className={styles.dropdownWrapper}>
                       <button
                         className={styles.menuBtn}
-                        onClick={() => setOpenDropdown(openDropdown === f.id ? null : f.id)}
+                        onClick={(e) => handleMenuClick(e, f.id)}
                         disabled={publishingId === f.id || deletingId === f.id}
                       >
                         <MoreVert fontSize="small" />
                       </button>
-
-                      {openDropdown === f.id && (
-                        <div className={styles.dropdownMenu}>
-                          <button
-                            className={styles.dropdownItem}
-                            onClick={() => handleOpenView(f, true)}
-                          >
-                            <Visibility fontSize="small" style={{ color: "#1e40af" }} />
-                            View
-                          </button>
-
-                          <button
-                            className={styles.dropdownItem}
-                            onClick={() => handleOpenView(f, false)}
-                          >
-                            <Edit fontSize="small" style={{ color: "#92400e" }} />
-                            Edit
-                          </button>
-
-                          {f.status === "draft" && (
-                            <>
-                              <div className={styles.dropdownDivider} />
-                              <button
-                                className={`${styles.dropdownItem} ${styles.dropdownPublish}`}
-                                onClick={() => handlePublish(f.id)}
-                              >
-                                <Publish fontSize="small" />
-                                Publish
-                              </button>
-                            </>
-                          )}
-
-                          <div className={styles.dropdownDivider} />
-                          <button
-                            className={`${styles.dropdownItem} ${styles.dropdownDelete}`}
-                            onClick={() => { setDeleteId(f.id); setOpenDropdown(null); }}
-                          >
-                            <Delete fontSize="small" />
-                            Delete
-                          </button>
-                        </div>
-                      )}
                     </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Dropdown Portal */}
+      {openDropdown && (
+        <div
+          className={styles.dropdownMenu}
+          style={{ top: dropdownPos.top, left: dropdownPos.left, position: "absolute" }}
+        >
+          {(() => {
+            const f = forms.find(x => x.id === openDropdown);
+            if (!f) return null;
+            return (
+              <>
+                <button
+                  className={styles.dropdownItem}
+                  onClick={() => handleOpenView(f, true)}
+                >
+                  <Visibility fontSize="small" style={{ color: "#1e40af" }} /> View
+                </button>
+
+                {f.status === "draft" && (
+                  <>
+                    <button
+                      className={styles.dropdownItem}
+                      onClick={() => handleOpenView(f, false)}
+                    >
+                      <Edit fontSize="small" style={{ color: "#92400e" }} /> Edit
+                    </button>
+                    <div className={styles.dropdownDivider} />
+                    <button
+                      className={`${styles.dropdownItem} ${styles.dropdownPublish}`}
+                      onClick={() => handlePublish(f.id)}
+                      disabled={publishingId === f.id}
+                    >
+                      <Publish fontSize="small" />
+                      {publishingId === f.id ? "Publishing..." : "Publish"}
+                    </button>
+                  </>
+                )}
+
+                <div className={styles.dropdownDivider} />
+                <button
+                  className={`${styles.dropdownItem} ${styles.dropdownDelete}`}
+                  onClick={() => { setDeleteId(f.id); setOpenDropdown(null); }}
+                >
+                  <Delete fontSize="small" /> Delete
+                </button>
+              </>
+            );
+          })()}
         </div>
       )}
 
@@ -389,9 +396,7 @@ function ViewEditModal({ form, viewOnly, onClose, onSave }) {
     setSaving(true);
     try {
       const res = await api.put(`/Coordinator/EvaluationForms/${form.id}`, {
-        title,
-        assignTo,
-        description,
+        title, assignTo, description,
       });
       onSave({ ...form, ...res.data, title, assignTo, description, fields });
     } catch (err) {
@@ -419,7 +424,6 @@ function ViewEditModal({ form, viewOnly, onClose, onSave }) {
 
         <div className={styles.modalBody}>
           {saveError && <p className={styles.fieldErrorMsg}>{saveError}</p>}
-
           <div className={styles.modalRow}>
             <div className={styles.modalField}>
               <label className={styles.modalLabel}>Form Title</label>
@@ -449,7 +453,11 @@ function ViewEditModal({ form, viewOnly, onClose, onSave }) {
           <div className={styles.modalField}>
             <label className={styles.modalLabel}>Description</label>
             {isEdit ? (
-              <textarea className={styles.modalTextarea} value={description} onChange={(e) => setDescription(e.target.value)} />
+              <textarea
+                className={styles.modalTextarea}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
             ) : <p className={styles.modalValue}>{description || "-"}</p>}
           </div>
 
@@ -472,7 +480,9 @@ function ViewEditModal({ form, viewOnly, onClose, onSave }) {
                       <tr key={f.id}>
                         <td>
                           {isEdit ? (
-                            <input className={styles.tableInput} value={f.fieldName}
+                            <input
+                              className={styles.tableInput}
+                              value={f.fieldName}
                               onBlur={(e) => handleUpdateField(f.id, { ...f, fieldName: e.target.value })}
                               onChange={(e) => setFields(fields.map(x => x.id === f.id ? { ...x, fieldName: e.target.value } : x))}
                             />
@@ -481,7 +491,10 @@ function ViewEditModal({ form, viewOnly, onClose, onSave }) {
                         <td><span className={styles.typeBadge}>Integer</span></td>
                         <td>
                           {isEdit ? (
-                            <input type="number" className={styles.tableInput} value={f.minValue}
+                            <input
+                              type="number"
+                              className={styles.tableInput}
+                              value={f.minValue}
                               onBlur={(e) => handleUpdateField(f.id, { ...f, minValue: e.target.value })}
                               onChange={(e) => { setFields(fields.map(x => x.id === f.id ? { ...x, minValue: e.target.value } : x)); setSaveError(""); }}
                             />
@@ -489,7 +502,10 @@ function ViewEditModal({ form, viewOnly, onClose, onSave }) {
                         </td>
                         <td>
                           {isEdit ? (
-                            <input type="number" className={styles.tableInput} value={f.maxValue}
+                            <input
+                              type="number"
+                              className={styles.tableInput}
+                              value={f.maxValue}
                               onBlur={(e) => handleUpdateField(f.id, { ...f, maxValue: e.target.value })}
                               onChange={(e) => { setFields(fields.map(x => x.id === f.id ? { ...x, maxValue: e.target.value } : x)); setSaveError(""); }}
                             />
