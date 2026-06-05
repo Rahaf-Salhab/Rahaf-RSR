@@ -11,18 +11,6 @@ import {
   CalendarMonth,
 } from "@mui/icons-material";
 
-const timeAgo = (dateString) => {
-  const now = new Date();
-  const date = new Date(dateString);
-  const diff = Math.floor((now - date) / 1000);
-  if (diff < 0) return "just now";
-  if (diff < 60) return `${diff} seconds ago`;
-  if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
-  if (diff < 2592000) return `${Math.floor(diff / 86400)} days ago`;
-  if (diff < 31536000) return `${Math.floor(diff / 2592000)} months ago`;
-  return `${Math.floor(diff / 31536000)} years ago`;
-};
 
 function StartSemesterScreen({ onStart, loading }) {
   const [form, setForm] = useState({ Name: "", StartDate: "", EndDate: "" });
@@ -126,12 +114,38 @@ export default function CoordinatorHome() {
   const [semesterState, setSemesterState] = useState(null);
   const [startingSemester, setStartingSemester] = useState(false);
   const [stats, setStats] = useState(null);
-  const [activities, setActivities] = useState([]);
-  const [systemStatus, setSystemStatus] = useState([]);
+  const [activeSemester, setActiveSemester] = useState(null);
+  const [animatedProgress, setAnimatedProgress] = useState(0);
   const [loading, setLoading] = useState(true);
   const intervalRef = useRef(null);
   const endDateRef = useRef(null);
+useEffect(() => {
+  if (!activeSemester) return;
 
+  const start = new Date(activeSemester.startDate);
+  const end = new Date(activeSemester.endDate);
+  const now = new Date();
+
+  const totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+  const daysRemaining = Math.max(
+    Math.ceil((end - now) / (1000 * 60 * 60 * 24)),
+    0
+  );
+
+  const passedDays = Math.max(totalDays - daysRemaining, 0);
+
+  const progress =
+    totalDays > 0
+      ? Math.min(Math.round((passedDays / totalDays) * 100), 100)
+      : 0;
+
+  const timer = setTimeout(() => {
+    setAnimatedProgress(progress);
+  }, 200);
+
+  return () => clearTimeout(timer);
+}, [activeSemester]);
   useEffect(() => {
     checkActiveSemester();
     return () => {
@@ -160,6 +174,7 @@ export default function CoordinatorHome() {
       const semester = res.data?.semester;
 
       if (semester) {
+        setActiveSemester(semester);
         const now = new Date();
         const endDate = new Date(semester.endDate);
 
@@ -220,9 +235,6 @@ export default function CoordinatorHome() {
         examinations: statistics?.examinations ?? 0,
       });
 
-      // مؤقتًا لحد ما يصير في endpoint خاصة للأنشطة والـ system status
-      setActivities([]);
-      setSystemStatus([]);
     } catch (err) {
       console.error("dashboard coordinator error:", err);
     } finally {
@@ -270,6 +282,52 @@ export default function CoordinatorHome() {
     },
   ];
 
+  const formatDate = (dateString) => {
+  if (!dateString) return "-";
+
+  return new Date(dateString).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
+const getSemesterInfo = () => {
+  if (!activeSemester) {
+    return {
+      totalDays: 0,
+      daysRemaining: 0,
+      progress: 0,
+    };
+  }
+
+  const start = new Date(activeSemester.startDate);
+  const end = new Date(activeSemester.endDate);
+  const now = new Date();
+
+  const totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+  const daysRemaining = Math.max(
+    Math.ceil((end - now) / (1000 * 60 * 60 * 24)),
+    0
+  );
+
+  const passedDays = Math.max(totalDays - daysRemaining, 0);
+
+  const progress =
+    totalDays > 0
+      ? Math.min(Math.round((passedDays / totalDays) * 100), 100)
+      : 0;
+
+  return {
+    totalDays,
+    daysRemaining,
+    progress,
+  };
+};
+
+const semesterInfo = getSemesterInfo();
+
   return (
     <div className={styles.page}>
       <div className={styles.pageHeader}>
@@ -302,53 +360,51 @@ export default function CoordinatorHome() {
         ))}
       </div>
 
-      <div className={styles.bottom}>
-        <div className={styles.box}>
-          <h2 className={styles.boxTitle}>Recent Activities</h2>
-          {activities.length === 0 ? (
-            <p style={{ color: "#aaa", fontSize: 14, padding: "12px 0" }}>
-              No recent activities yet.
-            </p>
-          ) : (
-            <div className={styles.activities}>
-              {activities.map((a) => (
-                <div key={a.id} className={styles.activityItem}>
-                  <p className={styles.activityText}>{a.text}</p>
-                  <p className={styles.activityTime}>{timeAgo(a.createdAt)}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className={styles.box}>
-          <h2 className={styles.boxTitle}>System Status</h2>
-          <div className={styles.statusList}>
-            {systemStatus.map((s) => (
-              <div key={s.id} className={styles.statusItem}>
-                <div className={styles.statusHeader}>
-                  <span className={styles.statusLabel}>{s.label}</span>
-                  <span className={styles.statusValue}>
-                    {s.value}/{s.max}
-                  </span>
-                </div>
-                <div className={styles.progressBar}>
-                  <div
-                    className={styles.progressFill}
-                    style={{
-                      width:
-                        s.max > 0
-                          ? `${Math.min((s.value / s.max) * 100, 100)}%`
-                          : "0%",
-                      background: s.color,
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+    {activeSemester && (
+  <div className={styles.semesterStatusCard}>
+    <div className={styles.semesterStatusHeader}>
+      <div>
+        <h2 className={styles.semesterStatusTitle}>Current Semester</h2>
+        <p className={styles.semesterStatusName}>
+          {activeSemester.name}
+        </p>
       </div>
+
+      <span className={styles.activeBadge}>Active</span>
+    </div>
+
+    <div className={styles.semesterDatesRow}>
+      <div>
+        <span>Start Date</span>
+        <strong>{formatDate(activeSemester.startDate)}</strong>
+      </div>
+
+      <div>
+        <span>End Date</span>
+        <strong>{formatDate(activeSemester.endDate)}</strong>
+      </div>
+    </div>
+
+    <div className={styles.semesterProgressHeader}>
+      <span>Semester Progress</span>
+      <strong>{animatedProgress}%</strong>
+    </div>
+
+    <div className={styles.semesterBar}>
+      <div
+        className={styles.semesterBarFill}
+        style={{ width: `${animatedProgress}%` }}
+      />
+    </div>
+
+    <div className={styles.semesterFooter}>
+      <span>Days Remaining</span>
+      <strong>
+        {semesterInfo.daysRemaining} days
+      </strong>
+    </div>
+  </div>
+)}
     </div>
   );
 }

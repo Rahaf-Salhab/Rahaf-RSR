@@ -2,33 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axiosInstance";
 import styles from "./ExaminerHome.module.css";
-import {
-  Folder,
-  CheckCircle,
-  HourglassEmpty,
-  CalendarMonth,
-} from "@mui/icons-material";
-
-const timeAgo = (dateString) => {
-  const now = new Date();
-  const date = new Date(dateString);
-  const diff = Math.floor((now - date) / 1000);
-  if (diff < 60) return `${diff} seconds ago`;
-  if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
-  if (diff < 2592000) return `${Math.floor(diff / 86400)} days ago`;
-  if (diff < 31536000) return `${Math.floor(diff / 2592000)} months ago`;
-  return `${Math.floor(diff / 31536000)} years ago`;
-};
-
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-};
+import { Folder, CalendarMonth } from "@mui/icons-material";
 
 const formatTime = (dateString) => {
   const date = new Date(dateString);
@@ -138,9 +112,11 @@ export default function ExaminerHome() {
               schedule.map((s) => (
                 <div key={s.scheduleId} className={styles.scheduleItem}>
                   <div className={styles.scheduleDate}>
+
                     <p className={styles.scheduleDay}>
                       {new Date(s.date).getDate()}
                     </p>
+
                     <p className={styles.scheduleMonth}>
                       {new Date(s.date).toLocaleString("en", {
                         month: "short",
@@ -150,10 +126,24 @@ export default function ExaminerHome() {
 
                   <div className={styles.scheduleInfo}>
                     <p className={styles.scheduleTitle}>{s.projectName}</p>
-                    <p className={styles.scheduleMeta}>{s.groupName}</p>
-                    <p className={styles.scheduleMeta}>
-                      {formatTime(s.date)} · {s.location}
-                    </p>
+
+                    <div className={styles.scheduleMetaRow}>
+                      <span>
+                        <strong>Group:</strong> {s.groupName}
+                      </span>
+
+                      <span className={styles.metaDot}>•</span>
+
+                      <span>
+                        <strong>Time:</strong> {formatTime(s.date)}
+                      </span>
+
+                      <span className={styles.metaDot}>•</span>
+
+                      <span>
+                        <strong>Room:</strong> {s.location}
+                      </span>
+                    </div>
                   </div>
                 </div>
               ))
