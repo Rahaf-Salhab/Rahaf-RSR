@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { mockApi as api } from "../../api/axiosInstance";
+import api from "../../api/axiosInstance";
 import styles from "./StudentHome.module.css";
 import {
   TrendingUp,
@@ -10,55 +10,32 @@ import {
 
 function StudentHome() {
   const [stats, setStats] = useState(null);
-  const [projectStatus, setProjectStatus] = useState(null);
   const [deadlines, setDeadlines] = useState([]);
+
+  const [projectStatus, setProjectStatus] = useState("");
   const [loading, setLoading] = useState(true);
   const [animatedProgress, setAnimatedProgress] = useState(0);
 
   useEffect(() => {
     const fetchStudentDashboard = async () => {
       try {
-        const gradesRes = await api.get("/finalGrades");
-        const finalGrade = gradesRes.data?.[0];
+        const [dashboardRes, deadlinesRes] = await Promise.all([
+          api.get("/Dashboard/dashboard-student"),
+          api.get("/Dashboard/dashboard-deadlines"),
+        ]);
+
+        const statistics = dashboardRes.data?.statistics;
 
         setStats({
-          tasksCompleted: 12,
-          totalTasks: 18,
-          submissions: 8,
-          currentGrade: finalGrade?.finalGrade || 0,
+          totalTasks: statistics?.totalTask || 0,
+          tasksCompleted: statistics?.completedTask || 0,
         });
 
-        setProjectStatus({
-          progress: 75,
-          phases: [
-            { name: "Research Phase", status: "Completed" },
-            { name: "Writing Phase", status: "In Progress" },
-            { name: "Review Phase", status: "Pending" },
-          ],
-        });
+        setProjectStatus(statistics?.projectStatus || "No Status");
 
-        setDeadlines([
-          {
-            id: 1,
-            title: "Chapter 3 Submission",
-            date: "2026-02-20",
-            daysLeft: 5,
-          },
-          {
-            id: 2,
-            title: "Presentation Review",
-            date: "2026-02-25",
-            daysLeft: 10,
-          },
-          {
-            id: 3,
-            title: "Final Thesis Draft",
-            date: "2026-03-05",
-            daysLeft: 18,
-          },
-        ]);
+        setDeadlines(deadlinesRes.data?.deadlines || []);
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching student dashboard:", err);
       } finally {
         setLoading(false);
       }
@@ -69,16 +46,50 @@ function StudentHome() {
 
   // Animate progressBar on projectStatus change
   useEffect(() => {
-    if (!projectStatus) return;
+    if (!stats) return;
+
+    const progress =
+      stats.totalTasks > 0
+        ? Math.round((stats.tasksCompleted / stats.totalTasks) * 100)
+        : 0;
 
     const timer = setTimeout(() => {
-      setAnimatedProgress(projectStatus.progress);
-    }, 100); //  progress بعد 100 ثانية بتتغير القيمية من 0 الى قيمة ال
+      setAnimatedProgress(progress);
+    }, 100);
 
     return () => clearTimeout(timer);
-  }, [projectStatus]); //  Animation تتغير شغل ال projectStatus لما ال
+  }, [stats]); //  Animation تتغير شغل ال projectStatus لما ال
 
   if (loading) return <div className={styles.loading}>Loading...</div>;
+
+  const formatDate = (date) => {
+    if (!date) return "No deadline";
+
+    return new Date(date).toLocaleDateString("en-GB", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const getDaysLeft = (deadline) => {
+    if (!deadline) return null;
+
+    const today = new Date();
+    const deadlineDate = new Date(deadline);
+
+    today.setHours(0, 0, 0, 0);
+    deadlineDate.setHours(0, 0, 0, 0);
+
+    const diffTime = deadlineDate - today;
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  };
+
+  // حساب نسبة الانجاز الحالي بناء على عدد المهام المكتملو وعدد المهام الكلي
+  const progress =
+    stats?.totalTasks > 0
+      ? Math.round((stats.tasksCompleted / stats.totalTasks) * 100)
+      : 0;
 
   const cards = [
     {
@@ -87,13 +98,13 @@ function StudentHome() {
       icon: <TaskAlt />,
     },
     {
-      label: "Submissions",
-      value: stats?.submissions,
+      label: "Total Tasks",
+      value: stats?.totalTasks,
       icon: <CalendarMonth />,
     },
     {
-      label: "Current Grade",
-      value: `${stats?.currentGrade}%`,
+      label: "Project Progress",
+      value: `${progress}%`,
       icon: <TrendingUp />,
     },
   ];
@@ -110,10 +121,6 @@ function StudentHome() {
         </div>
       </div>
 
-      {/* Stats Cards */}
-
-      <div className={styles.cards}></div>
-      {/*+++++++++++*/}
       {/* Cards */}
       <div className={styles.cards}>
         {cards.map((card, i) => (
@@ -139,9 +146,7 @@ function StudentHome() {
 
           <div className={styles.progressHeader}>
             <span className={styles.progressLabel}>Overall Progress</span>
-            <span className={styles.progressValue}>
-              {projectStatus?.progress}% {/*  نسبة الانجاز مثلا 75*/}
-            </span>
+            <span className={styles.progressValue}>{progress}%</span>
           </div>
 
           {/*شريط التقدم*/}
@@ -153,28 +158,25 @@ function StudentHome() {
             ></div>
             {/** progressFill هو الجزء المملوء من الشريط اللي يعبر عن نسبة الانجاز*/}
           </div>
-
-          {/* Phases List */}
           <div className={styles.phaseList}>
-            {projectStatus?.phases.map((phase, index) => (
-              <div key={index} className={styles.phaseItem}>
-                <span className={styles.phaseName}>{phase.name}</span>
-                <span
-                  className={`${styles.statusBadge} ${
-                    phase.status === "Completed"
-                      ? styles.completed
-                      : phase.status === "In Progress"
-                        ? styles.inProgress
-                        : styles.pending
-                  }`}
-                >
-                  {phase.status}
-                </span>
-              </div>
-            ))}
+            <div className={styles.phaseItem}>
+              <span className={styles.phaseName}>Current Status</span>
+              <span
+                className={`${styles.statusBadge} ${
+                  projectStatus === "Completed"
+                    ? styles.completed
+                    : projectStatus === "InProgress"
+                      ? styles.inProgress
+                      : styles.pending
+                }`}
+              >
+                {projectStatus}
+              </span>
+            </div>
           </div>
         </div>
 
+        {/* Upcoming Deadlines */}
         {/* Upcoming Deadlines */}
         <div className={styles.box}>
           <div className={styles.boxHeader}>
@@ -182,27 +184,42 @@ function StudentHome() {
           </div>
 
           <div className={styles.deadlineList}>
-            {deadlines.map((item) => (
-              <div key={item.id} className={styles.deadlineItem}>
-                <div>
-                  <p className={styles.deadlineTitle}>{item.title}</p>
-                  <p className={styles.deadlineDate}>{item.date}</p>
-                </div>
+            {deadlines.length > 0 ? (
+              deadlines.map((item) => {
+                const daysLeft = getDaysLeft(item.deadline);
 
-                <div className={styles.deadlineRight}>
-                  <AccessTime fontSize="small" />
-                  <span
-                    className={
-                      item.daysLeft <= 5
-                        ? styles.deadlineUrgent
-                        : styles.deadlineNormal
-                    }
-                  >
-                    {item.daysLeft} days
-                  </span>
-                </div>
-              </div>
-            ))}
+                return (
+                  <div key={item.id} className={styles.deadlineItem}>
+                    <div>
+                      <p className={styles.deadlineTitle}>{item.title}</p>
+                      <p className={styles.deadlineDate}>
+                        {item.type} • {formatDate(item.deadline)}
+                      </p>
+                    </div>
+
+                    <div className={styles.deadlineRight}>
+                      <AccessTime fontSize="small" />
+
+                      <span
+                        className={
+                          daysLeft !== null && daysLeft <= 5
+                            ? styles.deadlineUrgent
+                            : styles.deadlineNormal
+                        }
+                      >
+                        {daysLeft < 0
+                          ? "Overdue"
+                          : daysLeft === 0
+                            ? "Today"
+                            : `${daysLeft} days`}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <p className={styles.emptyText}>No upcoming deadlines.</p>
+            )}
           </div>
         </div>
       </div>

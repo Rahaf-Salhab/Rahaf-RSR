@@ -63,9 +63,9 @@ export default function SupervisorThesis() {
     e.preventDefault();
 
     if (!thesisFile && !deadline) {
-  setErrorMessage("Thesis file and deadline are required.");
-  return;
-}
+      setErrorMessage("Thesis file and deadline are required.");
+      return;
+    }
 
     if (!thesisFile) {
       setErrorMessage("Thesis file is required.");
@@ -89,7 +89,7 @@ export default function SupervisorThesis() {
         formData,
         { headers: { "Content-Type": "multipart/form-data" } },
       );
-
+      await fetchGroups();
       closeCreateModal();
     } catch (err) {
       console.error("Error creating thesis:", err);
@@ -99,9 +99,9 @@ export default function SupervisorThesis() {
     }
   };
 
-const handleViewThesis = (groupId) => {
-  navigate(`/supervisor/thesis/${groupId}`);
-};
+  const handleViewThesis = (groupId) => {
+    navigate(`/supervisor/thesis/${groupId}`);
+  };
 
   if (loading) {
     return <div className={taskStyles.loading}>Loading...</div>;
@@ -148,19 +148,23 @@ const handleViewThesis = (groupId) => {
         <div className={taskStyles.groupsList}>
           {filteredGroups.map((g) => (
             <div key={g.groupId} className={taskStyles.groupSection}>
-              <div className={taskStyles.groupRow}>
-                <div className={taskStyles.groupLeft}>
+              <div
+                className={`${taskStyles.groupRow} ${thesisStyles.thesisGroupRow}`}
+              >
+                <div
+                  className={`${taskStyles.groupLeft} ${thesisStyles.thesisGroupLeft}`}
+                >
                   <div className={taskStyles.groupAvatar}>
                     <People style={{ fontSize: 18, color: "#C0441A" }} />
                   </div>
 
-                  <div>
+                  <div className={thesisStyles.thesisGroupText}>
                     <h3 className={taskStyles.groupName}>{g.groupName}</h3>
                     <p className={taskStyles.groupProject}>{g.projectName}</p>
                   </div>
                 </div>
 
-                <div className={taskStyles.groupRight}>
+               <div className={`${taskStyles.groupRight} ${thesisStyles.thesisGroupRight}`}>
                   <button
                     className={thesisStyles.createThesisBtn}
                     onClick={() => handleCreateThesis(g.groupId)}

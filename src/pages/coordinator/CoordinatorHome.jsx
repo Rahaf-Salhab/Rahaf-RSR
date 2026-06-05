@@ -1,11 +1,15 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import api, { mockApi } from "../../api/axiosInstance";
+import api from "../../api/axiosInstance";
 import styles from "./CoordinatorHome.module.css";
 import {
-  People, FolderOpen, EventNote, HourglassEmpty, Add, CalendarMonth,
+  People,
+  FolderOpen,
+  EventNote,
+  HourglassEmpty,
+  Add,
+  CalendarMonth,
 } from "@mui/icons-material";
-
 
 const timeAgo = (dateString) => {
   const now = new Date();
@@ -25,9 +29,18 @@ function StartSemesterScreen({ onStart, loading }) {
   const [error, setError] = useState("");
 
   const handleSubmit = () => {
-    if (!form.Name.trim()) { setError("Semester name is required."); return; }
-    if (!form.StartDate) { setError("Start date is required."); return; }
-    if (!form.EndDate) { setError("End date is required."); return; }
+    if (!form.Name.trim()) {
+      setError("Semester name is required.");
+      return;
+    }
+    if (!form.StartDate) {
+      setError("Start date is required.");
+      return;
+    }
+    if (!form.EndDate) {
+      setError("End date is required.");
+      return;
+    }
     if (new Date(form.EndDate) <= new Date(form.StartDate)) {
       setError("End date must be after start date.");
       return;
@@ -51,30 +64,45 @@ function StartSemesterScreen({ onStart, loading }) {
 
         <div className={styles.semesterForm}>
           <div className={styles.semesterFieldGroup}>
-            <label className={styles.semesterLabel}>Semester Name <span className={styles.required}>*</span></label>
+            <label className={styles.semesterLabel}>
+              Semester Name <span className={styles.required}>*</span>
+            </label>
             <input
               className={styles.semesterInput}
               value={form.Name}
-              onChange={e => { setForm(p => ({ ...p, Name: e.target.value })); setError(""); }}
+              onChange={(e) => {
+                setForm((p) => ({ ...p, Name: e.target.value }));
+                setError("");
+              }}
               placeholder="e.g. 2025/2026"
             />
           </div>
           <div className={styles.semesterFieldGroup}>
-            <label className={styles.semesterLabel}>Start Date <span className={styles.required}>*</span></label>
+            <label className={styles.semesterLabel}>
+              Start Date <span className={styles.required}>*</span>
+            </label>
             <input
               className={styles.semesterInput}
               type="date"
               value={form.StartDate}
-              onChange={e => { setForm(p => ({ ...p, StartDate: e.target.value })); setError(""); }}
+              onChange={(e) => {
+                setForm((p) => ({ ...p, StartDate: e.target.value }));
+                setError("");
+              }}
             />
           </div>
           <div className={styles.semesterFieldGroup}>
-            <label className={styles.semesterLabel}>End Date <span className={styles.required}>*</span></label>
+            <label className={styles.semesterLabel}>
+              End Date <span className={styles.required}>*</span>
+            </label>
             <input
               className={styles.semesterInput}
               type="date"
               value={form.EndDate}
-              onChange={e => { setForm(p => ({ ...p, EndDate: e.target.value })); setError(""); }}
+              onChange={(e) => {
+                setForm((p) => ({ ...p, EndDate: e.target.value }));
+                setError("");
+              }}
             />
           </div>
         </div>
@@ -178,88 +206,25 @@ export default function CoordinatorHome() {
     }
   };
   const fetchDashboardData = async () => {
-      
-   
     setLoading(true);
-    
+
     try {
-      const [usersRes, groupsRes, gradesRes, timetableRes, thesisRes] = await Promise.all([
-        mockApi.get("/users"),
-        api.get("/Groups/groups-coordinater"),
-        mockApi.get("/grades"),
-        mockApi.get("/examinationTimetable"),
-        mockApi.get("/thesis"),
-      ]);
+      const res = await api.get("/Dashboard/dashboard-coordinator");
 
-      console.log("GROUPS:", groupsRes.data);
-      const realUsers = usersRes.data.filter(u => u.role !== "coordinator");
-      const activeProjects = thesisRes.data.filter(t => t.status === "in-progress").length;
-    const pendingGrades = groupsRes.data.reduce((count, group) => {
-  const hasSupervisor = gradesRes.data.some(g => g.groupId === group.id && g.role === "supervisor");
-  const hasExaminer = gradesRes.data.some(g => g.groupId === group.id && g.role === "examiner");
-  if (!hasSupervisor) count++;
-  if (!hasExaminer) count++;
-  return count;
-}, 0);
+      const statistics = res.data?.statistics;
 
-      setStats({ 
-        totalUsers: realUsers.length,
-        examinations: timetableRes.data.length,
-        activeProjects,
-        pendingGrades,
+      setStats({
+        totalUsers: statistics?.totalUsers ?? 0,
+        totalProjects: statistics?.totalProjects ?? 0,
+        activeProjects: statistics?.activeProjects ?? 0,
+        examinations: statistics?.examinations ?? 0,
       });
 
-      const gradeActivities = gradesRes.data.map(g => ({
-        id: `grade-${g.id}`,
-        text: `Grades submitted for ${g.groupName} by ${g.role}`,
-        createdAt: g.createdAt,
-      }));
-
-      const userActivities = usersRes.data
-        .filter(u => u.role !== "coordinator" && u.createdAt)
-        .map(u => ({
-          id: `user-${u.id}`,
-          text: `New ${u.role} registered: ${u.name}`,
-          createdAt: u.createdAt,
-        }));
-
-      const seen = new Set();
-      const allActivities = [...gradeActivities, ...userActivities]
-        .filter(a => a.createdAt)
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .filter(a => {
-          if (seen.has(a.text)) return false;
-          seen.add(a.text);
-          return true;
-        })
-        .slice(0, 5);
-
-      setActivities(allActivities);
-
-      const allSupervisors = usersRes.data.filter(u => u.role === "supervisor");
-      const allStudents = usersRes.data.filter(u => u.role === "student");
-      const allExaminers = usersRes.data.filter(u => u.role === "examiner");
-
-      const activeSupervisors = allSupervisors.filter(u =>
-        groupsRes.data.some(g => g.supervisorId === u.id)
-      ).length;
-
-      const activeStudents = allStudents.filter(u =>
-        groupsRes.data.some(g => g.students.includes(u.id))
-      ).length;
-
-      const activeExaminers = allExaminers.filter(u =>
-        groupsRes.data.some(g => g.examinerId === u.id)
-      ).length;
-
-      setSystemStatus([
-        { id: 1, label: "Active Supervisors", value: activeSupervisors, max: allSupervisors.length, color: "#22c55e" },
-        { id: 2, label: "Active Students", value: activeStudents, max: allStudents.length, color: "#3b82f6" },
-        { id: 3, label: "Active Examiners", value: activeExaminers, max: allExaminers.length, color: "#a855f7" },
-      ]);
-
+      // مؤقتًا لحد ما يصير في endpoint خاصة للأنشطة والـ system status
+      setActivities([]);
+      setSystemStatus([]);
     } catch (err) {
-      console.error(err);
+      console.error("dashboard coordinator error:", err);
     } finally {
       setLoading(false);
     }
@@ -279,10 +244,30 @@ export default function CoordinatorHome() {
   if (loading) return <div className={styles.loading}>Loading...</div>;
 
   const cards = [
-    { label: "Total Users", value: stats?.totalUsers, icon: <People />, color: "#e8f4fd" },
-    { label: "Active Projects", value: stats?.activeProjects, icon: <FolderOpen />, color: "#fef3e2" },
-    { label: "Examinations", value: stats?.examinations, icon: <EventNote />, color: "#fde8e8" },
-    { label: "Pending Grades", value: stats?.pendingGrades, icon: <HourglassEmpty />, color: "#e8fdf0" },
+    {
+      label: "Total Users",
+      value: stats?.totalUsers ?? 0,
+      icon: <People />,
+      color: "#e8f4fd",
+    },
+    {
+      label: "Total Projects",
+      value: stats?.totalProjects ?? 0,
+      icon: <FolderOpen />,
+      color: "#fef3e2",
+    },
+    {
+      label: "Active Projects",
+      value: stats?.activeProjects ?? 0,
+      icon: <HourglassEmpty />,
+      color: "#e8fdf0",
+    },
+    {
+      label: "Examinations",
+      value: stats?.examinations ?? 0,
+      icon: <EventNote />,
+      color: "#fde8e8",
+    },
   ];
 
   return (
@@ -290,7 +275,9 @@ export default function CoordinatorHome() {
       <div className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>Dashboard</h1>
-          <p className={styles.pageSubtitle}>System administration and coordination overview</p>
+          <p className={styles.pageSubtitle}>
+            System administration and coordination overview
+          </p>
         </div>
         <button
           className={styles.startBtn}
@@ -319,7 +306,9 @@ export default function CoordinatorHome() {
         <div className={styles.box}>
           <h2 className={styles.boxTitle}>Recent Activities</h2>
           {activities.length === 0 ? (
-            <p style={{ color: "#aaa", fontSize: 14, padding: "12px 0" }}>No recent activities yet.</p>
+            <p style={{ color: "#aaa", fontSize: 14, padding: "12px 0" }}>
+              No recent activities yet.
+            </p>
           ) : (
             <div className={styles.activities}>
               {activities.map((a) => (
@@ -339,13 +328,18 @@ export default function CoordinatorHome() {
               <div key={s.id} className={styles.statusItem}>
                 <div className={styles.statusHeader}>
                   <span className={styles.statusLabel}>{s.label}</span>
-                  <span className={styles.statusValue}>{s.value}/{s.max}</span>
+                  <span className={styles.statusValue}>
+                    {s.value}/{s.max}
+                  </span>
                 </div>
                 <div className={styles.progressBar}>
                   <div
                     className={styles.progressFill}
                     style={{
-                      width: s.max > 0 ? `${Math.min((s.value / s.max) * 100, 100)}%` : "0%",
+                      width:
+                        s.max > 0
+                          ? `${Math.min((s.value / s.max) * 100, 100)}%`
+                          : "0%",
                       background: s.color,
                     }}
                   />
