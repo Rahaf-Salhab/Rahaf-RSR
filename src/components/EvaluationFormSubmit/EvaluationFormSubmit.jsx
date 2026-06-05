@@ -1,58 +1,39 @@
 import { useEffect, useState } from "react";
-import { mockApi as api } from "../../api/axiosInstance";
+import api from "../../api/axiosInstance";
 import styles from "./EvaluationFormSubmit.module.css";
 import {
   RateReview, Close, CheckCircle, HourglassEmpty, Group, Lock
 } from "@mui/icons-material";
 
 export default function EvaluationFormSubmit({ role }) {
-  const [forms, setForms] = useState([]);
+  const [form, setForm] = useState(null);
   const [groups, setGroups] = useState([]);
-  const [grades, setGrades] = useState([]);
+  const [submittedGroupIds, setSubmittedGroupIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedForm, setSelectedForm] = useState(null);
 
-  const userId = localStorage.getItem("id");
-  const assignTo = role === "examiner" ? "Examiner" : "Supervisor";
+  const groupsEndpoint = role === "supervisor"
+    ? "/Group/groups-supervisor"
+    : "/Groups/groups-examiner";
 
   useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      // 🔴 MOCK
-      const [formsRes, groupsRes, gradesRes, finalGradesRes] = await Promise.all([
-        api.get("/evaluationForms"),
-        api.get("/groups"),
-        api.get("/grades"),
-        api.get("/finalGrades"),
+      const [formsRes, groupsRes] = await Promise.all([
+        api.get("/Evaluation/EvaluationSubmissions/my-forms"),
+        api.get(groupsEndpoint),
       ]);
 
-      const publishedForms = formsRes.data.filter(f =>
-        f.assignTo === assignTo && f.status === "published"
-      );
-      const latestForm = publishedForms
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .slice(0, 1);
-      setForms(latestForm);
+      const forms = formsRes.data || [];
+      const latest = forms
+        .filter(f => f.status === 2)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0] || null;
+      setForm(latest);
 
-      // شيل الـ groups الـ published من القائمة
-      const myGroups = groupsRes.data.filter(g => {
-        const isMyGroup = role === "examiner" ? g.examinerId === userId : g.supervisorId === userId;
-        const isPublished = finalGradesRes.data.some(f => f.groupId === g.id && f.status === "published");
-        return isMyGroup && !isPublished;
-      });
-
+      const myGroups = groupsRes.data?.groups || [];
       setGroups(myGroups);
-      setGrades(gradesRes.data);
-
-      // ✅ REAL
-      // const [formsRes, groupsRes, gradesRes, finalGradesRes] = await Promise.all([
-      //   api.get(`/${role}/evaluation-forms`),
-      //   api.get(`/${role}/groups`),
-      //   api.get(`/${role}/grades`),
-      //   api.get(`/${role}/final-grades`),
-      // ]);
     } catch (err) {
       console.error(err);
     } finally {
@@ -60,14 +41,13 @@ export default function EvaluationFormSubmit({ role }) {
     }
   };
 
-  const isSubmitted = (formId, groupId) =>
-    grades.some(g => g.formId === formId && g.groupId === groupId && g.role === role);
+  const handleSubmitGrade = (groupId) => {
+    setSubmittedGroupIds(prev => [...prev, groupId]);
+  };
 
-  const getSubmittedGrade = (formId, groupId) =>
-    grades.find(g => g.formId === formId && g.groupId === groupId && g.role === role);
-
-  const submittedCount = (formId) =>
-    groups.filter(g => isSubmitted(formId, g.id)).length;
+  const isSubmitted = (groupId) => submittedGroupIds.includes(groupId);
+  const submittedCount = submittedGroupIds.length;
+  const totalGroups = groups.length;
 
   return (
     <div className={styles.page}>
@@ -80,7 +60,7 @@ export default function EvaluationFormSubmit({ role }) {
 
       {loading ? (
         <div className={styles.loading}>Loading...</div>
-      ) : forms.length === 0 ? (
+      ) : !form ? (
         <div className={styles.emptyBox}>
           <RateReview style={{ fontSize: 56, color: "#ddd" }} />
           <p>No evaluation forms assigned to you yet.</p>
@@ -88,52 +68,65 @@ export default function EvaluationFormSubmit({ role }) {
       ) : groups.length === 0 ? (
         <div className={styles.emptyBox}>
           <Lock style={{ fontSize: 56, color: "#ddd" }} />
-          <p>All your groups have been finalized and published.</p>
+          <p>You have no assigned groups.</p>
         </div>
       ) : (
         <div className={styles.formsList}>
-          {forms.map(form => (
-            <div key={form.id} className={styles.formCard} onClick={() => setSelectedForm(form)}>
-              <div className={styles.formCardLeft}>
-                <div className={styles.formIcon}><RateReview /></div>
-                <div>
-                  <h3 className={styles.formTitle}>{form.title}</h3>
-                  {form.description && <p className={styles.formDesc}>{form.description}</p>}
-                  <div className={styles.formMeta}>
-                    <span className={styles.metaItem}>
-                      <Group fontSize="small" /> {groups.length} Groups
-                    </span>
-                    <span className={styles.metaItem}>
-                      <CheckCircle fontSize="small" /> {submittedCount(form.id)} Submitted
-                    </span>
-                    <span className={styles.metaItem}>
-                      <HourglassEmpty fontSize="small" /> {groups.length - submittedCount(form.id)} Pending
-                    </span>
-                  </div>
-                </div>
+          <div
+            className={styles.formCard}
+            onClick={() => setSelectedForm(form)}
+            style={submittedCount === totalGroups ? { cursor: "default", opacity: 0.75 } : {}}
+          >
+            <div className={styles.formCardLeft}>
+              <div className={styles.formIcon}>
+                {submittedCount === totalGroups ? <Lock /> : <RateReview />}
               </div>
-              <div className={styles.formCardRight}>
-                <div className={styles.progressWrap}>
-                  <div className={styles.progressBar}>
-                    <div
-                      className={styles.progressFill}
-                      style={{
-                        width: groups.length > 0
-                          ? `${(submittedCount(form.id) / groups.length) * 100}%`
-                          : "0%"
-                      }}
-                    />
-                  </div>
-                  <span className={styles.progressText}>
-                    {groups.length > 0
-                      ? Math.round((submittedCount(form.id) / groups.length) * 100)
-                      : 0}%
+              <div>
+                <h3 className={styles.formTitle}>{form.title}</h3>
+                {form.description && <p className={styles.formDesc}>{form.description}</p>}
+                <div className={styles.formMeta}>
+                  <span className={styles.metaItem}>
+                    <Group fontSize="small" /> {totalGroups} Groups
+                  </span>
+                  <span className={styles.metaItem}>
+                    <CheckCircle fontSize="small" /> {submittedCount} Submitted
+                  </span>
+                  <span className={styles.metaItem}>
+                    <HourglassEmpty fontSize="small" /> {totalGroups - submittedCount} Pending
                   </span>
                 </div>
-                <button className={styles.openBtn}>Open →</button>
               </div>
             </div>
-          ))}
+            <div className={styles.formCardRight}>
+              <div className={styles.progressWrap}>
+                <div className={styles.progressBar}>
+                  <div
+                    className={styles.progressFill}
+                    style={{
+                      width: totalGroups > 0
+                        ? `${(submittedCount / totalGroups) * 100}%`
+                        : "0%"
+                    }}
+                  />
+                </div>
+                <span className={styles.progressText}>
+                  {totalGroups > 0
+                    ? Math.round((submittedCount / totalGroups) * 100)
+                    : 0}%
+                </span>
+              </div>
+              {submittedCount === totalGroups ? (
+                <span style={{
+                  fontSize: 12, color: "#166534", fontWeight: 600,
+                  background: "#f0fdf4", padding: "4px 10px", borderRadius: 99
+                }}>
+                  ✓ All Done
+                </span>
+              ) : (
+                <button className={styles.openBtn}>Open →</button>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
@@ -141,17 +134,9 @@ export default function EvaluationFormSubmit({ role }) {
         <FormDetailModal
           form={selectedForm}
           groups={groups}
-          role={role}
-          userId={userId}
           isSubmitted={isSubmitted}
-          getSubmittedGrade={getSubmittedGrade}
           onClose={() => setSelectedForm(null)}
-          onSubmit={(newGrade) => {
-            setGrades(prev => [
-              ...prev.filter(g => !(g.formId === newGrade.formId && g.groupId === newGrade.groupId && g.role === role)),
-              newGrade
-            ]);
-          }}
+          onSubmit={handleSubmitGrade}
         />
       )}
     </div>
@@ -159,8 +144,22 @@ export default function EvaluationFormSubmit({ role }) {
 }
 
 // ── Form Detail Modal ───────────────────────────────────────────────
-function FormDetailModal({ form, groups, role, userId, isSubmitted, getSubmittedGrade, onClose, onSubmit }) {
+function FormDetailModal({ form, groups, isSubmitted, onClose, onSubmit }) {
   const [selectedGroup, setSelectedGroup] = useState(null);
+  const [localSubmitted, setLocalSubmitted] = useState(
+    groups.reduce((acc, g) => ({ ...acc, [g.groupId]: isSubmitted(g.groupId) }), {})
+  );
+  const [submittedTotals, setSubmittedTotals] = useState({});
+
+  const handleGradeSubmit = (groupId, total) => {
+    setLocalSubmitted(prev => ({ ...prev, [groupId]: true }));
+    setSubmittedTotals(prev => ({ ...prev, [groupId]: total }));
+    setSelectedGroup(null);
+    onSubmit(groupId);
+  };
+
+  const pendingGroups = groups.filter(g => !localSubmitted[g.groupId]);
+  const doneGroups = groups.filter(g => localSubmitted[g.groupId]);
 
   return (
     <div className={styles.modalOverlay}>
@@ -170,61 +169,70 @@ function FormDetailModal({ form, groups, role, userId, isSubmitted, getSubmitted
             <h3 className={styles.modalTitle}>{form.title}</h3>
             {form.description && <p className={styles.modalSubtitle}>{form.description}</p>}
           </div>
-          <button className={styles.closeBtn} onClick={onClose}><Close fontSize="small" /></button>
+          <button className={styles.closeBtn} onClick={onClose}>
+            <Close fontSize="small" />
+          </button>
         </div>
 
         <div className={styles.modalBody}>
           {!selectedGroup ? (
             <div className={styles.groupsList}>
               <p className={styles.groupsLabel}>Select a group to evaluate:</p>
-              {groups.map(group => {
-                const submitted = isSubmitted(form.id, group.id);
-                const grade = getSubmittedGrade(form.id, group.id);
-                return (
-                  <div
-                    key={group.id}
-                    className={`${styles.groupRow} ${submitted ? styles.groupSubmitted : ""}`}
-                    onClick={() => setSelectedGroup(group)}
-                  >
-                    <div className={styles.groupRowLeft}>
-                      <div className={styles.groupAvatar}>{group.name.charAt(0)}</div>
-                      <div>
-                        <p className={styles.groupName}>{group.name}</p>
-                        {submitted && (
-                          <p className={styles.submittedInfo}>
-                            Submitted · Total: {grade?.total} pts
-                          </p>
-                        )}
-                      </div>
+
+              {pendingGroups.map(group => (
+                <div
+                  key={group.groupId}
+                  className={styles.groupRow}
+                  onClick={() => setSelectedGroup(group)}
+                >
+                  <div className={styles.groupRowLeft}>
+                    <div className={styles.groupAvatar}>
+                      {group.groupName?.charAt(0).toUpperCase() || "G"}
                     </div>
-                    <div className={styles.groupRowRight}>
-                      {submitted ? (
-                        <span className={styles.submittedBadge}>
-                          <CheckCircle fontSize="small" /> Submitted
-                        </span>
-                      ) : (
-                        <span className={styles.pendingBadge}>
-                          <HourglassEmpty fontSize="small" /> Pending
-                        </span>
-                      )}
-                      <span className={styles.arrowIcon}>→</span>
+                    <div>
+                      <p className={styles.groupName}>{group.groupName}</p>
+                      <p className={styles.submittedInfo}>{group.projectName}</p>
                     </div>
                   </div>
-                );
-              })}
+                  <div className={styles.groupRowRight}>
+                    <span className={styles.pendingBadge}>
+                      <HourglassEmpty fontSize="small" /> Pending
+                    </span>
+                    <span className={styles.arrowIcon}>→</span>
+                  </div>
+                </div>
+              ))}
+
+              {doneGroups.map(group => (
+                <div
+                  key={group.groupId}
+                  className={`${styles.groupRow} ${styles.groupSubmitted}`}
+                >
+                  <div className={styles.groupRowLeft}>
+                    <div className={styles.groupAvatar}>
+                      {group.groupName?.charAt(0).toUpperCase() || "G"}
+                    </div>
+                    <div>
+                      <p className={styles.groupName}>{group.groupName}</p>
+                      <p className={styles.submittedInfo}>
+                        Submitted · Total: {submittedTotals[group.groupId] ?? "-"} pts
+                      </p>
+                    </div>
+                  </div>
+                  <div className={styles.groupRowRight}>
+                    <span className={styles.submittedBadge}>
+                      <CheckCircle fontSize="small" /> Submitted
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
             <GradeForm
               form={form}
               group={selectedGroup}
-              role={role}
-              userId={userId}
-              existingGrade={getSubmittedGrade(form.id, selectedGroup.id)}
               onBack={() => setSelectedGroup(null)}
-              onSubmit={(grade) => {
-                onSubmit(grade);
-                setSelectedGroup(null);
-              }}
+              onSubmit={handleGradeSubmit}
             />
           )}
         </div>
@@ -234,12 +242,10 @@ function FormDetailModal({ form, groups, role, userId, isSubmitted, getSubmitted
 }
 
 // ── Grade Form ──────────────────────────────────────────────────────
-function GradeForm({ form, group, role, userId, existingGrade, onBack, onSubmit }) {
+function GradeForm({ form, group, onBack, onSubmit }) {
   const [values, setValues] = useState(() => {
     const init = {};
-    form.fields.forEach(f => {
-      init[f.id] = existingGrade?.fields?.find(ef => ef.fieldName === f.fieldName)?.value ?? "";
-    });
+    (form.fields || []).forEach(f => { init[f.id] = ""; });
     return init;
   });
   const [error, setError] = useState("");
@@ -252,7 +258,7 @@ function GradeForm({ form, group, role, userId, existingGrade, onBack, onSubmit 
   };
 
   const handleSubmit = async () => {
-    for (const field of form.fields) {
+    for (const field of (form.fields || [])) {
       const val = Number(values[field.id]);
       if (values[field.id] === "" || isNaN(val)) {
         setError(`Please enter a value for "${field.fieldName}".`);
@@ -264,36 +270,27 @@ function GradeForm({ form, group, role, userId, existingGrade, onBack, onSubmit 
       }
     }
 
-    const total = form.fields.reduce((sum, f) => sum + Number(values[f.id]), 0);
-    const gradeData = {
-      id: existingGrade?.id || Date.now().toString(),
-      groupId: group.id,
-      groupName: group.name,
-      formId: form.id,
-      submittedBy: userId,
-      role,
-      fields: form.fields.map(f => ({ fieldName: f.fieldName, value: Number(values[f.id]) })),
-      total,
-      status: "submitted",
-      createdAt: new Date().toISOString(),
+    const payload = {
+      evaluationFormId: form.id,
+      groupId: group.groupId,
+      answers: (form.fields || []).map(f => ({
+        evaluationFieldId: f.id,
+        value: Number(values[f.id]),
+      })),
     };
+
+    const total = (form.fields || []).reduce((sum, f) => sum + (Number(values[f.id]) || 0), 0);
 
     setLoading(true);
     try {
-      // 🔴 MOCK
-      if (existingGrade) {
-        await api.put(`/grades/${existingGrade.id}`, gradeData);
-      } else {
-        await api.post("/grades", gradeData);
-      }
-      // ✅ REAL
-      // if (existingGrade) await api.put(`/grades/${existingGrade.id}`, gradeData);
-      // else await api.post("/grades", gradeData);
-
+      await api.post("/Evaluation/EvaluationSubmissions", payload);
       setSuccess(true);
-      setTimeout(() => { onSubmit(gradeData); }, 1200);
+      setTimeout(() => {
+        onSubmit(group.groupId, total);
+      }, 1200);
     } catch (err) {
-      setError("Something went wrong.");
+      console.error(err);
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -312,7 +309,7 @@ function GradeForm({ form, group, role, userId, existingGrade, onBack, onSubmit 
     <div className={styles.gradeForm}>
       <button className={styles.backBtn} onClick={onBack}>← Back</button>
       <div className={styles.gradeFormHeader}>
-        <h4 className={styles.gradeGroupName}>{group.name}</h4>
+        <h4 className={styles.gradeGroupName}>{group.groupName}</h4>
         <p className={styles.gradeFormHint}>Enter grades within the allowed range for each field</p>
       </div>
 
@@ -324,7 +321,7 @@ function GradeForm({ form, group, role, userId, existingGrade, onBack, onSubmit 
           <span>Range</span>
           <span>Grade</span>
         </div>
-        {form.fields.map(field => (
+        {(form.fields || []).map(field => (
           <div key={field.id} className={styles.fieldRow}>
             <span className={styles.fieldName}>{field.fieldName}</span>
             <span className={styles.fieldRange}>{field.minValue} – {field.maxValue}</span>
@@ -343,7 +340,7 @@ function GradeForm({ form, group, role, userId, existingGrade, onBack, onSubmit 
           <span>Total</span>
           <span></span>
           <span className={styles.totalValue}>
-            {form.fields.reduce((sum, f) => sum + (Number(values[f.id]) || 0), 0)} pts
+            {(form.fields || []).reduce((sum, f) => sum + (Number(values[f.id]) || 0), 0)} pts
           </span>
         </div>
       </div>
@@ -351,7 +348,7 @@ function GradeForm({ form, group, role, userId, existingGrade, onBack, onSubmit 
       <div className={styles.gradeFormFooter}>
         <button className={styles.cancelBtn} onClick={onBack}>Cancel</button>
         <button className={styles.submitBtn} onClick={handleSubmit} disabled={loading}>
-          {loading ? "Submitting..." : existingGrade ? "Update Grades" : "Submit Grades"}
+          {loading ? "Submitting..." : "Submit Grades"}
         </button>
       </div>
     </div>

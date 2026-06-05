@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { mockApi as api } from "../../../api/axiosInstance";
+import api from "../../../api/axiosInstance";
 import styles from "./CreateEvaluationForm.module.css";
 import { Delete, Add, Info, Edit, Save, Publish } from "@mui/icons-material";
 
@@ -20,6 +20,7 @@ export default function CreateEvaluationForm() {
   const [isEditMode, setIsEditMode] = useState(true);
   const [savedId, setSavedId] = useState(null);
   const [fieldError, setFieldError] = useState("");
+  const [addingField, setAddingField] = useState(false);
 
   const [newField, setNewField] = useState({
     fieldName: "",
@@ -27,7 +28,21 @@ export default function CreateEvaluationForm() {
     maxValue: "",
   });
 
-  const handleAddField = () => {
+  const ensureFormCreated = async () => {
+    if (savedId) return savedId;
+    const payload = {
+      title: formTitle,
+      assignTo,
+      description,
+      status: 0,
+    };
+    const res = await api.post("/Coordinator/EvaluationForms", payload);
+    const id = res.data.id;
+    setSavedId(id);
+    return id;
+  };
+
+  const handleAddField = async () => {
     if (!newField.fieldName.trim() || newField.minValue === "" || newField.maxValue === "") {
       setFieldError("All fields are required.");
       return;
@@ -36,14 +51,52 @@ export default function CreateEvaluationForm() {
       setFieldError("Min value must be less than Max value.");
       return;
     }
+    if (!formTitle.trim()) {
+      setFieldError("Please enter a form title before adding fields.");
+      return;
+    }
+
     setFieldError("");
-    setFields((prev) => [...prev, { ...newField, id: Date.now() }]);
-    setNewField({ fieldName: "", minValue: "", maxValue: "" });
-    setShowAddField(false);
+    setAddingField(true);
+    try {
+      const formId = await ensureFormCreated();
+      const res = await api.post(`/Coordinator/EvaluationForms/${formId}/fields`, {
+        fieldName: newField.fieldName,
+        minValue: Number(newField.minValue),
+        maxValue: Number(newField.maxValue),
+        isRequired: true,
+      });
+      setFields((prev) => [...prev, res.data]);
+      setNewField({ fieldName: "", minValue: "", maxValue: "" });
+      setShowAddField(false);
+    } catch (err) {
+      console.error(err);
+      setFieldError("Failed to add field. Please try again.");
+    } finally {
+      setAddingField(false);
+    }
   };
 
-  const handleDeleteField = (id) => {
-    setFields((prev) => prev.filter((f) => f.id !== id));
+  const handleDeleteField = async (fieldId) => {
+    try {
+      await api.delete(`/Coordinator/EvaluationForms/fields/${fieldId}`);
+      setFields((prev) => prev.filter((f) => f.id !== fieldId));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleUpdateField = async (fieldId, updatedField) => {
+    try {
+      await api.put(`/Coordinator/EvaluationForms/fields/${fieldId}`, {
+        fieldName: updatedField.fieldName,
+        minValue: Number(updatedField.minValue),
+        maxValue: Number(updatedField.maxValue),
+        isRequired: updatedField.isRequired ?? true,
+      });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const validate = () => {
@@ -57,32 +110,14 @@ export default function CreateEvaluationForm() {
     setLoading(true);
     setError("");
     try {
-      const data = {
-        title: formTitle,
-        assignTo,
-        description,
-        fields,
-        status: "draft",
-        createdAt: new Date().toISOString(),
-      };
-
-      // 🔴 MOCK
-      if (savedId) {
-        await api.patch(`/evaluationForms/${savedId}`, data);
-      } else {
-        const res = await api.post("/evaluationForms", data);
-        setSavedId(res.data.id);
-      }
-
-      // ✅ REAL
-      // if (savedId) await api.patch(`/evaluation-forms/${savedId}`, data);
-      // else { const res = await api.post("/evaluation-forms", data); setSavedId(res.data.id); }
-
+      const formId = await ensureFormCreated();
+      await api.post(`/Coordinator/EvaluationForms/${formId}/draft`, {});
       setSuccess("Saved as draft successfully!");
       setIsEditMode(false);
       setTimeout(() => navigate("/coordinator/evaluation-forms"), 1500);
     } catch (err) {
-      setError("Something went wrong.");
+      console.error(err);
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -99,40 +134,14 @@ export default function CreateEvaluationForm() {
     setLoading(true);
     setError("");
     try {
-      // 🔴 MOCK - أرشف الـ forms القديمة من نفس الـ assignTo
-      const oldFormsRes = await api.get("/evaluationForms");
-      const toArchive = oldFormsRes.data.filter(f =>
-        f.assignTo === assignTo &&
-        f.status === "published" &&
-        f.id !== savedId
-      );
-      await Promise.all(
-        toArchive.map(f => api.patch(`/evaluationForms/${f.id}`, { ...f, status: "archived" }))
-      );
-
-      const data = {
-        title: formTitle,
-        assignTo,
-        description,
-        fields,
-        status: "published",
-        createdAt: new Date().toISOString(),
-      };
-
-      if (savedId) {
-        await api.patch(`/evaluationForms/${savedId}`, { ...data, status: "published" });
-      } else {
-        await api.post("/evaluationForms", data);
-      }
-
-      // ✅ REAL
-      // await api.post("/evaluation-forms/publish", { ...data, archivePrevious: true });
-
+      const formId = await ensureFormCreated();
+      await api.post(`/Coordinator/EvaluationForms/${formId}/publish`, {});
       setSuccess("Form published successfully!");
       setIsEditMode(false);
       setTimeout(() => navigate("/coordinator/evaluation-forms"), 1500);
     } catch (err) {
-      setError("Something went wrong.");
+      console.error(err);
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -223,6 +232,7 @@ export default function CreateEvaluationForm() {
                           className={styles.tableInput}
                           value={f.fieldName}
                           onChange={(e) => setFields(fields.map(x => x.id === f.id ? { ...x, fieldName: e.target.value } : x))}
+                          onBlur={(e) => handleUpdateField(f.id, { ...f, fieldName: e.target.value })}
                         />
                       ) : f.fieldName}
                     </td>
@@ -234,8 +244,9 @@ export default function CreateEvaluationForm() {
                           className={styles.tableInput}
                           value={f.minValue}
                           onChange={(e) => setFields(fields.map(x => x.id === f.id ? { ...x, minValue: e.target.value } : x))}
+                          onBlur={(e) => handleUpdateField(f.id, { ...f, minValue: e.target.value })}
                         />
-                      ) : f.minValue || "-"}
+                      ) : f.minValue ?? "-"}
                     </td>
                     <td>
                       {isEditMode ? (
@@ -244,8 +255,9 @@ export default function CreateEvaluationForm() {
                           className={styles.tableInput}
                           value={f.maxValue}
                           onChange={(e) => setFields(fields.map(x => x.id === f.id ? { ...x, maxValue: e.target.value } : x))}
+                          onBlur={(e) => handleUpdateField(f.id, { ...f, maxValue: e.target.value })}
                         />
-                      ) : f.maxValue || "-"}
+                      ) : f.maxValue ?? "-"}
                     </td>
                     {isEditMode && (
                       <td>
@@ -302,7 +314,9 @@ export default function CreateEvaluationForm() {
             {fieldError && <p className={styles.fieldErrorMsg}>{fieldError}</p>}
             <div className={styles.addFieldActions}>
               <button className={styles.cancelBtn} onClick={() => { setShowAddField(false); setFieldError(""); }}>Cancel</button>
-              <button className={styles.confirmBtn} onClick={handleAddField}>Add</button>
+              <button className={styles.confirmBtn} onClick={handleAddField} disabled={addingField}>
+                {addingField ? "Adding..." : "Add"}
+              </button>
             </div>
           </div>
         )}

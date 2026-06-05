@@ -75,31 +75,26 @@
       "createdAt": "2026-02-15T10:00:00Z"
     }
   ],
-
-
-
   "students": [
-  {
-    "id": "7",
-    "studentNumber": "092456",
-    "fullName": "Rahaf Alawneh",
-    "groupId": "1772889606299"
-  },
-  {
-    "id": "1772365854849",
-    "studentNumber": "09875456",
-    "fullName": "Alaa Yasin",
-    "groupId": "1772889606299"
-  },
-  {
-    "id": "1772365639808",
-    "studentNumber": "20222567",
-    "fullName": "Eman Shtawi",
-    "groupId": "1772889606299"
-  }
-],
-
-
+    {
+      "id": "7",
+      "studentNumber": "092456",
+      "fullName": "Rahaf Alawneh",
+      "groupId": "1772889606299"
+    },
+    {
+      "id": "1772365854849",
+      "studentNumber": "09875456",
+      "fullName": "Alaa Yasin",
+      "groupId": "1772889606299"
+    },
+    {
+      "id": "1772365639808",
+      "studentNumber": "20222567",
+      "fullName": "Eman Shtawi",
+      "groupId": "1772889606299"
+    }
+  ],
   "groups": [
     {
       "id": "1772889606299",
@@ -274,90 +269,137 @@
           "id": 1772889761213
         }
       ],
-      "status": "published",
+      "status": "archived",
       "createdAt": "2026-03-07T13:22:59.006Z"
     },
     {
-      "id": "2f24",
-      "title": "first semester",
-      "assignTo": "Examiner",
-      "description": "2025-2026",
+      "id": "6dbe",
+      "title": "wwbfjkqf",
+      "assignTo": "Supervisor",
+      "description": "dd,,fba",
       "fields": [
         {
           "fieldName": "thesis",
           "minValue": "10",
           "maxValue": "15",
-          "id": 1772889830266
-        },
+          "id": 1780169884337
+        }
+      ],
+      "status": "archived",
+      "createdAt": "2026-05-30T19:38:08.000Z"
+    },
+    {
+      "id": "3bed",
+      "title": "firksl",
+      "assignTo": "Supervisor",
+      "description": "kjkfbvewjkfwjk.fv",
+      "fields": [
         {
-          "fieldName": "presentation",
+          "fieldName": "thesis",
+          "minValue": "10",
+          "maxValue": "20",
+          "id": 1780237620048
+        }
+      ],
+      "status": "draft",
+      "createdAt": "2026-05-31T14:27:04.376Z"
+    },
+    {
+      "id": "c346",
+      "title": "sjdbkqjb",
+      "assignTo": "Supervisor",
+      "description": "eqklefbqklb",
+      "fields": [
+        {
+          "fieldName": "kfnqlk",
+          "minValue": "10",
+          "maxValue": "18",
+          "id": 1780237835991
+        }
+      ],
+      "status": "archived",
+      "createdAt": "2026-05-31T14:30:48.275Z"
+    },
+    {
+      "id": "1e19",
+      "title": "second semester",
+      "assignTo": "Supervisor",
+      "description": "second semester graduation projects ",
+      "fields": [
+        {
+          "fieldName": "thesis",
           "minValue": "10",
           "maxValue": "15",
-          "id": 1772889857816
-        },
+          "id": 1780238021756
+        }
+      ],
+      "status": "draft",
+      "createdAt": "2026-05-31T14:33:44.187Z"
+    },
+    {
+      "id": "f297",
+      "title": "kkfhe",
+      "assignTo": "Supervisor",
+      "description": "fnasm",
+      "fields": [
         {
-          "fieldName": "documentation",
+          "fieldName": "kldg",
           "minValue": "10",
           "maxValue": "15",
-          "id": 1772889877937
+          "id": 1780238059968
         }
       ],
       "status": "published",
-      "createdAt": "2026-03-07T13:24:46.107Z"
+      "createdAt": "2026-05-31T14:34:21.331Z"
     }
   ],
-  
-
-"tasks": [
-  {
-    "id": "t1",
-    "taskId": "30bce25c-d275-48d1-9f52-1b1d0facf7e0",
-    "groupId": "1772889606299",
-    "title": "Complete Literature Review",
-    "description": "Review and summarize at least 20 academic papers related to graduation projects management.",
-    "supervisorNotes": "Focus on systems similar to PTUK graduation project platforms.",
-    "createdAt": "2026-05-01T09:46:43",
-    "deadLine": "2026-05-20T00:00:00",
-    "taskFileURL": "http://rsr.tryasp.net/files/Tasks/a529283b.pdf",
-    "supervisorName": "Rahaf Salhab",
-    "status": "In Progress",
-    "priority": "High Priority",
-    "progress": 65
-  },
-  {
-    "id": "t2",
-    "taskId": "8d7ca8de-19a7-4af3-8357-6d3862b942ba",
-    "groupId": "1772889606299",
-    "title": "System Sequence Diagram",
-    "description": "Create the system sequence diagram for the selected scenario.",
-    "supervisorNotes": "Only PDF files are allowed for submission.",
-    "createdAt": "2026-05-10T15:30:55",
-    "deadLine": "2026-05-15T00:00:00",
-    "taskFileURL": "http://rsr.tryasp.net/files/Tasks/bb497ca.pdf",
-    "supervisorName": "Rahaf Salhab",
-    "status": "Pending",
-    "priority": "High Priority",
-    "progress": 0
-  },
-  {
-    "id": "t3",
-    "taskId": "d9024e04-9016-4150-9b5b-9987981b581d",
-    "groupId": "1772889606299",
-    "title": "Database Schema Design",
-    "description": "Design the main database tables and relationships for the project.",
-    "supervisorNotes": "Make sure the relationships are clear.",
-    "createdAt": "2026-05-11T10:00:00",
-    "deadLine": "2026-06-01T00:00:00",
-    "taskFileURL": "",
-    "supervisorName": "Rahaf Salhab",
-    "status": "Pending",
-    "priority": "Normal",
-    "progress": 0
-  }
-],
-
-
-
+  "tasks": [
+    {
+      "id": "t1",
+      "taskId": "30bce25c-d275-48d1-9f52-1b1d0facf7e0",
+      "groupId": "1772889606299",
+      "title": "Complete Literature Review",
+      "description": "Review and summarize at least 20 academic papers related to graduation projects management.",
+      "supervisorNotes": "Focus on systems similar to PTUK graduation project platforms.",
+      "createdAt": "2026-05-01T09:46:43",
+      "deadLine": "2026-05-20T00:00:00",
+      "taskFileURL": "http://rsr.tryasp.net/files/Tasks/a529283b.pdf",
+      "supervisorName": "Rahaf Salhab",
+      "status": "In Progress",
+      "priority": "High Priority",
+      "progress": 65
+    },
+    {
+      "id": "t2",
+      "taskId": "8d7ca8de-19a7-4af3-8357-6d3862b942ba",
+      "groupId": "1772889606299",
+      "title": "System Sequence Diagram",
+      "description": "Create the system sequence diagram for the selected scenario.",
+      "supervisorNotes": "Only PDF files are allowed for submission.",
+      "createdAt": "2026-05-10T15:30:55",
+      "deadLine": "2026-05-15T00:00:00",
+      "taskFileURL": "http://rsr.tryasp.net/files/Tasks/bb497ca.pdf",
+      "supervisorName": "Rahaf Salhab",
+      "status": "Pending",
+      "priority": "High Priority",
+      "progress": 0
+    },
+    {
+      "id": "t3",
+      "taskId": "d9024e04-9016-4150-9b5b-9987981b581d",
+      "groupId": "1772889606299",
+      "title": "Database Schema Design",
+      "description": "Design the main database tables and relationships for the project.",
+      "supervisorNotes": "Make sure the relationships are clear.",
+      "createdAt": "2026-05-11T10:00:00",
+      "deadLine": "2026-06-01T00:00:00",
+      "taskFileURL": "",
+      "supervisorName": "Rahaf Salhab",
+      "status": "Pending",
+      "priority": "Normal",
+      "progress": 0
+    }
+  ],
   "schedule": [],
   "notifications": [],
   "archive": [
@@ -460,7 +502,4 @@
       "grade": "Excellent"
     }
   ]
-  
-
-  
 }

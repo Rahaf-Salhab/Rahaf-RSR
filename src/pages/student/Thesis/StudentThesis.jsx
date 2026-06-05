@@ -27,8 +27,9 @@ export default function StudentThesis() {
         setErrorMessage("Student id not found. Please login again.");
         return;
       }
-
+      
       const groupRes = await api.get(`/Group/my-group/${studentId}`);
+      console.log("FULL GROUP RESPONSE:", groupRes.data);
 
       const groupId = groupRes.data?.groupId;
 
