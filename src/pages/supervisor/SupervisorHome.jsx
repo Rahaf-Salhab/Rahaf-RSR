@@ -71,27 +71,35 @@ export default function SupervisorHome() {
   }, []);
 
   const dashboardCards = [
-    {
-      label: "My Groups",
-      value: statistics.myGroups,
-      icon: <Groups />,
-    },
-    {
-      label: "Total Pending Reviews",
-      value: statistics.totalPendingReviews,
-      icon: <RateReview />,
-    },
-    {
-      label: "Task Submissions Pending",
-      value: statistics.taskSubmissionsPending,
-      icon: <AssignmentTurnedIn />,
-    },
-    {
-      label: "Thesis Pending",
-      value: statistics.thesisPending,
-      icon: <Description />,
-    },
-  ];
+  {
+    label: "My Groups",
+    value: statistics.myGroups,
+    icon: <Groups />,
+    color: "#e8f4fd",
+    iconColor: "#4A5565",
+  },
+  {
+    label: "Total Pending Reviews",
+    value: statistics.totalPendingReviews,
+    icon: <RateReview />,
+    color: "#fff1eb",
+    iconColor: "#4A5565",
+  },
+  {
+    label: "Task Submissions Pending",
+    value: statistics.taskSubmissionsPending,
+    icon: <AssignmentTurnedIn />,
+    color: "#f0fdf4",
+    iconColor: "#4A5565",
+  },
+  {
+    label: "Thesis Pending",
+    value: statistics.thesisPending,
+    icon: <Description />,
+    color: "#fef3c7",
+    iconColor: "#4A5565",
+  },
+];
   const latestReviewTasks = reviewTasks.slice(0, 3);
   const latestReviewThesis = reviewThesis.slice(0, 3);
   if (loading) {
@@ -114,12 +122,19 @@ export default function SupervisorHome() {
       <div className={styles.cards}>
         {dashboardCards.map((card, index) => (
           <div key={index} className={styles.card}>
-            <p className={styles.cardLabel}>{card.label}</p>
-
-            <div className={styles.cardBottom}>
+            <div className={styles.cardContent}>
+              <p className={styles.cardLabel}>{card.label}</p>
               <p className={styles.cardValue}>{card.value}</p>
+            </div>
 
-              <div className={styles.cardIcon}>{card.icon}</div>
+            <div
+              className={styles.cardIcon}
+              style={{
+                backgroundColor: card.color,
+                color: card.iconColor,
+              }}
+            >
+              {card.icon}
             </div>
           </div>
         ))}

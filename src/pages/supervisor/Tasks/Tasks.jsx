@@ -1,12 +1,12 @@
 import { useEffect, useState, useRef } from "react";
-import { useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import api from "../../../api/axiosInstance";
 import styles from "./SupervisorTasks.module.css";
-
 import {
   Add,
   Search,
   Edit,
+  Delete,
   HourglassEmpty,
   CheckCircle,
   Close,
@@ -253,8 +253,6 @@ export default function SupervisorTasks() {
 
   const [taskError, setTaskError] = useState("");
 
-
-
   useEffect(() => {
     fetchData();
   }, []);
@@ -348,6 +346,30 @@ export default function SupervisorTasks() {
       }
     } finally {
       setTaskLoading(false);
+    }
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this task?",
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      await api.delete(`/Task/remove-delete/task-id/${taskId}`);
+
+      await fetchData();
+    } catch (err) {
+      console.error(err);
+
+      const data = err.response?.data;
+
+      if (data?.message) {
+        alert(data.message);
+      } else {
+        alert("Failed to delete task.");
+      }
     }
   };
 
@@ -648,19 +670,29 @@ export default function SupervisorTasks() {
                               </div>
                             </div>
 
-                            {/* EDIT */}
-                            <button
-                              className={styles.editTaskBtn}
-                              onClick={() => {
-                                setTaskError("");
+                            <div className={styles.taskActions}>
+                              {/* EDIT */}
+                              <button
+                                className={styles.editTaskBtn}
+                                onClick={() => {
+                                  setTaskError("");
 
-                                setSelectedGroupId(g.groupId);
+                                  setSelectedGroupId(g.groupId);
 
-                                setTaskModal(t);
-                              }}
-                            >
-                              <Edit fontSize="small" />
-                            </button>
+                                  setTaskModal(t);
+                                }}
+                              >
+                                <Edit fontSize="small" />
+                              </button>
+
+                              {/* DELETE */}
+                              <button
+                                className={styles.deleteTaskBtn}
+                                onClick={() => handleDeleteTask(t.taskId)}
+                              >
+                                <Delete fontSize="small" />
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>

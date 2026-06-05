@@ -6,6 +6,7 @@ import {
   ArrowBack,
   Add,
   Edit,
+  Delete,
   School,
   Assignment,
   CheckCircle,
@@ -13,7 +14,6 @@ import {
   Close,
   AttachFile,
 } from "@mui/icons-material";
-
 const STATUS_COLORS = {
   InProgress: { bg: "#e0f2fe", color: "#0369a1" },
   Completed: { bg: "#f0fdf4", color: "#166534" },
@@ -199,7 +199,7 @@ function TaskModal({ task, onClose, onSave, loading, error, onClearError }) {
 }
 
 export default function GroupDetails() {
-  const { groupId } = useParams();// من الرابط الحاليGroupId بنجيب ال 
+  const { groupId } = useParams(); // من الرابط الحاليGroupId بنجيب ال
   const navigate = useNavigate();
 
   const [group, setGroup] = useState(null);
@@ -208,6 +208,9 @@ export default function GroupDetails() {
   const [taskModal, setTaskModal] = useState(null);
   const [taskLoading, setTaskLoading] = useState(false);
   const [taskError, setTaskError] = useState("");
+  const [deleteModal, setDeleteModal] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   useEffect(() => {
     fetchData();
@@ -264,8 +267,29 @@ export default function GroupDetails() {
     }
   };
 
- const handleViewSubmissions = (taskId) => {// لما يضغط على عرض التسليمات بيروح لصفحة التسليمات الخاصة بالمهمة هاي
-    navigate(`/supervisor/groups/${groupId}/tasks/${taskId}/submissions`);//  عشان الصفحة الجديدة تعرف لأي جروب واي تاسك نجيب التسليمات TasKId وحطينا UseParamsمن GroupIdجبنا 
+  const handleDeleteTask = async () => {
+    if (!deleteModal?.taskId) return;
+
+    setDeleteLoading(true);
+    setDeleteError("");
+
+    try {
+      await api.delete(`/Task/remove-delete/task-id/${deleteModal.taskId}`);
+
+      await fetchData();
+
+      setDeleteModal(null);
+    } catch (err) {
+      console.error(err);
+
+      setDeleteError(err.response?.data?.message || "Failed to delete task.");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+  const handleViewSubmissions = (taskId) => {
+    // لما يضغط على عرض التسليمات بيروح لصفحة التسليمات الخاصة بالمهمة هاي
+    navigate(`/supervisor/groups/${groupId}/tasks/${taskId}/submissions`); //  عشان الصفحة الجديدة تعرف لأي جروب واي تاسك نجيب التسليمات TasKId وحطينا UseParamsمن GroupIdجبنا
   };
 
   const formatDate = (d) => {
@@ -294,12 +318,7 @@ export default function GroupDetails() {
       {/* Header */}
       <div className={styles.pageHeader}>
         <div className={styles.headerLeft}>
-          <button
-            className={styles.backBtn}
-            onClick={() => navigate("/supervisor/groups")}
-          >
-            <ArrowBack fontSize="small" /> Back
-          </button>
+
           <div>
             <h1 className={styles.pageTitle}>{group.groupName}</h1>
             <p className={styles.pageSubtitle}>{group.projectName}</p>
@@ -425,21 +444,34 @@ export default function GroupDetails() {
                     )}
                   </div>
                 </div>
-                <button
-                  className={styles.viewSubmissionBtn}
-                  onClick={() => handleViewSubmissions(t.taskId)}// 
-                >
-                  View Submission
-                </button> {/* Opens the submissions page for this specific task */}
-                <button
-                  className={styles.editTaskBtn}
-                  onClick={() => {
-                    setTaskError("");
-                    setTaskModal(t);
-                  }}
-                >
-                  <Edit fontSize="small" />
-                </button>
+                <div className={styles.taskActions}>
+                  <button
+                    className={styles.viewSubmissionBtn}
+                    onClick={() => handleViewSubmissions(t.taskId)}
+                  >
+                    View Submission
+                  </button>
+
+                  <button
+                    className={styles.editTaskBtn}
+                    onClick={() => {
+                      setTaskError("");
+                      setTaskModal(t);
+                    }}
+                  >
+                    <Edit fontSize="small" />
+                  </button>
+
+                  <button
+                    className={styles.deleteTaskBtn}
+                    onClick={() => {
+                      setDeleteError("");
+                      setDeleteModal(t);
+                    }}
+                  >
+                    <Delete fontSize="small" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -458,6 +490,38 @@ export default function GroupDetails() {
           error={taskError}
           onClearError={() => setTaskError("")}
         />
+      )}
+      {deleteModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.confirmModal}>
+            <h3>Delete Task</h3>
+
+            <p>Are you sure you want to delete this task?</p>
+
+            {deleteError && <p className={styles.actionError}>{deleteError}</p>}
+
+            <div className={styles.modalActions}>
+              <button
+                className={styles.modalCancelBtn}
+                onClick={() => {
+                  setDeleteModal(null);
+                  setDeleteError("");
+                }}
+                disabled={deleteLoading}
+              >
+                Cancel
+              </button>
+
+              <button
+                className={styles.modalDeleteBtn}
+                onClick={handleDeleteTask}
+                disabled={deleteLoading}
+              >
+                {deleteLoading ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
