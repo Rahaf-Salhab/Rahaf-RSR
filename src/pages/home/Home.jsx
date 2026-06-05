@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { mockApi as api } from "../../api/axiosInstance";
+import api from "../../api/axiosInstance";
 import styles from "./Home.module.css";
 import rsrLogo from "../../assets/logo/rsrLogo.png";
 
@@ -27,57 +27,75 @@ const FEATURES = [
   },
 ];
 
-const GRADE_COLOR = {
-  Excellent: "#C0441A",
-  "Very Good": "#e07b54",
-  Good: "#f4a97a",
-};
-
 export default function Home() {
   const navigate = useNavigate();
   const [archive, setArchive] = useState([]);
   const [loadingArchive, setLoadingArchive] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedYear, setSelectedYear] = useState("All");
   const [currentPage, setCurrentPage] = useState(0);
   const [cardsPerView, setCardsPerView] = useState(
-    window.innerWidth <= 600 ? 1 : 3
+    window.innerWidth <= 600 ? 1 : 3,
   );
 
   const isLoggedIn = !!localStorage.getItem("accessToken");
   const role = localStorage.getItem("role");
 
   useEffect(() => {
-    const handleResize = () => setCardsPerView(window.innerWidth <= 600 ? 1 : 3);
+    const handleResize = () =>
+      setCardsPerView(window.innerWidth <= 600 ? 1 : 3);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
-    api.get("/archive")
-      .then((res) => setArchive(res.data))
-      .catch(() => setArchive([]))
-      .finally(() => setLoadingArchive(false));
+    api
+      .get("/Thesis/thesis-homepage")
+      .then((res) => {
+        setArchive(res.data?.result || []);
+      })
+      .catch(() => {
+        setArchive([]);
+      })
+      .finally(() => {
+        setLoadingArchive(false);
+      });
   }, []);
 
-  useEffect(() => { setCurrentPage(0); }, [searchTerm, selectedYear]);
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [searchTerm]);
+  const getPublishedYear = (date) => {
+    if (!date) return "";
+    const year = new Date(date).getFullYear();
+    return Number.isNaN(year) ? "" : year;
+  };
 
-  const years = ["All", ...new Set(archive.map((p) => p.year))].sort((a, b) =>
-    a === "All" ? -1 : b - a
-  );
-
+  const formatDate = (date) => {
+    if (!date) return "Not published";
+    return new Date(date).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
   const filtered = archive.filter((p) => {
-    const matchSearch =
-      p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchYear = selectedYear === "All" || p.year === selectedYear;
-    return matchSearch && matchYear;
+    const keyword = searchTerm.toLowerCase().trim();
+
+    const projectName = p.projectName?.toLowerCase() || "";
+    const projectIdea = p.projectIdea?.toLowerCase() || "";
+    const publishedYear = String(getPublishedYear(p.publishedAt));
+
+    return (
+      projectName.includes(keyword) ||
+      projectIdea.includes(keyword) ||
+      publishedYear.includes(keyword)
+    );
   });
 
   const totalPages = Math.ceil(filtered.length / cardsPerView);
   const paginated = filtered.slice(
     currentPage * cardsPerView,
-    (currentPage + 1) * cardsPerView
+    (currentPage + 1) * cardsPerView,
   );
 
   const handleDashboard = () => {
@@ -90,9 +108,15 @@ export default function Home() {
       <nav className={styles.nav}>
         <img src={rsrLogo} alt="RSR" className={styles.navLogo} />
         <div className={styles.navLinks}>
-          <a href="#about" className={styles.navLink}>About</a>
-          <a href="#features" className={styles.navLink}>Features</a>
-          <a href="#archive" className={styles.navLink}>Archive</a>
+          <a href="#about" className={styles.navLink}>
+            About
+          </a>
+          <a href="#features" className={styles.navLink}>
+            Features
+          </a>
+          <a href="#archive" className={styles.navLink}>
+            Projects
+          </a>
         </div>
         {isLoggedIn ? (
           <button className={styles.navBtn} onClick={handleDashboard}>
@@ -109,21 +133,27 @@ export default function Home() {
       <section className={styles.hero}>
         <div className={styles.heroBg} />
         <div className={styles.heroContent}>
-          <span className={styles.heroBadge}>Palestine Technical University — Kadoorie</span>
+          <span className={styles.heroBadge}>
+            Palestine Technical University — Kadoorie
+          </span>
           <h1 className={styles.heroTitle}>
             Where Graduation <br />
             <span className={styles.heroAccent}>Projects Shine</span>
           </h1>
           <p className={styles.heroSubtitle}>
             RSR is the official platform for managing, evaluating, and archiving
-            graduation projects — connecting students, supervisors, examiners, and coordinators.
+            graduation projects — connecting students, supervisors, examiners,
+            and coordinators.
           </p>
           <div className={styles.heroBtns}>
             <a href="#archive" className={styles.heroBtnPrimary}>
               Explore Archive
             </a>
             {!isLoggedIn && (
-              <button className={styles.heroBtnSecondary} onClick={() => navigate("/login")}>
+              <button
+                className={styles.heroBtnSecondary}
+                onClick={() => navigate("/login")}
+              >
                 Sign In
               </button>
             )}
@@ -136,37 +166,51 @@ export default function Home() {
         <div className={styles.aboutInner}>
           <div className={styles.aboutText}>
             <span className={styles.sectionTag}>About RSR</span>
-            <h2 className={styles.sectionTitle}>A Complete Graduation Management Ecosystem</h2>
+            <h2 className={styles.sectionTitle}>
+              A Complete Graduation Management Ecosystem
+            </h2>
             <p className={styles.aboutDesc}>
-              RSR (Research, Supervision & Review) is built to streamline every step of the graduation
-              project journey at PTUK. From project registration to final grade publishing, the platform
-              ensures transparency, efficiency, and fairness for all stakeholders.
+              RSR (Research, Supervision & Review) is built to streamline every
+              step of the graduation project journey at PTUK. From project
+              registration to final grade publishing, the platform ensures
+              transparency, efficiency, and fairness for all stakeholders.
             </p>
             <p className={styles.aboutDesc}>
-              Coordinators manage the full lifecycle, supervisors guide and evaluate projects,
-              examiners review and score presentations, and students track their progress in real time.
+              Coordinators manage the full lifecycle, supervisors guide and
+              evaluate projects, examiners review and score presentations, and
+              students track their progress in real time.
             </p>
           </div>
           <div className={styles.aboutVisual}>
             <div className={styles.aboutCard}>
               <div className={styles.aboutCardIcon}>🏛️</div>
               <div>
-                <div className={styles.aboutCardTitle}>Palestine Technical University</div>
+                <div className={styles.aboutCardTitle}>
+                  Palestine Technical University
+                </div>
                 <div className={styles.aboutCardSub}>Kadoorie</div>
               </div>
             </div>
             <div className={styles.aboutCard}>
               <div className={styles.aboutCardIcon}>🔬</div>
               <div>
-                <div className={styles.aboutCardTitle}>Research-Driven Education</div>
-                <div className={styles.aboutCardSub}>Empowering students through real-world projects</div>
+                <div className={styles.aboutCardTitle}>
+                  Research-Driven Education
+                </div>
+                <div className={styles.aboutCardSub}>
+                  Empowering students through real-world projects
+                </div>
               </div>
             </div>
             <div className={styles.aboutCard}>
               <div className={styles.aboutCardIcon}>✅</div>
               <div>
-                <div className={styles.aboutCardTitle}>Accredited Evaluation Process</div>
-                <div className={styles.aboutCardSub}>Standardized forms, transparent grading</div>
+                <div className={styles.aboutCardTitle}>
+                  Accredited Evaluation Process
+                </div>
+                <div className={styles.aboutCardSub}>
+                  Standardized forms, transparent grading
+                </div>
               </div>
             </div>
           </div>
@@ -177,7 +221,9 @@ export default function Home() {
       <section id="features" className={styles.features}>
         <div className={styles.sectionHeader}>
           <span className={styles.sectionTag}>Platform Features</span>
-          <h2 className={styles.sectionTitle}>Everything You Need, In One Place</h2>
+          <h2 className={styles.sectionTitle}>
+            Everything You Need, In One Place
+          </h2>
         </div>
         <div className={styles.featuresGrid}>
           {FEATURES.map((f) => (
@@ -193,25 +239,38 @@ export default function Home() {
       {/* ── ARCHIVE ── */}
       <section id="archive" className={styles.archiveSection}>
         <div className={styles.archiveHeader}>
-          <div className={styles.sectionHeader} style={{ marginBottom: 0, textAlign: "left" }}>
-            <span className={styles.sectionTag}>Project Archive</span>
+          <div
+            className={styles.sectionHeader}
+            style={{ marginBottom: 0, textAlign: "left" }}
+          >
             <h2 className={styles.sectionTitle}>Past Graduation Projects</h2>
           </div>
-          {!loadingArchive && filtered.length > 0 && (
+
+          {!loadingArchive && totalPages > 1 && (
             <div className={styles.carouselControls}>
-              <span className={styles.carouselInfo}>
-                {currentPage * cardsPerView + 1}–{Math.min((currentPage + 1) * cardsPerView, filtered.length)} of {filtered.length}
-              </span>
               <button
+                type="button"
                 className={styles.arrowBtn}
-                onClick={() => setCurrentPage((p) => p - 1)}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
                 disabled={currentPage === 0}
-              >←</button>
+              >
+                ‹
+              </button>
+
+              <span className={styles.carouselInfo}>
+                {currentPage + 1} / {totalPages || 1}
+              </span>
+
               <button
+                type="button"
                 className={styles.arrowBtn}
-                onClick={() => setCurrentPage((p) => p + 1)}
-                disabled={currentPage >= totalPages - 1}
-              >→</button>
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1))
+                }
+                disabled={currentPage === totalPages - 1 || totalPages <= 1}
+              >
+                ›
+              </button>
             </div>
           )}
         </div>
@@ -225,17 +284,6 @@ export default function Home() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className={styles.searchInput}
           />
-          <div className={styles.yearTabs}>
-            {years.map((y) => (
-              <button
-                key={y}
-                className={`${styles.yearTab} ${selectedYear === y ? styles.yearTabActive : ""}`}
-                onClick={() => setSelectedYear(y)}
-              >
-                {y}
-              </button>
-            ))}
-          </div>
         </div>
 
         {loadingArchive ? (
@@ -246,27 +294,31 @@ export default function Home() {
           <>
             <div className={styles.archiveGrid}>
               {paginated.map((project) => (
-                <div key={project.id} className={styles.archiveCard}>
+                <div
+                  key={project.thesisVersionId}
+                  className={styles.archiveCard}
+                >
                   <div className={styles.archiveCardTop}>
-                    <span className={styles.archiveYear}>{project.year}</span>
-                    <span
-                      className={styles.archiveGrade}
-                      style={{ color: GRADE_COLOR[project.grade] || "#888" }}
-                    >
-                      {project.grade}
+                    <span className={styles.archiveDate}>
+                      {formatDate(project.publishedAt)}
                     </span>
                   </div>
-                  <h3 className={styles.archiveTitle}>{project.title}</h3>
-                  <p className={styles.archiveDesc}>{project.description}</p>
+
+                  <h3 className={styles.archiveTitle}>{project.projectName}</h3>
+
+                  <p className={styles.archiveDesc}>{project.projectIdea}</p>
+
                   <div className={styles.archiveFooter}>
-                    <div className={styles.archiveStudents}>
-                      {project.students.map((s) => (
-                        <span key={s} className={styles.studentChip}>{s}</span>
-                      ))}
-                    </div>
-                    <div className={styles.archiveSupervisor}>
-                      👨‍🏫 {project.supervisorName}
-                    </div>
+                    {project.thesisFile && (
+                      <a
+                        href={project.thesisFile}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.thesisLink}
+                      >
+                        View Thesis PDF
+                      </a>
+                    )}
                   </div>
                 </div>
               ))}
@@ -299,11 +351,17 @@ export default function Home() {
           <div className={styles.footerLinks}>
             <a href="#about">About</a>
             <a href="#features">Features</a>
-            <a href="#archive">Archive</a>
-            <span onClick={() => navigate("/login")} style={{ cursor: "pointer" }}>Sign In</span>
+            <a href="#archive">Projects</a>
+            <span
+              onClick={() => navigate("/login")}
+              style={{ cursor: "pointer" }}
+            >
+              Sign In
+            </span>
           </div>
           <p className={styles.footerCopy}>
-            © {new Date().getFullYear()} RSR Platform — Palestine Technical University Kadoorie
+            © {new Date().getFullYear()} RSR Platform — Palestine Technical
+            University Kadoorie
           </p>
         </div>
       </footer>

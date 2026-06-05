@@ -251,7 +251,11 @@ export default function ThesisDetails() {
         <h1>Thesis Details</h1>
         <p>View supervisor thesis file and student thesis versions.</p>
       </div>
-      <AlertMessage type="success" message={updateSuccessMessage} onClose={() => setUpdateSuccessMessage("")} />
+      <AlertMessage
+        type="success"
+        message={updateSuccessMessage}
+        onClose={() => setUpdateSuccessMessage("")}
+      />
       <div className={styles.sectionCard}>
         <div className={styles.sectionHeader}>
           <h2>Supervisor Thesis</h2>
@@ -270,15 +274,12 @@ export default function ThesisDetails() {
               </p>
 
               <p>
-                <span>Uploaded At:</span>{" "}
-                {new Date(thesis.createdAt).toLocaleString()}
+                <span>Uploaded At:</span> {formatDate(thesis.createdAt)}
               </p>
 
               <p>
                 <span>Deadline:</span>{" "}
-                {thesis.deadLine
-                  ? new Date(thesis.deadLine).toLocaleString()
-                  : "No deadline"}
+                {thesis.deadLine ? formatDate(thesis.deadLine) : "No deadline"}
               </p>
 
               <p>
@@ -307,8 +308,16 @@ export default function ThesisDetails() {
       </div>
       <div className={styles.sectionCard}>
         <h2 className={styles.sectionTitle}>Student Thesis Versions</h2>
-        <AlertMessage type="success" message={freezeSuccessMessage} onClose={() => setFreezeSuccessMessage("")} />
-        <AlertMessage type="error" message={freezeError} onClose={() => setFreezeError("")} />
+        <AlertMessage
+          type="success"
+          message={freezeSuccessMessage}
+          onClose={() => setFreezeSuccessMessage("")}
+        />
+        <AlertMessage
+          type="error"
+          message={freezeError}
+          onClose={() => setFreezeError("")}
+        />
         {sortedThesisVersions.length > 0 ? (
           <div className={styles.versionsList}>
             {sortedThesisVersions.map((version) => {
@@ -328,13 +337,13 @@ export default function ThesisDetails() {
                             {getFileName(version.fileURL)}
                           </h3>
 
-                          {getVersionFeedback(version) && (
+                          {feedback && (
                             <span
                               className={getDecisionClassName(
-                                getVersionFeedback(version).decision,
+                                feedback.decision,
                               )}
                             >
-                              {getVersionFeedback(version).decision}
+                              {feedback.decision}
                             </span>
                           )}
                         </div>
@@ -476,36 +485,32 @@ export default function ThesisDetails() {
                     </form>
                   )}
 
-                  {getVersionFeedback(version) && (
-                    <div className={styles.feedbackBox}>
-                      <div className={styles.feedbackTop}>
-                        <h4 className={styles.feedbackTitle}>
-                          Supervisor Feedback
-                        </h4>
+                {feedback && (
+  <div className={styles.feedbackBox}>
+    <div className={styles.feedbackTop}>
+      <h4 className={styles.feedbackTitle}>
+        Supervisor Feedback
+      </h4>
 
-                        <div className={styles.feedbackMeta}>
-                          <span>{getVersionFeedback(version).reviwerName}</span>
+      <div className={styles.feedbackMeta}>
+        <span>{feedback.reviwerName}</span>
 
-                          {getVersionFeedback(version).createAt && (
-                            <>
-                              <span className={styles.metaDot}>•</span>
-                              <span>
-                                {formatDate(
-                                  getVersionFeedback(version).createAt,
-                                )}
-                              </span>
-                            </>
-                          )}
-                        </div>
-                      </div>
+        {feedback.createAt && (
+          <>
+            <span className={styles.metaDot}>•</span>
+            <span>{formatDate(feedback.createAt)}</span>
+          </>
+        )}
+      </div>
+    </div>
 
-                      {getVersionFeedback(version).feedback && (
-                        <p className={styles.feedbackText}>
-                          {getVersionFeedback(version).feedback}
-                        </p>
-                      )}
-                    </div>
-                  )}
+    {feedback.feedback && (
+      <p className={styles.feedbackText}>
+        {feedback.feedback}
+      </p>
+    )}
+  </div>
+)}
                 </div>
               );
             })}
@@ -537,7 +542,10 @@ export default function ThesisDetails() {
               )}
 
               <div className={styles.formGroup}>
-                <label>Thesis File <span className={styles.optional}>(optional)</span></label>
+                <label>
+                  Thesis File{" "}
+                  <span className={styles.optional}>(optional)</span>
+                </label>
 
                 <div className={styles.currentFileBox}>
                   <label className={styles.fileNameBox}>

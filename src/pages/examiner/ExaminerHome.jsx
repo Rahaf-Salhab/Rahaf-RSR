@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { mockApi as api } from "../../api/axiosInstance";
+import api from "../../api/axiosInstance";
 import styles from "./ExaminerHome.module.css";
 import {
   Folder,
@@ -23,56 +23,72 @@ const timeAgo = (dateString) => {
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 };
 
 const formatTime = (dateString) => {
   const date = new Date(dateString);
-  return date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  return date.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 };
 
 export default function ExaminerHome() {
   const navigate = useNavigate();
-  const [stats, setStats] = useState(null);
-  const [projects, setProjects] = useState([]);
+  const [stats, setStats] = useState({
+    totalProjects: 0,
+    upComingExaminations: 0,
+  });
+
   const [schedule, setSchedule] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        //  MOCK
-        const [statsRes, projectsRes, scheduleRes] = await Promise.all([
-          api.get("/examinerStats"),
-          api.get("/examinerProjects"),
-          api.get("/examinerSchedule"),
+        const [statsRes, scheduleRes] = await Promise.all([
+          api.get("/Dashboard/dashboard-examiner"),
+          api.get("/Dashboard/dashboard-UpComingExamination"),
         ]);
-        setStats(statsRes.data);
-        setProjects(projectsRes.data.slice(0, 4));
-        setSchedule(scheduleRes.data);
 
-        //  REAL
-        // const [statsRes, projectsRes, scheduleRes] = await Promise.all([
-        //   api.get("/examiner/stats"),
-        //   api.get("/examiner/projects"),
-        //   api.get("/examiner/schedule"),
-        // ]);
+        setStats(
+          statsRes.data.statistics || {
+            totalProjects: 0,
+            upComingExaminations: 0,
+          },
+        );
+
+        setSchedule(scheduleRes.data.examinations || []);
       } catch (err) {
-        console.error(err);
+        console.error("Failed to fetch examiner dashboard data:", err);
       } finally {
         setLoading(false);
       }
     };
+
     fetchData();
   }, []);
 
   if (loading) return <div className={styles.loading}>Loading...</div>;
 
   const cards = [
-    { label: "Total Projects", value: stats?.totalProjects, icon: <Folder />, color: "#e8f4fd" },
-    { label: "Completed Evaluations", value: stats?.completedEvaluations, icon: <CheckCircle />, color: "#f0fdf4" },
-    { label: "Pending Evaluations", value: stats?.pendingEvaluations, icon: <HourglassEmpty />, color: "#fef3e2" },
-    { label: "Upcoming Examinations", value: stats?.upcomingExaminations, icon: <CalendarMonth />, color: "#fde8e8" },
+    {
+      label: "Total Projects",
+      value: stats?.totalProjects ?? 0,
+      icon: <Folder />,
+      color: "#e8f4fd",
+    },
+    {
+      label: "Upcoming Examinations",
+      value: stats?.upComingExaminations ?? 0,
+      icon: <CalendarMonth />,
+      color: "#fde8e8",
+    },
   ];
 
   return (
@@ -81,7 +97,9 @@ export default function ExaminerHome() {
       <div className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>Dashboard</h1>
-          <p className={styles.pageSubtitle}>Welcome back! Here's your examination overview.</p>
+          <p className={styles.pageSubtitle}>
+            Welcome back! Here's your examination overview.
+          </p>
         </div>
       </div>
 
@@ -102,37 +120,14 @@ export default function ExaminerHome() {
 
       {/* Bottom */}
       <div className={styles.bottom}>
-        {/* Recent Projects */}
-        <div className={styles.box}>
-          <div className={styles.boxHeader}>
-            <h2 className={styles.boxTitle}>My Projects</h2>
-            <button className={styles.viewAllBtn} onClick={() => navigate("/examiner/projects")}>
-              View All
-            </button>
-          </div>
-          <div className={styles.projectsList}>
-            {projects.map((p) => (
-              <div key={p.id} className={styles.projectItem}>
-                <div className={styles.projectInfo}>
-                  <p className={styles.projectTitle}>{p.title}</p>
-                  <p className={styles.projectMeta}>{p.studentName} · {p.supervisorName}</p>
-                </div>
-                <div className={styles.projectRight}>
-                  <span className={`${styles.statusBadge} ${p.status === "evaluated" ? styles.evaluated : styles.pending}`}>
-                    {p.status.charAt(0).toUpperCase() + p.status.slice(1)}
-                  </span>
-                  <p className={styles.projectDate}>{formatDate(p.submissionDate)}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Upcoming Schedule */}
         <div className={styles.box}>
           <div className={styles.boxHeader}>
             <h2 className={styles.boxTitle}>Upcoming Examinations</h2>
-            <button className={styles.viewAllBtn} onClick={() => navigate("/examiner/schedule")}>
+            <button
+              className={styles.viewAllBtn}
+              onClick={() => navigate("/examiner/schedule")}
+            >
               View All
             </button>
           </div>
@@ -141,17 +136,24 @@ export default function ExaminerHome() {
               <p className={styles.empty}>No upcoming examinations.</p>
             ) : (
               schedule.map((s) => (
-                <div key={s.id} className={styles.scheduleItem}>
+                <div key={s.scheduleId} className={styles.scheduleItem}>
                   <div className={styles.scheduleDate}>
-                    <p className={styles.scheduleDay}>{new Date(s.date).getDate()}</p>
+                    <p className={styles.scheduleDay}>
+                      {new Date(s.date).getDate()}
+                    </p>
                     <p className={styles.scheduleMonth}>
-                      {new Date(s.date).toLocaleString("en", { month: "short" })}
+                      {new Date(s.date).toLocaleString("en", {
+                        month: "short",
+                      })}
                     </p>
                   </div>
+
                   <div className={styles.scheduleInfo}>
-                    <p className={styles.scheduleTitle}>{s.projectTitle}</p>
-                    <p className={styles.scheduleMeta}>{s.studentName}</p>
-                    <p className={styles.scheduleMeta}>{formatTime(s.date)} · {s.location}</p>
+                    <p className={styles.scheduleTitle}>{s.projectName}</p>
+                    <p className={styles.scheduleMeta}>{s.groupName}</p>
+                    <p className={styles.scheduleMeta}>
+                      {formatTime(s.date)} · {s.location}
+                    </p>
                   </div>
                 </div>
               ))

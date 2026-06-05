@@ -41,7 +41,7 @@
 }
 
 .sectionHeader p {
-  color: #475467;
+  color: #604767;
   font-size: 14px;
   font-weight: 400;
 }
@@ -61,7 +61,7 @@
 
 
 .sectionTitle {
-  color: #475467;
+  color: #111827;
   font-size: 20px;
   font-weight: 900;
 }
@@ -307,10 +307,6 @@
   font-size: 13px;
   font-weight: 500;
   color: #333;
-}
-
-.star {
-  color: #c0441a;
 }
 
 .optional {
@@ -667,4 +663,213 @@
   font-size: 12px;
   font-weight: 400;
   white-space: nowrap;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 900px) {
+  .detailsPage {
+    padding: 18px;
+  }
+
+  .detailsHeader {
+    transform: none;
+    margin-bottom: 18px;
+  }
+
+  .sectionCard {
+    padding: 24px;
+  }
+
+  .innerBox {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .updateBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .fileTop {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .versionActions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .actionBtn,
+  .reviewBtn,
+  .freezeBtn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .feedbackTop {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .feedbackMeta {
+    white-space: normal;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 600px) {
+  .detailsPage {
+    padding: 14px;
+  }
+
+  .detailsHeader h1 {
+    font-size: 21px;
+  }
+
+  .detailsHeader p {
+    font-size: 13px;
+  }
+
+  .sectionCard {
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+  .sectionHeader h2,
+  .sectionTitle {
+    font-size: 18px;
+  }
+
+  .innerBox {
+    padding: 18px;
+    gap: 18px;
+  }
+
+  .fileInfo {
+    width: 100%;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .fileIcon,
+  .studentVersionIcon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    transform: none;
+  }
+
+  .fileIcon svg,
+  .studentVersionIcon svg {
+    width: 23px;
+    height: 23px;
+    font-size: 23px;
+  }
+
+  .infoContent {
+    min-width: 0;
+  }
+
+  .infoContent p {
+    font-size: 13px;
+    word-break: break-word;
+  }
+
+  .fileCard {
+    padding: 18px;
+  }
+
+  .versionTitleRow {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .fileName {
+    font-size: 14px;
+  }
+
+  .fileMeta {
+    font-size: 12.5px;
+  }
+
+  .versionActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actionBtn,
+  .reviewBtn,
+  .freezeBtn {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 12px;
+  }
+
+  .decisionBtns {
+    flex-direction: column;
+  }
+
+  .decisionBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .reviewActions {
+    flex-direction: column-reverse;
+  }
+
+  .cancelReviewBtn,
+  .submitReviewBtn {
+    width: 100%;
+  }
+
+  .modalOverlay {
+    align-items: flex-start;
+    padding: 14px;
+    overflow-y: auto;
+  }
+
+  .modalBox {
+    max-width: 100%;
+    margin-top: 30px;
+    border-radius: 14px;
+  }
+
+  .modalHeader {
+    padding: 18px 20px;
+  }
+
+  .modalHeader h2 {
+    font-size: 20px;
+  }
+
+  .modalForm {
+    padding: 20px;
+  }
+
+  .currentFileBox {
+    align-items: stretch;
+  }
+
+  .fileNameBox {
+    min-width: 0;
+    font-size: 13px;
+  }
+
+  .fileNameBox span {
+    overflow-wrap: anywhere;
+  }
+
+  .modalActions {
+    flex-direction: column-reverse;
+  }
+
+  .cancelBtn,
+  .submitBtn {
+    width: 100%;
+  }
 }

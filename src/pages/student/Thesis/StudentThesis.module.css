@@ -441,3 +441,161 @@
   font-weight: 800;
   white-space: nowrap;
 }
+
+/* ===================== RESPONSIVE FIX ===================== */
+
+@media (max-width: 950px) {
+  .page {
+    padding: 18px;
+  }
+
+  .supervisorThesisCard,
+  .uploadCard,
+  .versionsCard {
+    padding: 18px;
+  }
+
+  .versionItem {
+    padding: 18px;
+  }
+
+  .versionMainRow {
+    display: grid;
+    grid-template-columns: 50px minmax(0, 1fr);
+    align-items: center;
+    gap: 14px;
+  }
+
+  .versionInfo {
+    min-width: 0;
+  }
+
+  .versionTitleRow {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .versionTitleRow h4 {
+    max-width: 100%;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  .versionActions {
+    grid-column: 1 / -1;
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+
+  .feedbackTop {
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .feedbackMeta {
+    flex-wrap: wrap;
+    white-space: normal;
+  }
+}
+
+@media (max-width: 650px) {
+  .page {
+    padding: 14px;
+  }
+
+  .header h1 {
+    font-size: 22px;
+  }
+
+  .supervisorThesisCard,
+  .uploadCard,
+  .versionsCard {
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  .supervisorContent {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .supervisorInfo {
+    width: 100%;
+  }
+
+  .supervisorMeta,
+  .versionMeta {
+    font-size: 12px;
+    gap: 6px;
+  }
+
+  .versionMainRow {
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .versionFileIcon,
+  .supervisorFileIcon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .versionFileIcon svg {
+    font-size: 23px;
+  }
+
+  .versionTitleRow h4 {
+    font-size: 14px;
+  }
+
+  .versionActions {
+    justify-content: stretch;
+  }
+
+  .viewBtn,
+  .updateBtn {
+    flex: 1;
+    justify-content: center;
+    padding: 8px 10px;
+    font-size: 12.5px;
+  }
+
+  .feedbackTop {
+    flex-direction: column;
+  }
+
+  .feedbackBox {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 420px) {
+  .versionMainRow {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .versionInfo,
+  .versionActions {
+    width: 100%;
+  }
+
+  .versionActions {
+    flex-direction: column;
+  }
+
+  .viewBtn,
+  .updateBtn,
+  .selectFileBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .uploadBox {
+    padding: 24px 14px;
+    text-align: center;
+  }
+}

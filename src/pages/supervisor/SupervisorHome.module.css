@@ -3,7 +3,7 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 28px;
   font-family: "Inter", sans-serif;
 }
 
@@ -17,9 +17,11 @@
 }
 
 .pageHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  background: #ffffff;
+  border: 1px solid #f1f1f1;
+  border-radius: 18px;
+  padding: 26px 30px;
+  box-shadow: 0 4px 14px rgba(16, 24, 40, 0.06);
 }
 
 .pageTitle {
@@ -30,72 +32,67 @@
 }
 
 .pageSubtitle {
-  margin-top: 8px;
-  font-size: 16px;
-  color: #4a5565;
+  margin: 8px 0 0;
+  font-size: 15px;
+  color: #667085;
 }
-
-/* Cards */
 
 .cards {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
 }
 
 .card {
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 24px 26px;
-  min-height: 120px;
-  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.06);
-  border: 1px solid #f1f1f1;
+background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.cardContent {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .cardLabel {
-  font-size: 15px;
-  color: #344054;
-  margin: 0 0 14px;
+     font-size: 13px;
+    color: #4A5565;
+    margin-bottom: 8px;
 }
 
 .cardValue {
-  font-size: 34px;
-  font-weight: 700;
-  color: #101828;
-  margin: 0;
+     font-size: 28px;
+    font-weight: 700;
+    color: #101828;
 }
 
 .cardIcon {
-  width: 58px;
-  height: 58px;
-  border-radius: 14px;
-  background: #f4ebe7;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: #fff1eb;
   color: #c2410c;
   display: flex;
   align-items: center;
   justify-content: center;
+
 }
 
 .cardIcon svg {
-  font-size: 28px;
+  font-size: 30px;
 }
 
-/* Layout */
-
-.mainGrid {
-  display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: 20px;
-}
-
+/*____________________________TASK REVIEWS__________________________*/
 .box {
   background: #ffffff;
-  border-radius: 14px;
+  border-radius: 18px;
   padding: 26px;
-  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.06);
+  box-shadow: 0 4px 14px rgba(16, 24, 40, 0.06);
   border: 1px solid #f1f1f1;
 }
 
@@ -120,46 +117,27 @@
   color: #667085;
 }
 
-.viewAllBtn {
-  border: none;
-  background: transparent;
-  color: #c2410c;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-family: inherit;
-  white-space: nowrap;
-}
-
-.viewAllBtn:hover {
-  text-decoration: underline;
-}
-
-/* Lists */
-
-.list,
-.activityList {
+.reviewList {
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 
-.reviewItem,
-.examItem,
-.activityItem {
+.reviewItem {
   background: #f9fafb;
-  border-radius: 12px;
+  border: 1px solid #f2f4f7;
+  border-radius: 14px;
   padding: 18px 20px;
   display: flex;
   align-items: center;
   gap: 16px;
+  transition: 0.25s ease;
 }
 
-.reviewItem {
-  justify-content: space-between;
+.reviewItem:hover {
+  background: #ffffff;
+  border-color: #f2d2c7;
+  box-shadow: 0 8px 18px rgba(16, 24, 40, 0.08);
 }
 
 .reviewIcon {
@@ -174,9 +152,13 @@
   flex-shrink: 0;
 }
 
-.reviewContent,
-.examContent {
+.reviewIcon svg {
+  font-size: 26px;
+}
+
+.reviewContent {
   flex: 1;
+  min-width: 0;
 }
 
 .itemTitle {
@@ -187,7 +169,7 @@
 }
 
 .itemMeta {
-  margin: 8px 0 0;
+  margin: 7px 0 0;
   font-size: 14px;
   color: #667085;
 }
@@ -198,90 +180,29 @@
   color: #98a2b3;
 }
 
-.reviewRight {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.statusBadge {
-  padding: 7px 12px;
-  border-radius: 999px;
-  background: #fef3c7;
-  color: #92400e;
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
 .actionBtn {
   border: none;
   background: #c2410c;
   color: #ffffff;
-  padding: 9px 18px;
-  border-radius: 9px;
+  padding: 10px 16px;
+  border-radius: 10px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
 }
 
 .actionBtn:hover {
   background: #9a3412;
 }
 
-/* Exam */
-
-.dateBox {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  background: #c2410c;
-  color: #ffffff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.dateDay {
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.dateMonth {
-  font-size: 12px;
-  font-weight: 600;
-  margin-top: 4px;
-}
-
-/* Recent Activity */
-
-.activityItem {
-  justify-content: space-between;
-}
-
-.activityDot {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  background: #c2410c;
-  flex-shrink: 0;
-}
-
-.activityTime {
-  font-size: 13px;
-  color: #98a2b3;
-  white-space: nowrap;
-}
-
-/* Empty */
-
 .emptyState {
-  min-height: 120px;
-  border-radius: 12px;
+  min-height: 130px;
+  border-radius: 14px;
   background: #f9fafb;
   color: #667085;
   display: flex;
@@ -293,49 +214,71 @@
   font-size: 15px;
 }
 
-.emptyIcon {
-  color: #c2410c;
-  opacity: 0.8;
+.emptyState p {
+  margin: 0;
 }
 
-/* Responsive */
+.emptyIcon {
+  color: #c2410c;
+  opacity: 0.85;
+}
+
+.viewAllBtn {
+  border: none;
+  background: transparent;
+  color: #c2410c;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.viewAllBtn:hover {
+  text-decoration: underline;
+}
 
 @media (max-width: 1200px) {
   .cards {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .mainGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 700px) {
-  .cards {
-    grid-template-columns: 1fr;
+  .page {
+    gap: 20px;
+  }
+
+  .pageHeader {
+    padding: 22px;
   }
 
   .pageTitle {
     font-size: 26px;
   }
 
-  .box {
-    padding: 20px;
+  .pageSubtitle {
+    font-size: 14px;
   }
 
-  .reviewItem,
-  .examItem,
-  .activityItem {
-    align-items: flex-start;
-    flex-direction: column;
+  .cards {
+    grid-template-columns: 1fr;
   }
 
-  .reviewRight {
-    width: 100%;
-    justify-content: space-between;
+  .card {
+    min-height: 120px;
+    padding: 22px;
   }
 
-  .actionBtn {
-    width: 100%;
+  .cardValue {
+    font-size: 34px;
+  }
+
+  .cardIcon {
+    width: 52px;
+    height: 52px;
   }
 }

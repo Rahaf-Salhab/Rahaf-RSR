@@ -23,8 +23,6 @@ export default function StudentThesis() {
     try {
       const studentId = localStorage.getItem("id");
 
-      console.log("studentId:", studentId);
-
       if (!studentId) {
         setErrorMessage("Student id not found. Please login again.");
         return;
@@ -32,11 +30,7 @@ export default function StudentThesis() {
 
       const groupRes = await api.get(`/Group/my-group/${studentId}`);
 
-      console.log("group response:", groupRes.data);
-
       const groupId = groupRes.data?.groupId;
-
-      console.log("groupId:", groupId);
 
       if (!groupId) {
         setErrorMessage("No group found for this student.");
@@ -45,12 +39,8 @@ export default function StudentThesis() {
 
       const thesisRes = await api.get(`/Thesis/get-thesis/group-id/${groupId}`);
 
-      console.log("thesis response:", thesisRes.data);
-
-      console.log("versions:", thesisRes.data?.result?.thesisVersions);
       setThesis(thesisRes.data?.result || null);
-    } catch (err) {
-      console.error("Error fetching student thesis:", err);
+    } catch {
       setErrorMessage("No thesis found for your group yet.");
     } finally {
       setLoading(false);

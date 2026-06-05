@@ -1,10 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 .page {
   display: flex;
   flex-direction: column;
   gap: 24px;
   font-family: 'Inter', sans-serif;
 }
+
 .loading {
   display: flex;
   align-items: center;
@@ -49,7 +51,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .cardLabel {
@@ -86,7 +88,7 @@
   background: #fff;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .boxHeader {
@@ -198,7 +200,7 @@
 .deadlineTitle {
   font-size: 14px;
   font-weight: 500;
-  color: #101828; 
+  color: #101828;
 }
 
 .deadlineDate {
@@ -221,6 +223,11 @@
 
 .deadlineNormal {
   color: #333;
+}
+.emptyText {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
 }
 
 /*___________________________________________________________________*/
