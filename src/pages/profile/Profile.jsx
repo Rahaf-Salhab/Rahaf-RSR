@@ -76,6 +76,8 @@ export default function Profile() {
       if (!endpoint) throw new Error("Unknown role");
       const res = await api.get(`/User/${endpoint}/${userId}`);
       const extracted = extractUser(res.data, role);
+      console.log("userId:", userId);    
+      console.log("role:", role); 
       setUser(extracted);
     } catch (err) {
       console.error("fetchUser error:", err);

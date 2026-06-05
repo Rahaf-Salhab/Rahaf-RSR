@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { mockApi as api } from "../../api/axiosInstance.jsx";
+import api from "../../api/axiosInstance";
 import styles from "./SupervisorHome.module.css";
 
 import {
