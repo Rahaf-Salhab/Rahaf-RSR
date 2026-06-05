@@ -14,8 +14,9 @@ import UnAuthorized from "./unAuthorized/UnAuthorized";
 import StudentHome from "./pages/student/StudentHome";
 import StudentTasks from "./pages/student/Tasks/StudentTasks";
 import StudentThesis from "./pages/student/Thesis/StudentThesis";
+import StudentExamination from "./pages/student/Examination/StudentExamination";
 import StudentTaskDetails from "./pages/student/Tasks/StudentTaskDetails";
-import SupervisorHome from "./pages/supervisor/SupervisorHome";
+  import SupervisorHome from "./pages/supervisor/SupervisorHome";
 import CoordinatorHome from "./pages/coordinator/CoordinatorHome";
 import ExaminerHome from "./pages/examiner/ExaminerHome";
 
@@ -38,6 +39,8 @@ import TaskSubmissions from "./pages/supervisor/Tasks/TaskSubmissions";
 import Tasks from "./pages/supervisor/Tasks/Tasks";
 import SupervisorThesis from "./pages/supervisor/Thesis/SupervisorThesis";
 import ThesisDetails from "./pages/supervisor/Thesis/ThesisDetails";
+import ExaminerExamination from "./pages/examiner/Examination/Examination";
+import ExaminationTables from "./pages/supervisor/Examination/ExaminationTables";
 
 import Profile from "./pages/profile/Profile";
 
@@ -70,9 +73,13 @@ const routes = createBrowserRouter([
       { index: true, element: <StudentHome /> },
       { path: "home", element: <StudentHome /> },
       { path: "grades", element: <StudentGrades /> },
-      { path: "profile", element: <Profile /> },
+            { path: "profile", element: <Profile /> },
       { path: "tasks", element: <StudentTasks /> }, // Main tasks page showing all tasks for the student's group
       { path: "thesis", element: <StudentThesis /> },
+      {
+        path: "schedule",
+        element: <StudentExamination />,
+      },
       { path: "tasks/:taskId", element: <StudentTaskDetails /> }, // Detais page for a specific task
     ],
   },
@@ -94,6 +101,7 @@ const routes = createBrowserRouter([
       { path: "thesis", element: <SupervisorThesis /> },
       { path: "thesis/:groupId", element: <ThesisDetails /> },
       { path: "evaluation-forms", element: <SupervisorEvaluationForms /> },
+      { path: "examination-timetable", element: <ExaminationTables /> },
       { path: "archive", element: <ArchiveSemesters /> },
       { path: "archive/:semesterId", element: <ArchivedThesis /> },
       { path: "profile", element: <Profile /> },
@@ -140,6 +148,7 @@ const routes = createBrowserRouter([
       { index: true, element: <ExaminerHome /> },
       { path: "home", element: <ExaminerHome /> },
       { path: "evaluation-forms", element: <ExaminerEvaluationForms /> },
+      { path: "examination-timetable", element: <ExaminerExamination /> },
       { path: "profile", element: <Profile /> },
     ],
   },
