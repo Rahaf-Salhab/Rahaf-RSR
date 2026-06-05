@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../api/axiosInstance";
+import api from "../../api/axiosInstance.jsx";
 import styles from "./SupervisorHome.module.css";
 
 import {
