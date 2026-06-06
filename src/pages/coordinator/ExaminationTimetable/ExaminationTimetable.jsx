@@ -68,17 +68,22 @@ export default function ExaminationTimetable() {
 
   const handleSave = async (data) => {
     try {
-      const payload = {
-        GroupId: data.groupId,
-        Date: data.date ? new Date(data.date).toISOString() : "",
-        Location: data.location,
-        Notes: data.notes || "",
-        ExaminersIds: data.examiners,
-      };
-
       if (data.id) {
-        await api.patch(`/Schedule/update-schedule/${data.id}`, payload);
+        const updatePayload = {
+          Date: data.date ? new Date(data.date).toISOString() : "",
+          Location: data.location,
+          Notes: data.notes || "",
+          ExaminersIds: data.examiners,
+        };
+        await api.patch(`/Schedule/update-schedule/${data.id}`, updatePayload);
       } else {
+        const payload = {
+          GroupId: data.groupId,
+          Date: data.date ? new Date(data.date).toISOString() : "",
+          Location: data.location,
+          Notes: data.notes || "",
+          ExaminersIds: data.examiners,
+        };
         await api.post("/Schedule/create-schedule", payload);
       }
       setModal(null);
@@ -225,16 +230,22 @@ export default function ExaminationTimetable() {
               <div className={styles.cardFooter}>
                 <button
                   className={styles.editActionBtn}
-                  onClick={() => setModal({
-                    id: t.id,
-                    groupId: t.groupId,
-                    groupName: t.groupName,
-                    supervisorName: t.supervisorName,
-                    date: t.date ? t.date.slice(0, 16) : "",
-                    location: t.location || "",
-                    notes: t.notes || "",
-                    examiners: t.examinerIds || [],
-                  })}
+                  onClick={() => {
+                    const examinerIds = (t.examiners || [])
+                      .map(name => examiners.find(e => e.fullName === name)?.id)
+                      .filter(Boolean);
+
+                    setModal({
+                      id: t.id,
+                      groupId: t.groupId || "existing",
+                      groupName: t.groupName,
+                      supervisorName: t.supervisorName,
+                      date: t.date ? t.date.slice(0, 16) : "",
+                      location: t.location || "",
+                      notes: t.notes || "",
+                      examiners: examinerIds,
+                    });
+                  }}
                 >
                   <Edit fontSize="small" /> Edit
                 </button>
@@ -279,6 +290,7 @@ export default function ExaminationTimetable() {
 function TimetableModal({ data, examiners, groups, onClose, onSave }) {
   const [form, setForm] = useState({ ...data });
   const [error, setError] = useState("");
+  const isEdit = !!data.id;
 
   const handleGroupChange = (groupId) => {
     const group = groups.find(g => g.groupId === groupId);
@@ -305,8 +317,12 @@ function TimetableModal({ data, examiners, groups, onClose, onSave }) {
   };
 
   const validate = () => {
-    if (!form.groupId || !form.date || !form.location?.trim() || form.examiners.length === 0) {
+    if (!isEdit && !form.groupId) {
       setError("Group, Date, Location, and at least one examiner are required.");
+      return false;
+    }
+    if (!form.date || !form.location?.trim() || form.examiners.length === 0) {
+      setError("Date, Location, and at least one examiner are required.");
       return false;
     }
     return true;
@@ -321,7 +337,7 @@ function TimetableModal({ data, examiners, groups, onClose, onSave }) {
     <div className={styles.modalOverlay}>
       <div className={styles.modal}>
         <div className={styles.modalHeader}>
-          <h3 className={styles.modalTitle}>{data.id ? "Edit Schedule" : "Add Schedule"}</h3>
+          <h3 className={styles.modalTitle}>{isEdit ? "Edit Schedule" : "Add Schedule"}</h3>
           <button className={styles.closeBtn} onClick={onClose}>
             <Close fontSize="small" />
           </button>
@@ -329,21 +345,35 @@ function TimetableModal({ data, examiners, groups, onClose, onSave }) {
         <div className={styles.modalBody}>
           {error && <p className={styles.errorMsg}>{error}</p>}
 
-          <div className={styles.fieldGroup}>
-            <label className={styles.label}>Group <span className={styles.required}>*</span></label>
-            <select
-              className={styles.select}
-              value={form.groupId}
-              onChange={(e) => handleGroupChange(e.target.value)}
-            >
-              <option value="">Select Group</option>
-              {groups.map(g => (
-                <option key={g.groupId} value={g.groupId}>
-                  {g.groupName} — {g.supervisorName}
-                </option>
-              ))}
-            </select>
-          </div>
+          {!isEdit && (
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>Group <span className={styles.required}>*</span></label>
+              <select
+                className={styles.select}
+                value={form.groupId}
+                onChange={(e) => handleGroupChange(e.target.value)}
+              >
+                <option value="">Select Group</option>
+                {groups.map(g => (
+                  <option key={g.groupId} value={g.groupId}>
+                    {g.groupName} — {g.supervisorName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {isEdit && (
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>Group</label>
+              <input
+                className={styles.input}
+                value={form.groupName}
+                disabled
+                style={{ background: "#f5f5f5", color: "#888" }}
+              />
+            </div>
+          )}
 
           {form.supervisorName && (
             <div className={styles.fieldGroup}>
@@ -413,7 +443,7 @@ function TimetableModal({ data, examiners, groups, onClose, onSave }) {
         <div className={styles.modalFooter}>
           <button className={styles.cancelBtn} onClick={onClose}>Cancel</button>
           <button className={styles.modalPublishBtn} onClick={handleSubmit}>
-            <SaveAlt fontSize="small" /> {data.id ? "Update" : "Save"}
+            <SaveAlt fontSize="small" /> {isEdit ? "Update" : "Save"}
           </button>
         </div>
       </div>
