@@ -43,6 +43,11 @@ export default function EvaluationForms() {
   const [publishingId, setPublishingId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
+  // ── Create limit state ──────────────────────────────────────────────
+  const [canCreate, setCanCreate] = useState(true);
+  const [createTooltip, setCreateTooltip] = useState("");
+  const [semesterStartDate, setSemesterStartDate] = useState(null);
+
   useEffect(() => { fetchForms(); }, []);
 
   useEffect(() => {
@@ -55,14 +60,52 @@ export default function EvaluationForms() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  const checkCreateLimit = (normalizedForms, semesterStartDate) => {
+    const semesterStart = semesterStartDate ? new Date(semesterStartDate) : null;
+
+    const activeForms = normalizedForms.filter(f => {
+      if (f.status !== "draft" && f.status !== "published") return false;
+      // لو عندنا تاريخ بداية الفصل، نشوف بس الفورمز اللي اتعملت بعده
+      if (semesterStart) {
+        const createdAt = new Date(f.createdAt);
+        return createdAt >= semesterStart;
+      }
+      return true;
+    });
+
+    const hasSupervisor = activeForms.some(f => f.assignTo === "Supervisor");
+    const hasExaminer = activeForms.some(f => f.assignTo === "Examiner");
+    if (hasSupervisor && hasExaminer) {
+      setCanCreate(false);
+      setCreateTooltip("You already have one form for Supervisor and one for Examiner this semester.");
+    } else {
+      setCanCreate(true);
+      setCreateTooltip("");
+    }
+  };
+
   const fetchForms = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/Coordinator/EvaluationForms");
-      const normalized = (res.data || [])
+      // جيب الفورمز والفصل الحالي بنفس الوقت
+      const [formsRes, semesterRes] = await Promise.allSettled([
+        api.get("/Coordinator/EvaluationForms"),
+        api.get("/Semester/ActiveSemester"),
+      ]);
+
+      const semesterStartDate =
+        semesterRes.status === "fulfilled"
+          ? semesterRes.value.data?.semester?.startDate
+          : null;
+
+      setSemesterStartDate(semesterStartDate);
+
+      const normalized = (formsRes.status === "fulfilled" ? formsRes.value.data || [] : [])
         .filter(f => f.status !== 3 && f.status !== "3")
         .map(f => ({ ...f, status: normalizeStatus(f.status) }));
+
       setForms(normalized);
+      checkCreateLimit(normalized, semesterStartDate);
     } catch (err) {
       console.error(err);
     } finally {
@@ -87,8 +130,10 @@ export default function EvaluationForms() {
         await api.post(`/Coordinator/EvaluationForms/${id}/draft`, {});
       }
       await api.delete(`/Coordinator/EvaluationForms/${id}`);
-      setForms(prev => prev.filter(f => f.id !== id));
+      const updated = forms.filter(f => f.id !== id);
+      setForms(updated);
       setDeleteId(null);
+      checkCreateLimit(updated, semesterStartDate);
     } catch (err) {
       console.error(err);
     } finally {
@@ -146,7 +191,13 @@ export default function EvaluationForms() {
           <h1 className={styles.pageTitle}>Evaluation Forms</h1>
           <p className={styles.pageSubtitle}>Manage all evaluation forms</p>
         </div>
-        <button className={styles.createBtn} onClick={() => navigate("/coordinator/create-evaluation-form")}>
+        <button
+          className={styles.createBtn}
+          onClick={() => canCreate && navigate("/coordinator/create-evaluation-form")}
+          disabled={!canCreate}
+          title={createTooltip}
+          style={!canCreate ? { opacity: 0.5, cursor: "not-allowed" } : {}}
+        >
           <Add fontSize="small" /> Create Form
         </button>
       </div>
@@ -182,9 +233,11 @@ export default function EvaluationForms() {
       ) : filtered.length === 0 ? (
         <div className={styles.empty}>
           <p>No evaluation forms found.</p>
-          <button className={styles.createBtn} onClick={() => navigate("/coordinator/create-evaluation-form")}>
-            <Add fontSize="small" /> Create your first form
-          </button>
+          {canCreate && (
+            <button className={styles.createBtn} onClick={() => navigate("/coordinator/create-evaluation-form")}>
+              <Add fontSize="small" /> Create your first form
+            </button>
+          )}
         </div>
       ) : (
         <div className={styles.tableWrapper}>

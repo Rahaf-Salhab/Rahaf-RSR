@@ -107,6 +107,12 @@ function StartSemesterScreen({ onStart, loading }) {
   );
 }
 
+const normalizeStatus = (status) => {
+  if (status === 1 || status === "draft") return "draft";
+  if (status === 2 || status === "published") return "published";
+  return String(status).toLowerCase();
+};
+
 export default function CoordinatorHome() {
   const navigate = useNavigate();
 
@@ -119,33 +125,39 @@ export default function CoordinatorHome() {
   const [loading, setLoading] = useState(true);
   const intervalRef = useRef(null);
   const endDateRef = useRef(null);
-useEffect(() => {
-  if (!activeSemester) return;
 
-  const start = new Date(activeSemester.startDate);
-  const end = new Date(activeSemester.endDate);
-  const now = new Date();
+  // ── Create limit state ──────────────────────────────────────────────
+  const [canCreate, setCanCreate] = useState(true);
+  const [createTooltip, setCreateTooltip] = useState("");
 
-  const totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+  useEffect(() => {
+    if (!activeSemester) return;
 
-  const daysRemaining = Math.max(
-    Math.ceil((end - now) / (1000 * 60 * 60 * 24)),
-    0
-  );
+    const start = new Date(activeSemester.startDate);
+    const end = new Date(activeSemester.endDate);
+    const now = new Date();
 
-  const passedDays = Math.max(totalDays - daysRemaining, 0);
+    const totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
 
-  const progress =
-    totalDays > 0
-      ? Math.min(Math.round((passedDays / totalDays) * 100), 100)
-      : 0;
+    const daysRemaining = Math.max(
+      Math.ceil((end - now) / (1000 * 60 * 60 * 24)),
+      0
+    );
 
-  const timer = setTimeout(() => {
-    setAnimatedProgress(progress);
-  }, 200);
+    const passedDays = Math.max(totalDays - daysRemaining, 0);
 
-  return () => clearTimeout(timer);
-}, [activeSemester]);
+    const progress =
+      totalDays > 0
+        ? Math.min(Math.round((passedDays / totalDays) * 100), 100)
+        : 0;
+
+    const timer = setTimeout(() => {
+      setAnimatedProgress(progress);
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [activeSemester]);
+
   useEffect(() => {
     checkActiveSemester();
     return () => {
@@ -153,7 +165,6 @@ useEffect(() => {
     };
   }, []);
 
-  // بيشوف إذا انتهى الفصل كل دقيقة
   const startEndDateWatcher = (endDate) => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     endDateRef.current = endDate;
@@ -164,7 +175,7 @@ useEffect(() => {
         setSemesterState("ended");
         clearInterval(intervalRef.current);
       }
-    }, 60000); // كل دقيقة
+    }, 60000);
   };
 
   const checkActiveSemester = async () => {
@@ -184,7 +195,8 @@ useEffect(() => {
         } else {
           setSemesterState("active");
           startEndDateWatcher(semester.endDate);
-          fetchDashboardData();
+          // نمرر startDate مباشرة لأن setActiveSemester لسا ما اتحدث
+          fetchDashboardData(semester.startDate);
         }
       } else {
         setSemesterState("none");
@@ -195,7 +207,7 @@ useEffect(() => {
         setSemesterState("none");
       } else {
         setSemesterState("active");
-        fetchDashboardData();
+        fetchDashboardData(null);
       }
       setLoading(false);
     } finally {
@@ -213,21 +225,19 @@ useEffect(() => {
       });
       setSemesterState("active");
       startEndDateWatcher(form.EndDate);
-      fetchDashboardData();
+      fetchDashboardData(new Date(form.StartDate).toISOString());
     } catch (err) {
       console.error("createSemester error:", err);
     } finally {
       setStartingSemester(false);
     }
   };
-  const fetchDashboardData = async () => {
-    setLoading(true);
 
+  const fetchDashboardData = async (semesterStartDate) => {
+    setLoading(true);
     try {
       const res = await api.get("/Dashboard/dashboard-coordinator");
-
       const statistics = res.data?.statistics;
-
       setStats({
         totalUsers: statistics?.totalUsers ?? 0,
         totalProjects: statistics?.totalProjects ?? 0,
@@ -235,6 +245,38 @@ useEffect(() => {
         examinations: statistics?.examinations ?? 0,
       });
 
+      // ── Check semester form limit ──────────────────────────────────
+      try {
+        const formsRes = await api.get("/Coordinator/EvaluationForms");
+        const semesterStart = semesterStartDate ? new Date(semesterStartDate) : null;
+
+        const activeForms = (formsRes.data || [])
+          .filter(f => f.status !== 3 && f.status !== "3")
+          .map(f => ({ ...f, status: normalizeStatus(f.status) }))
+          .filter(f => {
+            if (f.status !== "draft" && f.status !== "published") return false;
+            // بس الفورمز اللي اتعملت في هاد الفصل
+            if (semesterStart) {
+              return new Date(f.createdAt) >= semesterStart;
+            }
+            return true;
+          });
+
+        const hasSupervisor = activeForms.some(f => f.assignTo === "Supervisor");
+        const hasExaminer = activeForms.some(f => f.assignTo === "Examiner");
+
+        if (hasSupervisor && hasExaminer) {
+          setCanCreate(false);
+          setCreateTooltip(
+            "You already have one form for Supervisor and one for Examiner this semester."
+          );
+        } else {
+          setCanCreate(true);
+          setCreateTooltip("");
+        }
+      } catch {
+        setCanCreate(true);
+      }
     } catch (err) {
       console.error("dashboard coordinator error:", err);
     } finally {
@@ -283,50 +325,38 @@ useEffect(() => {
   ];
 
   const formatDate = (dateString) => {
-  if (!dateString) return "-";
-
-  return new Date(dateString).toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-};
-
-const getSemesterInfo = () => {
-  if (!activeSemester) {
-    return {
-      totalDays: 0,
-      daysRemaining: 0,
-      progress: 0,
-    };
-  }
-
-  const start = new Date(activeSemester.startDate);
-  const end = new Date(activeSemester.endDate);
-  const now = new Date();
-
-  const totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-
-  const daysRemaining = Math.max(
-    Math.ceil((end - now) / (1000 * 60 * 60 * 24)),
-    0
-  );
-
-  const passedDays = Math.max(totalDays - daysRemaining, 0);
-
-  const progress =
-    totalDays > 0
-      ? Math.min(Math.round((passedDays / totalDays) * 100), 100)
-      : 0;
-
-  return {
-    totalDays,
-    daysRemaining,
-    progress,
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
   };
-};
 
-const semesterInfo = getSemesterInfo();
+  const getSemesterInfo = () => {
+    if (!activeSemester) {
+      return { totalDays: 0, daysRemaining: 0, progress: 0 };
+    }
+
+    const start = new Date(activeSemester.startDate);
+    const end = new Date(activeSemester.endDate);
+    const now = new Date();
+
+    const totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+    const daysRemaining = Math.max(
+      Math.ceil((end - now) / (1000 * 60 * 60 * 24)),
+      0
+    );
+    const passedDays = Math.max(totalDays - daysRemaining, 0);
+    const progress =
+      totalDays > 0
+        ? Math.min(Math.round((passedDays / totalDays) * 100), 100)
+        : 0;
+
+    return { totalDays, daysRemaining, progress };
+  };
+
+  const semesterInfo = getSemesterInfo();
 
   return (
     <div className={styles.page}>
@@ -339,7 +369,10 @@ const semesterInfo = getSemesterInfo();
         </div>
         <button
           className={styles.startBtn}
-          onClick={() => navigate("/coordinator/create-evaluation-form")}
+          onClick={() => canCreate && navigate("/coordinator/create-evaluation-form")}
+          disabled={!canCreate}
+          title={createTooltip}
+          style={!canCreate ? { opacity: 0.5, cursor: "not-allowed" } : {}}
         >
           <Add fontSize="small" />
           Create Evaluation Form
@@ -360,51 +393,47 @@ const semesterInfo = getSemesterInfo();
         ))}
       </div>
 
-    {activeSemester && (
-  <div className={styles.semesterStatusCard}>
-    <div className={styles.semesterStatusHeader}>
-      <div>
-        <h2 className={styles.semesterStatusTitle}>Current Semester</h2>
-        <p className={styles.semesterStatusName}>
-          {activeSemester.name}
-        </p>
-      </div>
+      {activeSemester && (
+        <div className={styles.semesterStatusCard}>
+          <div className={styles.semesterStatusHeader}>
+            <div>
+              <h2 className={styles.semesterStatusTitle}>Current Semester</h2>
+              <p className={styles.semesterStatusName}>
+                {activeSemester.name}
+              </p>
+            </div>
+            <span className={styles.activeBadge}>Active</span>
+          </div>
 
-      <span className={styles.activeBadge}>Active</span>
-    </div>
+          <div className={styles.semesterDatesRow}>
+            <div>
+              <span>Start Date</span>
+              <strong>{formatDate(activeSemester.startDate)}</strong>
+            </div>
+            <div>
+              <span>End Date</span>
+              <strong>{formatDate(activeSemester.endDate)}</strong>
+            </div>
+          </div>
 
-    <div className={styles.semesterDatesRow}>
-      <div>
-        <span>Start Date</span>
-        <strong>{formatDate(activeSemester.startDate)}</strong>
-      </div>
+          <div className={styles.semesterProgressHeader}>
+            <span>Semester Progress</span>
+            <strong>{animatedProgress}%</strong>
+          </div>
 
-      <div>
-        <span>End Date</span>
-        <strong>{formatDate(activeSemester.endDate)}</strong>
-      </div>
-    </div>
+          <div className={styles.semesterBar}>
+            <div
+              className={styles.semesterBarFill}
+              style={{ width: `${animatedProgress}%` }}
+            />
+          </div>
 
-    <div className={styles.semesterProgressHeader}>
-      <span>Semester Progress</span>
-      <strong>{animatedProgress}%</strong>
-    </div>
-
-    <div className={styles.semesterBar}>
-      <div
-        className={styles.semesterBarFill}
-        style={{ width: `${animatedProgress}%` }}
-      />
-    </div>
-
-    <div className={styles.semesterFooter}>
-      <span>Days Remaining</span>
-      <strong>
-        {semesterInfo.daysRemaining} days
-      </strong>
-    </div>
-  </div>
-)}
+          <div className={styles.semesterFooter}>
+            <span>Days Remaining</span>
+            <strong>{semesterInfo.daysRemaining} days</strong>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
