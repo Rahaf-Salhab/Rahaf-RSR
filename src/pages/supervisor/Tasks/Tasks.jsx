@@ -127,6 +127,8 @@ function TaskModal({
               value={form.Description}
               onChange={(e) => handleChange("Description", e.target.value)}
               placeholder="Task description..."
+                maxLength={100}
+
             />
           </div>
 

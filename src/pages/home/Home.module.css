@@ -65,11 +65,12 @@
 .hero {
   position: relative;
   min-height: 100vh;
+  padding: 100px 40px 60px;
   display: flex;
   align-items: center;
-  padding: 100px 40px 60px;
   overflow: hidden;
 }
+
 
 .heroBg {
   position: absolute;
@@ -85,13 +86,37 @@
   background-image: radial-gradient(circle, rgba(150, 130, 110, 0.04) 1px, transparent 1px);
   background-size: 28px 28px;
 }
+.heroInner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(480px, 0.9fr) minmax(500px, 1.1fr);
+  align-items: center;
+  gap: 70px;
+}
 
 .heroContent {
   position: relative;
   z-index: 2;
   max-width: 620px;
 }
-
+.heroImageWrapper {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.heroImage {
+   width: 100%;
+  max-width: 700px;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
 .heroBadge {
   display: inline-block;
   background: rgba(192, 68, 26, 0.1);

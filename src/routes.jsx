@@ -16,7 +16,7 @@ import StudentTasks from "./pages/student/Tasks/StudentTasks";
 import StudentThesis from "./pages/student/Thesis/StudentThesis";
 import StudentExamination from "./pages/student/Examination/StudentExamination";
 import StudentTaskDetails from "./pages/student/Tasks/StudentTaskDetails";
-  import SupervisorHome from "./pages/supervisor/SupervisorHome";
+import SupervisorHome from "./pages/supervisor/SupervisorHome";
 import CoordinatorHome from "./pages/coordinator/CoordinatorHome";
 import ExaminerHome from "./pages/examiner/ExaminerHome";
 
@@ -73,7 +73,7 @@ const routes = createBrowserRouter([
       { index: true, element: <StudentHome /> },
       { path: "home", element: <StudentHome /> },
       { path: "grades", element: <StudentGrades /> },
-            { path: "profile", element: <Profile /> },
+      { path: "profile", element: <Profile /> },
       { path: "tasks", element: <StudentTasks /> }, // Main tasks page showing all tasks for the student's group
       { path: "thesis", element: <StudentThesis /> },
       {
@@ -106,9 +106,11 @@ const routes = createBrowserRouter([
       { path: "archive/:semesterId", element: <ArchivedThesis /> },
       { path: "profile", element: <Profile /> },
       {
-        path: "groups/:groupId/tasks/:taskId/submissions",
-        element: <TaskSubmissions />,
+        path: "groups/:groupId/tasks/:taskId/submissions", element: <TaskSubmissions />,
       }, // Page that displays submissions for a specific task inside a specific group
+      {
+        path: "tasks/:taskId/submissions", element: <TaskSubmissions />,
+      },
     ],
   },
 

@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import styles from "./Navbar.module.css";
-import { Menu, Language, Notifications } from "@mui/icons-material";
+import { Menu } from "@mui/icons-material";
 
 export default function Navbar({ onMenuClick }) {
   const role = localStorage.getItem("role");
@@ -19,11 +19,7 @@ export default function Navbar({ onMenuClick }) {
       </div>
 
       <div className={styles.headerRight}>
-        <button className={styles.iconBtn}><Language /></button>
-        <button className={styles.iconBtn}>
-          <Notifications />
-          <span className={styles.badge}>3</span>
-        </button>
+    
         <div
           className={styles.avatar}
           onClick={() => navigate(`/${role}/profile`)}

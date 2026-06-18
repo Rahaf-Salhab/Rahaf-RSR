@@ -429,11 +429,13 @@ const handleRoleSelect = async (selectedRole) => {
           className={
             styles.modalOverlay
           }
+          onClick={() => setShowRoleModal(false)}
         >
           <div
             className={
               styles.roleModal
             }
+            onClick={(e) => e.stopPropagation()}
           >
             <h2
               className={
