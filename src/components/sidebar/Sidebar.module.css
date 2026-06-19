@@ -17,13 +17,7 @@
 }
 
 .sidebarHeader {
-  /*
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 16px;
-  border-bottom: 1px solid #f0f0f0;*/
- height: 100px;
+ height: 90px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -31,10 +25,9 @@
 }
 
 .logo { 
-  width: 140px;
+  width: 130px;
   height: auto;
   object-fit: contain;
-
  }
 
 .closeBtn {
