@@ -53,16 +53,18 @@
 /* Logo */
 /* ========================= */
 .logo {
-  width: clamp(60px, 10vw, 90px);
-  margin-bottom: 8px;
+  width: 130px;
+  height: auto;
   object-fit: contain;
+  transform: translateY(18px);
+
 }
 
 /* ========================= */
 /* Titles */
 /* ========================= */
 .title {
-  margin: 8px 0 4px;
+  margin: 0px 0 4px;
   font-size: clamp(20px, 4vw, 26px);
   font-weight: 700;
   color: #101828;

@@ -7,7 +7,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 
 const RSRLogo = () => (
-  <img src={rsrLogo} alt="RSR Logo" style={{ width: "80px", marginBottom: "4px" }} />
+  <img src={rsrLogo} alt="RSR Logo" className={styles.logo} />
 );
 
 export default function ResetPassword() {

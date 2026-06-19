@@ -17,10 +17,7 @@ const RSRLogo = () => (
   <img
     src={rsrLogo}
     alt="RSR Logo"
-    style={{
-      width: "80px",
-      marginBottom: "4px",
-    }}
+   className={styles.logo}
   />
 );
 

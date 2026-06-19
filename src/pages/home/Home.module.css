@@ -24,7 +24,9 @@
 }
 
 .navLogo {
-  height: 36px;
+   height: 120px;
+  width: auto;
+  object-fit: contain;
 }
 
 .navLinks {
@@ -662,7 +664,7 @@
 }
 
 .footerLogo {
-  height: 40px;
+  height: 60px;
   filter: brightness(0) invert(1);
   opacity: 0.85;
 }

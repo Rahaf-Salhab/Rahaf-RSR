@@ -5,7 +5,7 @@ import styles from "./forgotPassword.module.css";
 import rsrLogo from "../../assets/logo/rsrLogo.png";
 
 const RSRLogo = () => (
-  <img src={rsrLogo} alt="RSR Logo" style={{ width: "80px", marginBottom: "4px" }} />
+  <img src={rsrLogo} alt="RSR Logo" className={styles.logo} />
 );
 
 export default function ForgotPassword() {

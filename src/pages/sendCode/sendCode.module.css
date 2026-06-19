@@ -40,6 +40,13 @@
   align-items: center;
 }
 
+.logo {
+  width: 120px;
+  height: auto;
+  object-fit: contain;
+  transform: translateY(8px);
+}
+
 .title {
   margin: 8px 0 4px;
   font-size: 24px;
