@@ -62,7 +62,27 @@
   background: #a33818;
   transform: translateY(-1px);
 }
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 
+.navBtnSecondary {
+  background: transparent;
+  color: #C0441A;
+  border: 1px solid #C0441A;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.navBtnSecondary:hover {
+  background: rgba(192, 68, 26, 0.08);
+}
 /* HERO */
 .hero {
   position: relative;
