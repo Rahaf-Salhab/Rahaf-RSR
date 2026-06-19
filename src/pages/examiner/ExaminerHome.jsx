@@ -100,7 +100,7 @@ export default function ExaminerHome() {
             <h2 className={styles.boxTitle}>Upcoming Examinations</h2>
             <button
               className={styles.viewAllBtn}
-              onClick={() => navigate("/examiner/schedule")}
+              onClick={() => navigate("/examiner/examination-timetable")}
             >
               View All
             </button>
@@ -112,7 +112,6 @@ export default function ExaminerHome() {
               schedule.map((s) => (
                 <div key={s.scheduleId} className={styles.scheduleItem}>
                   <div className={styles.scheduleDate}>
-
                     <p className={styles.scheduleDay}>
                       {new Date(s.date).getDate()}
                     </p>

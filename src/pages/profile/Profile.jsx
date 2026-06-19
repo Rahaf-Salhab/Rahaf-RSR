@@ -54,7 +54,6 @@ export default function Profile() {
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [avatarSuccess, setAvatarSuccess] = useState(false);
   const [avatarError, setAvatarError] = useState("");
-
   const [showPwSection, setShowPwSection] = useState(false);
   const [pwData, setPwData] = useState({ current: "", newPw: "", confirm: "" });
   const [pwErrors, setPwErrors] = useState({});
@@ -64,9 +63,12 @@ export default function Profile() {
 
   const fileRef = useRef();
   const userId = localStorage.getItem("id");
-  const role = localStorage.getItem("role");
+const role = localStorage.getItem("role")?.toLowerCase()?.trim();
 
-  useEffect(() => { fetchUser(); }, []);
+  useEffect(() => { fetchUser()
+    console.log("PROFILE userId:", userId);
+console.log("PROFILE role:", role);
+console.log("PROFILE endpoint:", ROLE_ENDPOINT[role]);; }, []);
 
   const fetchUser = async () => {
     setLoading(true);

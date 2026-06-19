@@ -65,13 +65,11 @@
 }
 
 .statusBadge {
-
     padding: 2px 15px;
     border-radius: 999px;
     border: 1px solid;
     font-size: 12px;
     font-weight: 510;
-  
 }
 
 
@@ -146,18 +144,18 @@
 
 .approveBtn {
   min-width: 145px;
-  border: 1px solid #A4F4CF;
+  border: 1px solid #9dbcae;
   padding: 13px 31px;
   border-radius: 999px;
-  background: #D0FAE5;
-  color: #006045;
+  background: #87a899;
+  color: #ffffff;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
 }
 
 .approveBtn:hover {
-  background: #76ab91;
+  background: #619079;
   color: #ffffff;
 }
 
@@ -174,7 +172,7 @@
 }
 
 .rejectBtn:hover {
-  background: #d05b29;
+  background: #c8714c;
   color: #ffffff;
 }
 
@@ -345,9 +343,8 @@
 }
 
 .pendingVersionBox {
-  background: #fffaf7;
   border-left-color: #c34c18;
-  box-shadow: 0 12px 30px rgba(196, 76, 24, 0.12);
+  box-shadow: 0 12px 30px rgba(100, 76, 24, 0.12);
 }
 
 .oldVersionBox {

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../../api/axiosInstance";
 import styles from "./Home.module.css";
 import rsrLogo from "../../assets/logo/rsrLogo.png";
+import GradGirl from "../../assets/images/GraduatedGirl.png";
 
 const FEATURES = [
   {
@@ -130,36 +131,51 @@ export default function Home() {
       </nav>
 
       {/* ── HERO ── */}
-      <section className={styles.hero}>
-        <div className={styles.heroBg} />
-        <div className={styles.heroContent}>
-          <span className={styles.heroBadge}>
-            Palestine Technical University — Kadoorie
-          </span>
-          <h1 className={styles.heroTitle}>
-            Where Graduation <br />
-            <span className={styles.heroAccent}>Projects Shine</span>
-          </h1>
-          <p className={styles.heroSubtitle}>
-            RSR is the official platform for managing, evaluating, and archiving
-            graduation projects — connecting students, supervisors, examiners,
-            and coordinators.
-          </p>
-          <div className={styles.heroBtns}>
-            <a href="#archive" className={styles.heroBtnPrimary}>
-              Explore Archive
-            </a>
-            {!isLoggedIn && (
-              <button
-                className={styles.heroBtnSecondary}
-                onClick={() => navigate("/login")}
-              >
-                Sign In
-              </button>
-            )}
-          </div>
-        </div>
-      </section>
+ <section className={styles.hero}>
+  <div className={styles.heroBg} />
+
+  <div className={styles.heroInner}>
+    <div className={styles.heroContent}>
+      <span className={styles.heroBadge}>
+        Palestine Technical University — Kadoorie
+      </span>
+
+      <h1 className={styles.heroTitle}>
+        Where Graduation <br />
+        <span className={styles.heroAccent}>Projects Shine</span>
+      </h1>
+
+      <p className={styles.heroSubtitle}>
+        RSR is the official platform for managing, evaluating, and archiving
+        graduation projects — connecting students, supervisors, examiners,
+        and coordinators.
+      </p>
+
+      <div className={styles.heroBtns}>
+        <a href="#archive" className={styles.heroBtnPrimary}>
+          Explore Projects
+        </a>
+
+        {!isLoggedIn && (
+          <button
+            className={styles.heroBtnSecondary}
+            onClick={() => navigate("/login")}
+          >
+            Sign In
+          </button>
+        )}
+      </div>
+    </div>
+
+    <div className={styles.heroImageWrapper}>
+      <img
+        src={GradGirl}
+        alt="Graduation projects platform"
+        className={styles.heroImage}
+      />
+    </div>
+  </div>
+</section>
 
       {/* ── ABOUT ── */}
       <section id="about" className={styles.about}>

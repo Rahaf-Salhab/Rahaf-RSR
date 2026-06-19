@@ -186,7 +186,7 @@ export default function SupervisorHome() {
                 <button
                   className={styles.actionBtn}
                   onClick={() =>
-                    navigate(`/supervisor/submissions/${task.taskSubmissionId}`)
+                    navigate(`/supervisor/tasks/${task.taskId}/submissions`)
                   }
                 >
                   Review <ArrowForward fontSize="small" />
@@ -243,12 +243,10 @@ export default function SupervisorHome() {
                 <button
                   className={styles.actionBtn}
                   onClick={() =>
-                    navigate(
-                      `/supervisor/thesis-review/${thesis.thesisVersionId}`,
-                    )
+                    navigate(`/supervisor/thesis/${thesis.groupId}`)
                   }
                 >
-                  Feedback <ArrowForward fontSize="small" />
+                  Review <ArrowForward fontSize="small" />
                 </button>
               </div>
             ))

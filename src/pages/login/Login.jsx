@@ -17,10 +17,7 @@ const RSRLogo = () => (
   <img
     src={rsrLogo}
     alt="RSR Logo"
-    style={{
-      width: "80px",
-      marginBottom: "4px",
-    }}
+   className={styles.logo}
   />
 );
 
@@ -429,11 +426,13 @@ const handleRoleSelect = async (selectedRole) => {
           className={
             styles.modalOverlay
           }
+          onClick={() => setShowRoleModal(false)}
         >
           <div
             className={
               styles.roleModal
             }
+            onClick={(e) => e.stopPropagation()}
           >
             <h2
               className={
