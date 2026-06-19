@@ -34,11 +34,7 @@ const sidebarConfig = {
       icon: <CalendarMonth />,
       path: "/coordinator/examination-timetable",
     },
-    {
-      label: "Thesis Management",
-      icon: <MenuBook />,
-      path: "/coordinator/thesis-management",
-    },
+    
     {
       label: "Final Grades",
       icon: <Grade />,
@@ -49,8 +45,7 @@ const sidebarConfig = {
   ],
   examiner: [
     { label: "Dashboard", icon: <Dashboard />, path: "/examiner/home" },
-    { label: "My Projects", icon: <Folder />, path: "/examiner/projects" },
-    {
+     {
       label: "Evaluation Forms",
       icon: <RateReview />,
       path: "/examiner/evaluation-forms",

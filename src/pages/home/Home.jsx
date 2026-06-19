@@ -38,7 +38,6 @@ export default function Home() {
     window.innerWidth <= 600 ? 1 : 3,
   );
 
-  const isLoggedIn = !!localStorage.getItem("accessToken");
   const role = localStorage.getItem("role");
 
   useEffect(() => {
@@ -100,7 +99,13 @@ export default function Home() {
   );
 
   const handleDashboard = () => {
-    navigate("/login");
+    const role = localStorage.getItem("role");
+  
+    if (role) {
+      navigate(`/${role}/home`);
+    } else {
+      navigate("/login");
+    }
   };
 
   return (
@@ -119,15 +124,12 @@ export default function Home() {
             Projects
           </a>
         </div>
-        {isLoggedIn ? (
-          <button className={styles.navBtn} onClick={handleDashboard}>
-            Go to Dashboard →
-          </button>
-        ) : (
-          <button className={styles.navBtn} onClick={() => navigate("/login")}>
-            Sign In
-          </button>
-        )}
+        <button
+  className={styles.navBtn}
+  onClick={handleDashboard}
+>
+  Go to Dashboard →
+</button>
       </nav>
 
       {/* ── HERO ── */}
@@ -152,19 +154,17 @@ export default function Home() {
       </p>
 
       <div className={styles.heroBtns}>
-        <a href="#archive" className={styles.heroBtnPrimary}>
-          Explore Projects
-        </a>
+  <a href="#archive" className={styles.heroBtnPrimary}>
+    Explore Projects
+  </a>
 
-        {!isLoggedIn && (
-          <button
-            className={styles.heroBtnSecondary}
-            onClick={() => navigate("/login")}
-          >
-            Sign In
-          </button>
-        )}
-      </div>
+  <button
+    className={styles.heroBtnSecondary}
+    onClick={() => navigate("/login")}
+  >
+    Sign In
+  </button>
+</div>
     </div>
 
     <div className={styles.heroImageWrapper}>

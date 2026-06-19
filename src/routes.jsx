@@ -24,8 +24,7 @@ import CreateEvaluationForm from "./pages/coordinator/CreateEvaluationForm/Creat
 import EvaluationForms from "./pages/coordinator/EvaluationForms/EvaluationForms";
 import Users from "./pages/coordinator/Users/Users";
 import ExaminationTimetable from "./pages/coordinator/ExaminationTimetable/ExaminationTimetable";
-import ThesisManagement from "./pages/coordinator/ThesisManagement/ThesisManagement";
-import FinalGrades from "./pages/coordinator/FinalGrades/FinalGrades";
+ import FinalGrades from "./pages/coordinator/FinalGrades/FinalGrades";
 import Semester from "./pages/coordinator/Semester/Semester";
 import ArchiveSemesters from "./pages/coordinator/archive/ArchiveSemesters";
 import ArchivedThesis from "./pages/coordinator/archive/ArchivedThesis";
@@ -129,8 +128,7 @@ const routes = createBrowserRouter([
       { path: "evaluation-forms", element: <EvaluationForms /> },
       { path: "users", element: <Users /> },
       { path: "examination-timetable", element: <ExaminationTimetable /> },
-      { path: "thesis-management", element: <ThesisManagement /> },
-      { path: "final-grades", element: <FinalGrades /> },
+       { path: "final-grades", element: <FinalGrades /> },
       { path: "profile", element: <Profile /> },
       { path: "semester", element: <Semester /> },
       { path: "archive", element: <ArchiveSemesters /> },

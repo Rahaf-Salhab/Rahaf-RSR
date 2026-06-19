@@ -83,12 +83,15 @@ export default function Login() {
   const handleChange = (e) => {
     setForm({
       ...form,
-      [e.target.name]:
-        e.target.value,
+      [e.target.name]: e.target.value,
     });
-
+  
     if (error) {
       setError("");
+    }
+  
+    if (showRoleModal) {
+      setShowRoleModal(false);
     }
   };
 
@@ -157,10 +160,13 @@ const handleRoleSelect = async (selectedRole) => {
     const success = response.data.success;
 
     if (!success) {
+      setShowRoleModal(false);
+
       setError(
         response.data.message ||
         "Login failed."
       );
+
       return;
     }
 
@@ -176,6 +182,7 @@ const handleRoleSelect = async (selectedRole) => {
       decodeToken(accessToken);
 
     if (!decoded) {
+      setShowRoleModal(false);
       setError("Invalid token.");
       return;
     }
@@ -188,13 +195,14 @@ const handleRoleSelect = async (selectedRole) => {
       refreshToken,
       decoded,
     });
-
   } catch (err) {
     console.log(err);
 
+    setShowRoleModal(false);
+
     setError(
       err.response?.data?.message ||
-      "Something went wrong."
+      "Invalid email, password, or role."
     );
   } finally {
     setLoading(false);
