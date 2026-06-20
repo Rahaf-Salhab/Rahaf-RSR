@@ -6,6 +6,9 @@ import {
 } from "@mui/icons-material";
 
 export default function EvaluationFormSubmit({ role }) {
+  console.log("COMPONENT RENDERED");
+  console.log("ROLE PROP =", role);
+
   const [form, setForm] = useState(null);
   const [groups, setGroups] = useState([]);
   const [submittedGroupIds, setSubmittedGroupIds] = useState([]);
@@ -16,26 +19,43 @@ export default function EvaluationFormSubmit({ role }) {
     ? "/Group/groups-supervisor"
     : "/Groups/groups-examiner";
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    console.log("USE EFFECT RUNNING");
+    fetchData();
+  }, []);
 
   const fetchData = async () => {
+    console.log("FETCH DATA STARTED");
     setLoading(true);
+
     try {
       const [formsRes, groupsRes] = await Promise.all([
         api.get("/Evaluation/EvaluationSubmissions/my-forms"),
         api.get(groupsEndpoint),
       ]);
 
+      console.log("FORMS RESPONSE =", formsRes.data);
+      console.log("GROUPS RESPONSE =", groupsRes.data);
+
       const forms = formsRes.data || [];
+
+      console.log("FORMS:", forms);
+      console.log("ROLE:", role);
+
       const latest = forms
-        .filter(f => f.status === 2)
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0] || null;
-      setForm(latest);
+      .filter((f) => f.status === 2)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0] || null;
+    
+    console.log("LATEST FORM =", latest);
+    
+    setForm(latest);
 
       const myGroups = groupsRes.data?.groups || [];
+      console.log("MY GROUPS =", myGroups);
       setGroups(myGroups);
+
     } catch (err) {
-      console.error(err);
+      console.error("FETCH ERROR =", err);
     } finally {
       setLoading(false);
     }
