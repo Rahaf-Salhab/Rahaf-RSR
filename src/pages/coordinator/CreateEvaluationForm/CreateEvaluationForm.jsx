@@ -30,15 +30,24 @@ export default function CreateEvaluationForm() {
 
   const ensureFormCreated = async () => {
     if (savedId) return savedId;
+  
     const payload = {
       title: formTitle,
       assignTo,
       description,
       status: 0,
     };
+  
     const res = await api.post("/Coordinator/EvaluationForms", payload);
+  
+    console.log("Create Form Response:", res.data);
+  
     const id = res.data.id;
+  
+    console.log("Returned Form ID:", id);
+  
     setSavedId(id);
+  
     return id;
   };
 
