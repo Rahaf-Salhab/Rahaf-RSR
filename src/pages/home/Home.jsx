@@ -124,12 +124,8 @@ export default function Home() {
             Projects
           </a>
         </div>
-        <button
-  className={styles.navBtn}
-  onClick={handleDashboard}
->
-  Go to Dashboard →
-</button>
+        
+
       </nav>
 
       {/* ── HERO ── */}
