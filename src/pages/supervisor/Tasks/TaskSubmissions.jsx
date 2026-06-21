@@ -6,49 +6,29 @@ import styles from "./TaskSubmission.module.css";
 import DescriptionIcon from "@mui/icons-material/Description";
 
 export default function TaskSubmissions() {
-  // جلب taskId من الرابط
-  // بنستخدمه عشان نجيب بيانات التاسك وتسليماته
+
   const { taskId } = useParams();
-
-  // تخزين بيانات التاسك مثل العنوان والوصف
   const [task, setTask] = useState(null);
-
-  // تخزين كل التسليمات الخاصة بهذا التاسك
   const [submissions, setSubmissions] = useState([]);
-
-  // حالات التحميل والخطأ الخاصة بالصفحة
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
   // تخزين صندوق التقييم المفتوح حاليًا
-  // يحتوي على رقم التسليم والحالة المختارة Approved أو Rejected
   const [reviewBox, setReviewBox] = useState(null);
-
   // تخزين تعليق المشرف عند التقييم
   const [reviewComment, setReviewComment] = useState("");
-
-  // حالات التحميل والخطأ الخاصة بعملية التقييم
   const [reviewLoading, setReviewLoading] = useState(false);
   const [reviewError, setReviewError] = useState("");
 
   useEffect(() => {
-    // جلب بيانات التاسك مع كل التسليمات التابعة له
     const fetchSubmissions = async () => {
       try {
         setLoading(true);
         setError("");
-
-        // طلب بيانات التاسك من الباك باستخدام taskId
         const res = await api.get(`/Task/task-id/${taskId}`);
-
-        // الباك برجع بيانات التاسك داخل res.data.task
         const taskData = res.data?.task;
 
-        // أخذ التسليمات من بيانات التاسك
-        // إذا ما في تسليمات بنخليها مصفوفة فاضية
         const taskSubmissions = taskData?.taskSubmissions || [];
 
-        // تخزين بيانات التاسك والتسليمات في الـ state
         setTask(taskData);
         setSubmissions(taskSubmissions);
       } catch{
@@ -69,7 +49,6 @@ export default function TaskSubmissions() {
       status,
     });
 
-    // تصفير التعليق والخطأ عند فتح صندوق تقييم جديد
     setReviewComment("");
     setReviewError("");
   };
@@ -78,7 +57,6 @@ export default function TaskSubmissions() {
   const handleSubmitReview = async () => {
     if (!reviewBox) return;
 
-    // في حالة الرفض، التعليق إجباري
     if (reviewBox.status === "Rejected" && !reviewComment.trim()) {
       setReviewError("Comment is required when rejecting a submission.");
       return;
@@ -96,15 +74,12 @@ export default function TaskSubmissions() {
           comment: reviewComment.trim(),
         },
       );
-
-      // إغلاق صندوق التقييم بعد نجاح العملية
       setReviewBox(null);
       setReviewComment("");
 
       // إعادة جلب بيانات التاسك حتى تظهر الحالة الجديدة مباشرة
       const res = await api.get(`/Task/task-id/${taskId}`);
       const taskData = res.data?.task;
-
       setTask(taskData);
       setSubmissions(taskData?.taskSubmissions || []);
     } catch (err) {
@@ -114,36 +89,25 @@ export default function TaskSubmissions() {
       setReviewLoading(false);
     }
   };
-
-  // عرض رسالة تحميل أثناء جلب البيانات
   if (loading) {
     return <div>Loading...</div>;
   }
-
-  // عرض رسالة خطأ إذا فشل جلب البيانات
   if (error) {
     return <div>{error}</div>;
   }
-
-  // تنسيق التاريخ قبل تمريره لكمبوننت المناقشة
   const formatDate = (date) => {
     if (!date) return "-";
     return new Date(date).toLocaleDateString();
   };
 
   // ترتيب التسليمات من الأحدث إلى الأقدم
-  // عشان أحدث نسخة تظهر بالأعلى
   const sortedSubmissions = [...submissions].sort(
     (a, b) => new Date(b.submittedAt) - new Date(a.submittedAt),
   );
 
-  // أخذ أحدث تسليم
-  // بنستخدمه عشان نعرض شارة Latest Version
   const latestSubmission = sortedSubmissions[0];
 
   // فحص إذا كان يوجد تسليم غير مقيم
-  // بنستخدمه عشان نخلي النسخة غير المقيمة أوضح
-  // ونخلي النسخ المقيمة أفتح فقط إذا كان في نسخة بانتظار التقييم
   const hasPendingSubmission = sortedSubmissions.some((submission) => {
     const status = submission.status?.trim();
     return status !== "Approved" && status !== "Rejected";
@@ -151,7 +115,6 @@ export default function TaskSubmissions() {
 
   return (
     <div className={styles.submissionsPage}>
-      {/* رأس الصفحة */}
       <div className={styles.submissionsHeader}>
         <h2 className={styles.submissionsTitle}>Task Submissions</h2>
         <p className={styles.submissionsSubtitle}>
@@ -160,7 +123,6 @@ export default function TaskSubmissions() {
       </div>
 
       <div className={styles.taskSubmissionCard}>
-        {/* عرض عنوان التاسك ووصفه */}
         {task && (
           <div className={styles.taskInfoSection}>
             <div className={styles.taskNameLine}>
@@ -180,32 +142,21 @@ export default function TaskSubmissions() {
           <div className={styles.submissionsList}>
             {sortedSubmissions.map((submission, index) => {
               // حساب رقم النسخة حسب ترتيب التسليمات
-              // الأحدث يأخذ أعلى رقم نسخة
               const displayVersion = sortedSubmissions.length - index;
 
-              // تنظيف قيمة الحالة القادمة من الباك
               const submissionStatus = submission.status?.trim();
 
-              // التسليم يعتبر مقيم فقط إذا كانت حالته Approved أو Rejected
-              const isReviewed =
-                submissionStatus === "Approved" ||
-                submissionStatus === "Rejected";
+              const isReviewed = submissionStatus === "Approved" || submissionStatus === "Rejected";
 
-              // التسليم غير المقيم هو الذي ما زال يحتاج تقييم من المشرف
               const isPending = !isReviewed;
 
               // فحص هل هذا التسليم هو أحدث تسليم
-              const isLatestSubmission =
-                submission.taskSubmissionId ===
-                latestSubmission?.taskSubmissionId;
+              const isLatestSubmission = submission.taskSubmissionId === latestSubmission?.taskSubmissionId;
 
               return (
                 <div
                   className={`${styles.submissionBox} ${
-                    // إذا في تسليم غير مقيم:
-                    // نخلي التسليم غير المقيم واضح
-                    // ونخلي التسليمات المقيمة أفتح
-                    // أما إذا كل التسليمات مقيمة، نخليها بشكل طبيعي
+    
                     hasPendingSubmission && isPending
                       ? styles.pendingVersionBox
                       : hasPendingSubmission && isReviewed
@@ -217,7 +168,6 @@ export default function TaskSubmissions() {
                   {/* صف الشارات: الحالة، أحدث نسخة، ورقم النسخة */}
                   <div className={styles.submissionVersionRow}>
                     <div className={styles.submissionBadgesLeft}>
-                      {/* إظهار Latest Version فقط إذا كان في أكثر من نسخة */}
                       {sortedSubmissions.length > 1 && isLatestSubmission && (
                         <span className={styles.latestBadge}>
                           Latest Version
@@ -246,7 +196,6 @@ export default function TaskSubmissions() {
 
                   <div className={styles.submissionTop}>
                     <div className={styles.submissionLeft}>
-                      {/* أيقونة الملف */}
                       <div className={styles.fileIcon}>
                         <DescriptionIcon />
                       </div>
@@ -267,7 +216,6 @@ export default function TaskSubmissions() {
                             : "-"}
                         </p>
 
-                        {/* عرض تاريخ التقييم فقط إذا كان التسليم مقيم */}
                         {isReviewed && submission.reviewedAt && (
                           <p className={styles.submissionMeta}>
                             <span>Reviewed At:</span>{" "}
@@ -275,7 +223,6 @@ export default function TaskSubmissions() {
                           </p>
                         )}
 
-                        {/* رابط ملف التسليم */}
                         {submission.taskSubmissionURL && (
                           <p className={styles.submissionMeta}>
                             <span>Submitted File:</span>{" "}
@@ -329,7 +276,6 @@ export default function TaskSubmissions() {
                     <div className={styles.reviewBox}>
                       <label className={styles.reviewLabel}>
                         Supervisor Comment{" "}
-                        {/* النجمة تظهر فقط عند الرفض لأن التعليق إجباري */}
                         {reviewBox.status === "Rejected" && (
                           <span className={styles.required}>*</span>
                         )}
@@ -350,7 +296,6 @@ export default function TaskSubmissions() {
                         }
                       />
 
-                      {/* عرض خطأ التقييم إذا وجد */}
                       {reviewError && (
                         <p className={styles.reviewError}>{reviewError}</p>
                       )}

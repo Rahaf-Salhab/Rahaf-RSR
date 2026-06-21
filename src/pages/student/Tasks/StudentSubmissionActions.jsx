@@ -17,43 +17,21 @@ export default function StudentSubmissionActions({
   submitButtonText = "Submit Task",
   compact = false,
 }) {
-  // للتحكم بفتح وإغلاق فورم إضافة تسليم جديد
   const [showSubmitForm, setShowSubmitForm] = useState(false);
-
-  // لتخزين الملف الذي يختاره الطالب عند التسليم الجديد
   const [submitFile, setSubmitFile] = useState(null);
-
   // لتخزين ملاحظات الطالب في التسليم الجديد
   const [studentNotes, setStudentNotes] = useState("");
-
-  // لمعرفة إذا كانت عملية الإرسال شغالة، حتى نعطل الزر ونظهر Loading
   const [submitting, setSubmitting] = useState(false);
-
-  // لتخزين رسالة الخطأ الخاصة بإضافة تسليم جديد
   const [submitError, setSubmitError] = useState("");
-
-  // لمعرفة إذا كانت عملية الحذف شغالة
   const [deleting, setDeleting] = useState(false);
-
-  // لتخزين رسالة الخطأ الخاصة بالحذف
   const [deleteError, setDeleteError] = useState("");
-
-  // للتحكم بفتح وإغلاق نافذة تأكيد الحذف
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-
   // للتحكم بفتح وإغلاق فورم تعديل التسليم
   const [showEditForm, setShowEditForm] = useState(startInEditMode);
-
-  // لتخزين الملف الجديد إذا اختاره الطالب أثناء التعديل
   const [editFile, setEditFile] = useState(null);
-
   // لتخزين الملاحظات أثناء التعديل، ونبدأها بالملاحظات القديمة إن وجدت
   const [editNotes, setEditNotes] = useState(submission?.studentNotes || "");
-
-  // لمعرفة إذا كانت عملية التعديل شغالة
   const [updating, setUpdating] = useState(false);
-
-  // لتخزين رسالة الخطأ الخاصة بالتعديل
   const [updateError, setUpdateError] = useState("");
 
   // للتحكم بعرض الملف الحالي داخل فورم التعديل
@@ -67,8 +45,7 @@ export default function StudentSubmissionActions({
     setSubmitError("");
   };
 
-  // تنظيف فورم التعديل بدون استدعاء onEditCancel
-  // نستخدمها بعد نجاح التعديل حتى لا يعتبرها النظام Cancel
+
   const resetEditForm = () => {
     setShowEditForm(false);
     setEditFile(null);
@@ -87,13 +64,11 @@ export default function StudentSubmissionActions({
   const handleSubmitTask = async (e) => {
     e.preventDefault();
 
-    // لا نسمح بالإرسال بدون ملف
     if (!submitFile) {
       setSubmitError("Please select a file.");
       return;
     }
 
-    // taskId ضروري لأنه يحدد لأي task سيتم إرسال التسليم
     if (!task?.taskId) {
       setSubmitError("Task id is missing.");
       return;
@@ -103,10 +78,8 @@ export default function StudentSubmissionActions({
       setSubmitting(true);
       setSubmitError("");
 
-      // نستخدم FormData لأن الطلب يحتوي على ملف
       const formData = new FormData();
 
-      // اسم الحقل لازم يطابق الاسم المتوقع من الباك
       formData.append("TaskSubmission", submitFile);
       formData.append("StudentNotes", studentNotes);
 
@@ -115,7 +88,6 @@ export default function StudentSubmissionActions({
         formData,
       );
 
-      // بعد نجاح الإرسال نغلق الفورم ونحدث تفاصيل التاسك
       closeSubmitModal();
       refreshTaskDetails();
     } catch (err) {
@@ -125,7 +97,7 @@ export default function StudentSubmissionActions({
     }
   };
 
-  // حذف التسليم الحالي
+
   const handleDeleteSubmission = async () => {
     // التأكد من وجود id الخاص بالتسليم قبل الحذف
     if (!submission?.taskSubmissionId) {
@@ -141,7 +113,7 @@ export default function StudentSubmissionActions({
         `/TaskSubmission/Delete/SubmissionId/${submission.taskSubmissionId}`,
       );
 
-      // بعد الحذف نغلق المودال ونحدث تفاصيل التاسك
+
       setShowDeleteModal(false);
       refreshTaskDetails();
     } catch (err) {
@@ -153,11 +125,10 @@ export default function StudentSubmissionActions({
     }
   };
 
-  // تعديل التسليم الحالي
+
   const handleUpdateSubmission = async (e) => {
     e.preventDefault();
 
-    // التأكد من وجود id الخاص بالتسليم قبل التعديل
     if (!submission?.taskSubmissionId) {
       setUpdateError("Submission id is missing.");
       return;
@@ -166,16 +137,12 @@ export default function StudentSubmissionActions({
     try {
       setUpdating(true);
       setUpdateError("");
-
-      // نستخدم FormData لأن الطالب قد يرفع ملف جديد أثناء التعديل
       const formData = new FormData();
 
-      // إذا اختار الطالب ملف جديد نرسله، وإذا لم يختر يبقى الملف القديم كما هو
       if (editFile) {
         formData.append("TaskSubmission", editFile);
       }
 
-      // الملاحظات يتم إرسالها في كل الحالات سواء تغير الملف أو لا
       formData.append("StudentNotes", editNotes);
 
       await api.patch(
@@ -183,7 +150,6 @@ export default function StudentSubmissionActions({
         formData,
       );
 
-      // بعد نجاح التعديل نغلق الفورم ونحدث البيانات
       resetEditForm();
       refreshTaskDetails();
       onEditDone?.();
@@ -196,26 +162,21 @@ export default function StudentSubmissionActions({
     }
   };
 
-  // إذا كان يوجد submission، نعرض أزرار التعديل والحذف فقط حسب الشروط
   if (submission) {
     // لا نعرض الأزرار إلا على آخر نسخة فقط
     if (!isLatestSubmission) {
       return null;
     }
 
-    // لا نعرض أزرار التعديل والحذف إذا كان التسليم مقيم Approved أو Rejected
     if (submission.status !== "Submitted") {
       return null;
     }
 
     return (
       <div className={styles.actionsAndEditWrapper}>
-        {/* أزرار التعديل والحذف تظهر فقط عندما لا يكون فورم التعديل مفتوح */}
         {!showEditForm && (
           <div className={styles.submissionActions}>
             {deleteError && <p className={styles.actionError}>{deleteError}</p>}
-
-            {/* زر تعديل التسليم */}
             <button
               type="button"
               className={styles.iconEditBtn}
@@ -233,7 +194,6 @@ export default function StudentSubmissionActions({
               <EditIcon fontSize="small" />
             </button>
 
-            {/* زر فتح نافذة تأكيد الحذف */}
             <button
               type="button"
               className={styles.iconDeleteBtn}
@@ -253,7 +213,6 @@ export default function StudentSubmissionActions({
               <div className={styles.modalHeader}>
                 <h3 className={styles.modalTitle}>Edit Submission</h3>
 
-                {/* إغلاق فورم التعديل */}
                 <button
                   type="button"
                   className={styles.modalCloseBtn}
@@ -286,7 +245,6 @@ export default function StudentSubmissionActions({
                         </span>
                       </div>
 
-                      {/* إخفاء الملف الحالي حتى يظهر input اختيار ملف جديد */}
                       <button
                         type="button"
                         className={styles.clearFileBtn}
@@ -300,7 +258,6 @@ export default function StudentSubmissionActions({
                       </button>
                     </div>
                   ) : editFile ? (
-                    // عرض اسم الملف الجديد الذي اختاره الطالب
                     <div className={styles.fileInputLikeBox}>
                       <div className={styles.currentFileInfo}>
                         <span className={styles.inlineFileIcon}>
@@ -312,7 +269,6 @@ export default function StudentSubmissionActions({
                         </span>
                       </div>
 
-                      {/* إزالة الملف الجديد المختار والرجوع لاختيار ملف آخر */}
                       <button
                         type="button"
                         className={styles.clearFileBtn}
@@ -326,7 +282,6 @@ export default function StudentSubmissionActions({
                       </button>
                     </div>
                   ) : (
-                    // اختيار ملف جديد عند التعديل
                     <input
                       type="file"
                       accept=".pdf"
@@ -339,7 +294,6 @@ export default function StudentSubmissionActions({
                   )}
                 </div>
 
-                {/* ملاحظات الطالب أثناء التعديل */}
                 <div className={styles.formGroup}>
                   <label>
                     Student Notes{" "}
@@ -358,7 +312,6 @@ export default function StudentSubmissionActions({
                   <p className={styles.submitError}>{updateError}</p>
                 )}
 
-                {/* أزرار إلغاء أو حفظ التعديل */}
                 <div className={styles.submitActions}>
                   <button
                     type="button"
@@ -395,7 +348,6 @@ export default function StudentSubmissionActions({
               )}
 
               <div className={styles.modalActions}>
-                {/* إلغاء الحذف وإغلاق المودال */}
                 <button
                   type="button"
                   className={styles.modalCancelBtn}
@@ -408,7 +360,6 @@ export default function StudentSubmissionActions({
                   Cancel
                 </button>
 
-                {/* تنفيذ عملية الحذف */}
                 <button
                   type="button"
                   className={styles.modalDeleteBtn}
@@ -439,14 +390,12 @@ export default function StudentSubmissionActions({
         {submitButtonText}
       </button>
 
-      {/* مودال إضافة تسليم جديد */}
       {showSubmitForm && (
         <div className={styles.modalOverlay}>
           <div className={styles.submissionModal}>
             <div className={styles.modalHeader}>
               <h3 className={styles.modalTitle}>{submitButtonText}</h3>
 
-              {/* إغلاق فورم الإضافة */}
               <button
                 type="button"
                 className={styles.modalCloseBtn}
@@ -458,7 +407,6 @@ export default function StudentSubmissionActions({
             </div>
 
             <form className={styles.submitForm} onSubmit={handleSubmitTask}>
-              {/* اختيار ملف التسليم */}
               <div className={styles.formGroup}>
                 <label>Upload File</label>
 
@@ -470,7 +418,6 @@ export default function StudentSubmissionActions({
                 />
               </div>
 
-              {/* ملاحظات الطالب، اختيارية */}
               <div className={styles.formGroup}>
                 <label>
                   Student Notes{" "}
@@ -489,7 +436,6 @@ export default function StudentSubmissionActions({
                 <p className={styles.submitError}>{submitError}</p>
               )}
 
-              {/* أزرار إلغاء أو إرسال التسليم */}
               <div className={styles.submitActions}>
                 <button
                   type="button"

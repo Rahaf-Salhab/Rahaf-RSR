@@ -849,3 +849,100 @@
     padding: 9px 14px;
   }
 }
+
+
+@media (max-width: 1100px) {
+  .heroInner {
+    grid-template-columns: 1fr 1fr;
+    gap: 35px;
+  }
+
+  .heroImage {
+    max-width: 520px;
+  }
+
+  .heroTitle {
+    font-size: clamp(38px, 5vw, 58px);
+  }
+}
+@media (max-width: 900px) {
+  .hero {
+    min-height: auto;
+    padding: 90px 24px 55px;
+  }
+
+  .heroInner {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    text-align: center;
+  }
+
+  .heroImageWrapper {
+    order: 1; /* الصورة فوق */
+    margin-top: 0;
+  }
+
+  .heroContent {
+    order: 2; /* النص تحت الصورة */
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .heroImage {
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+    transform: none;
+  }
+
+  .heroSubtitle {
+    max-width: 620px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .heroBtns {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero {
+    padding: 85px 18px 50px;
+  }
+
+  .heroImage {
+    max-width: 360px;
+  }
+
+  .heroTitle {
+    font-size: 38px;
+    line-height: 1.12;
+  }
+
+  .heroSubtitle {
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .heroBtns {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .heroBtnPrimary,
+  .heroBtnSecondary {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 420px) {
+  .heroImage {
+    max-width: 310px;
+  }
+
+  .heroTitle {
+    font-size: 33px;
+  }
+}
