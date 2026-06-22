@@ -144,7 +144,7 @@ export default function Home() {
       </h1>
 
       <p className={styles.heroSubtitle}>
-        RSR is the official platform for managing, evaluating, and archiving
+        GPMS is the official platform for managing, evaluating, and archiving
         graduation projects — connecting students, supervisors, examiners,
         and coordinators.
       </p>
@@ -177,12 +177,12 @@ export default function Home() {
       <section id="about" className={styles.about}>
         <div className={styles.aboutInner}>
           <div className={styles.aboutText}>
-            <span className={styles.sectionTag}>About RSR</span>
+            <span className={styles.sectionTag}>About GPMS</span>
             <h2 className={styles.sectionTitle}>
               A Complete Graduation Management Ecosystem
             </h2>
             <p className={styles.aboutDesc}>
-              RSR (Research, Supervision & Review) is built to streamline every
+              GPMS (Research, Supervision & Review) is built to streamline every
               step of the graduation project journey at PTUK. From project
               registration to final grade publishing, the platform ensures
               transparency, efficiency, and fairness for all stakeholders.
@@ -372,7 +372,7 @@ export default function Home() {
             </span>
           </div>
           <p className={styles.footerCopy}>
-            © {new Date().getFullYear()} RSR Platform — Palestine Technical
+            © {new Date().getFullYear()} GPMS Platform — Palestine Technical
             University Kadoorie
           </p>
         </div>
