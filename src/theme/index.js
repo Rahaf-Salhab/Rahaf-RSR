@@ -1,4 +1,5 @@
 import { createTheme } from "@mui/material";
+import { dark } from "@mui/material/styles/createPalette";
 
   const theme =(mode)=> createTheme({
     typography :{
@@ -8,6 +9,7 @@ import { createTheme } from "@mui/material";
     },
     palette: {
         mode: mode,
-    }
+    },
+   
 })
 export default theme;

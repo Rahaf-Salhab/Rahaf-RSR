@@ -6,12 +6,10 @@ import {
 } from "@mui/icons-material";
 
 export default function EvaluationFormSubmit({ role }) {
-  console.log("COMPONENT RENDERED");
-  console.log("ROLE PROP =", role);
-
   const [form, setForm] = useState(null);
   const [groups, setGroups] = useState([]);
   const [submittedGroupIds, setSubmittedGroupIds] = useState([]);
+  const [submittedTotals, setSubmittedTotals] = useState({});
   const [loading, setLoading] = useState(true);
   const [selectedForm, setSelectedForm] = useState(null);
 
@@ -20,39 +18,47 @@ export default function EvaluationFormSubmit({ role }) {
     : "/Groups/groups-examiner";
 
   useEffect(() => {
-    console.log("USE EFFECT RUNNING");
     fetchData();
   }, []);
 
   const fetchData = async () => {
-    console.log("FETCH DATA STARTED");
     setLoading(true);
-
     try {
       const [formsRes, groupsRes] = await Promise.all([
         api.get("/Evaluation/EvaluationSubmissions/my-forms"),
         api.get(groupsEndpoint),
       ]);
 
-      console.log("FORMS RESPONSE =", formsRes.data);
-      console.log("GROUPS RESPONSE =", groupsRes.data);
-
       const forms = formsRes.data || [];
-
-      console.log("FORMS:", forms);
-      console.log("ROLE:", role);
-
       const latest = forms
-      .filter((f) => f.status === 2)
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0] || null;
-    
-    console.log("LATEST FORM =", latest);
-    
-    setForm(latest);
+        .filter((f) => f.status === 2)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0] || null;
+
+      setForm(latest);
 
       const myGroups = groupsRes.data?.groups || [];
-      console.log("MY GROUPS =", myGroups);
       setGroups(myGroups);
+
+       if (latest && myGroups.length > 0) {
+        try {
+          const submittedRes = await api.get(
+            `/Evaluation/EvaluationSubmissions/my-submissions/${latest.id}`
+          );
+          console.log("MY SUBMISSIONS:", submittedRes.data);
+
+          // submittedRes.data = [{ groupId, total }, ...]
+          const ids = (submittedRes.data || []).map(s => s.groupId);
+          const totals = {};
+          (submittedRes.data || []).forEach(s => {
+            totals[s.groupId] = s.total;
+          });
+
+          setSubmittedGroupIds(ids);
+          setSubmittedTotals(totals);
+        } catch (e) {
+          console.error("Could not fetch submissions:", e);
+        }
+      }
 
     } catch (err) {
       console.error("FETCH ERROR =", err);
@@ -61,12 +67,15 @@ export default function EvaluationFormSubmit({ role }) {
     }
   };
 
-  const handleSubmitGrade = (groupId) => {
+  const handleSubmitGrade = (groupId, total) => {
     setSubmittedGroupIds(prev => [...prev, groupId]);
+    setSubmittedTotals(prev => ({ ...prev, [groupId]: total }));
   };
 
-  const isSubmitted = (groupId) => submittedGroupIds.includes(groupId);
-  const submittedCount = submittedGroupIds.length;
+  const isSubmitted = (groupId) =>
+    submittedGroupIds.some(id => String(id) === String(groupId));
+
+  const submittedCount = groups.filter(g => isSubmitted(g.groupId)).length;
   const totalGroups = groups.length;
 
   return (
@@ -155,6 +164,7 @@ export default function EvaluationFormSubmit({ role }) {
           form={selectedForm}
           groups={groups}
           isSubmitted={isSubmitted}
+          submittedTotals={submittedTotals}
           onClose={() => setSelectedForm(null)}
           onSubmit={handleSubmitGrade}
         />
@@ -164,18 +174,21 @@ export default function EvaluationFormSubmit({ role }) {
 }
 
 // ── Form Detail Modal ───────────────────────────────────────────────
-function FormDetailModal({ form, groups, isSubmitted, onClose, onSubmit }) {
+function FormDetailModal({ form, groups, isSubmitted, submittedTotals, onClose, onSubmit }) {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [localSubmitted, setLocalSubmitted] = useState(
-    groups.reduce((acc, g) => ({ ...acc, [g.groupId]: isSubmitted(g.groupId) }), {})
+    groups.reduce((acc, g) => ({
+      ...acc,
+      [g.groupId]: isSubmitted(g.groupId)
+    }), {})
   );
-  const [submittedTotals, setSubmittedTotals] = useState({});
+  const [localTotals, setLocalTotals] = useState({ ...submittedTotals });
 
   const handleGradeSubmit = (groupId, total) => {
     setLocalSubmitted(prev => ({ ...prev, [groupId]: true }));
-    setSubmittedTotals(prev => ({ ...prev, [groupId]: total }));
+    setLocalTotals(prev => ({ ...prev, [groupId]: total }));
     setSelectedGroup(null);
-    onSubmit(groupId);
+    onSubmit(groupId, total);
   };
 
   const pendingGroups = groups.filter(g => !localSubmitted[g.groupId]);
@@ -187,7 +200,9 @@ function FormDetailModal({ form, groups, isSubmitted, onClose, onSubmit }) {
         <div className={styles.modalHeader}>
           <div>
             <h3 className={styles.modalTitle}>{form.title}</h3>
-            {form.description && <p className={styles.modalSubtitle}>{form.description}</p>}
+            {form.description && (
+              <p className={styles.modalSubtitle}>{form.description}</p>
+            )}
           </div>
           <button className={styles.closeBtn} onClick={onClose}>
             <Close fontSize="small" />
@@ -235,7 +250,7 @@ function FormDetailModal({ form, groups, isSubmitted, onClose, onSubmit }) {
                     <div>
                       <p className={styles.groupName}>{group.groupName}</p>
                       <p className={styles.submittedInfo}>
-                        Submitted · Total: {submittedTotals[group.groupId] ?? "-"} pts
+                        Submitted · Total: {localTotals[group.groupId] ?? "-"} pts
                       </p>
                     </div>
                   </div>
@@ -299,18 +314,29 @@ function GradeForm({ form, group, onBack, onSubmit }) {
       })),
     };
 
-    const total = (form.fields || []).reduce((sum, f) => sum + (Number(values[f.id]) || 0), 0);
+    const total = (form.fields || []).reduce(
+      (sum, f) => sum + (Number(values[f.id]) || 0), 0
+    );
 
     setLoading(true);
     try {
-      await api.post("/Evaluation/EvaluationSubmissions", payload);
+      const res = await api.post("/Evaluation/EvaluationSubmissions", payload);
+
+      if (res.data?.success === false) {
+        setError(res.data.message || "Something went wrong.");
+        return;
+      }
+
       setSuccess(true);
       setTimeout(() => {
         onSubmit(group.groupId, total);
       }, 1200);
     } catch (err) {
       console.error(err);
-      setError("Something went wrong. Please try again.");
+      setError(
+        err.response?.data?.message ||
+        "Something went wrong. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -330,7 +356,9 @@ function GradeForm({ form, group, onBack, onSubmit }) {
       <button className={styles.backBtn} onClick={onBack}>← Back</button>
       <div className={styles.gradeFormHeader}>
         <h4 className={styles.gradeGroupName}>{group.groupName}</h4>
-        <p className={styles.gradeFormHint}>Enter grades within the allowed range for each field</p>
+        <p className={styles.gradeFormHint}>
+          Enter grades within the allowed range for each field
+        </p>
       </div>
 
       {error && <p className={styles.errorMsg}>{error}</p>}
@@ -344,7 +372,9 @@ function GradeForm({ form, group, onBack, onSubmit }) {
         {(form.fields || []).map(field => (
           <div key={field.id} className={styles.fieldRow}>
             <span className={styles.fieldName}>{field.fieldName}</span>
-            <span className={styles.fieldRange}>{field.minValue} – {field.maxValue}</span>
+            <span className={styles.fieldRange}>
+              {field.minValue} – {field.maxValue}
+            </span>
             <input
               type="number"
               className={styles.gradeInput}
@@ -360,14 +390,20 @@ function GradeForm({ form, group, onBack, onSubmit }) {
           <span>Total</span>
           <span></span>
           <span className={styles.totalValue}>
-            {(form.fields || []).reduce((sum, f) => sum + (Number(values[f.id]) || 0), 0)} pts
+            {(form.fields || []).reduce(
+              (sum, f) => sum + (Number(values[f.id]) || 0), 0
+            )} pts
           </span>
         </div>
       </div>
 
       <div className={styles.gradeFormFooter}>
         <button className={styles.cancelBtn} onClick={onBack}>Cancel</button>
-        <button className={styles.submitBtn} onClick={handleSubmit} disabled={loading}>
+        <button
+          className={styles.submitBtn}
+          onClick={handleSubmit}
+          disabled={loading}
+        >
           {loading ? "Submitting..." : "Submit Grades"}
         </button>
       </div>

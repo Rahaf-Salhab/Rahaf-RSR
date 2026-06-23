@@ -15,8 +15,11 @@ export default function FinalGrades() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [generatingId, setGeneratingId] = useState(null);
+  const [generateError, setGenerateError] = useState(null);
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -26,6 +29,9 @@ export default function FinalGrades() {
         api.get("/Coordinator/EvaluationForms/final-results"),
       ]);
 
+      console.log("GROUPS:", groupsRes.data);
+      console.log("FINAL RESULTS:", finalGradesRes.data);
+
       const allSupervisors = groupsRes.data?.allSupervisorsWithGroups || [];
       const flatGroups = [];
       allSupervisors.forEach(supervisor => {
@@ -33,10 +39,11 @@ export default function FinalGrades() {
           flatGroups.push({ ...group, supervisorName: supervisor.supervisorName });
         });
       });
+
       setGroups(flatGroups);
       setFinalGrades(finalGradesRes.data || []);
     } catch (err) {
-      console.error(err);
+      console.error("ERROR:", err);
     } finally {
       setLoading(false);
     }
@@ -45,23 +52,29 @@ export default function FinalGrades() {
   const getFinalGrade = (groupId) =>
     finalGrades.find(f => String(f.groupId) === String(groupId)) || null;
 
-  const handleGenerate = async (groupId) => {
-    setGeneratingId(groupId);
-    try {
-      await api.post(`/Coordinator/EvaluationForms/final-grade/${groupId}`);
-      await fetchData();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setGeneratingId(null);
-    }
-  };
+    const handleGenerate = async (groupId) => {
+      setGeneratingId(groupId);
+      try {
+        const res = await api.post(
+          `/Coordinator/EvaluationForms/final-grade/${groupId}`
+        );
+        console.log("GENERATE RESPONSE:", res.data);
+        await fetchData();
+      } catch (err) {
+        console.error("GENERATE ERROR:", err.response?.data);
+      } finally {
+        setGeneratingId(null);
+      }
+    };
 
   const handlePublish = async (groupId) => {
     const fg = getFinalGrade(groupId);
     if (!fg) return;
     try {
-      await api.post(`/Coordinator/EvaluationForms/final-grade/publish/${groupId}`);
+      // ✅ نرسل groupId مش fg.id لأن الباك يستقبل groupId
+      await api.post(
+        `/Coordinator/EvaluationForms/final-grade/publish/${groupId}`
+      );
       await fetchData();
     } catch (err) {
       console.error(err);
@@ -72,7 +85,9 @@ export default function FinalGrades() {
     const fg = getFinalGrade(groupId);
     if (!fg) return;
     try {
-      await api.post(`/Coordinator/EvaluationForms/final-grade/draft/${groupId}`);
+      await api.post(
+        `/Coordinator/EvaluationForms/final-grade/draft/${groupId}`
+      );
       await fetchData();
     } catch (err) {
       console.error(err);
@@ -88,29 +103,55 @@ export default function FinalGrades() {
     return matchSearch && matchStatus;
   });
 
-  const publishedCount = finalGrades.filter(f => f.status?.toLowerCase() === "published").length;
-  const draftCount = finalGrades.filter(f => f.status?.toLowerCase() === "draft").length;
+  const publishedCount = finalGrades.filter(
+    f => f.status?.toLowerCase() === "published"
+  ).length;
+  const draftCount = finalGrades.filter(
+    f => f.status?.toLowerCase() === "draft"
+  ).length;
 
   return (
     <div className={styles.page}>
       <div className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>Final Grades</h1>
-          <p className={styles.pageSubtitle}>Review and publish final grades for all groups</p>
+          <p className={styles.pageSubtitle}>
+            Review and publish final grades for all groups
+          </p>
         </div>
       </div>
 
+      {/* ✅ عرض الخطأ إذا فشل Generate */}
+      {generateError && (
+        <div style={{
+          background: "#fee2e2",
+          color: "#991b1b",
+          padding: "12px 16px",
+          borderRadius: 8,
+          marginBottom: 16,
+          fontSize: 14
+        }}>
+          {generateError}
+        </div>
+      )}
+
       <div className={styles.statsRow}>
         <div className={styles.statCard} style={{ borderLeft: "4px solid #6366f1" }}>
-          <p className={styles.statValue} style={{ color: "#6366f1" }}>{groups.length}</p>
+          <p className={styles.statValue} style={{ color: "#6366f1" }}>
+            {groups.length}
+          </p>
           <p className={styles.statLabel}>Total Groups</p>
         </div>
         <div className={styles.statCard} style={{ borderLeft: "4px solid #22c55e" }}>
-          <p className={styles.statValue} style={{ color: "#22c55e" }}>{publishedCount}</p>
+          <p className={styles.statValue} style={{ color: "#22c55e" }}>
+            {publishedCount}
+          </p>
           <p className={styles.statLabel}>Published</p>
         </div>
         <div className={styles.statCard} style={{ borderLeft: "4px solid #f59e0b" }}>
-          <p className={styles.statValue} style={{ color: "#f59e0b" }}>{draftCount}</p>
+          <p className={styles.statValue} style={{ color: "#f59e0b" }}>
+            {draftCount}
+          </p>
           <p className={styles.statLabel}>Draft</p>
         </div>
       </div>
@@ -168,7 +209,10 @@ export default function FinalGrades() {
                 const isDraft = fg?.status?.toLowerCase() === "draft";
 
                 return (
-                  <tr key={group.groupId} className={isPublished ? styles.publishedRow : ""}>
+                  <tr
+                    key={group.groupId}
+                    className={isPublished ? styles.publishedRow : ""}
+                  >
                     <td className={styles.num}>{i + 1}</td>
                     <td>
                       <div className={styles.groupCell}>
@@ -183,14 +227,18 @@ export default function FinalGrades() {
                     </td>
                     <td>
                       {fg ? (
-                        <span className={styles.gradeValue}>{fg.supervisorGrade}</span>
+                        <span className={styles.gradeValue}>
+                          {fg.supervisorGrade}
+                        </span>
                       ) : (
                         <span className={styles.noGrade}>Not submitted</span>
                       )}
                     </td>
                     <td>
                       {fg ? (
-                        <span className={styles.gradeValue}>{fg.examinerGrade}</span>
+                        <span className={styles.gradeValue}>
+                          {fg.examinerGrade}
+                        </span>
                       ) : (
                         <span className={styles.noGrade}>Not submitted</span>
                       )}
@@ -227,7 +275,9 @@ export default function FinalGrades() {
                             onClick={() => handleGenerate(group.groupId)}
                             disabled={generatingId === group.groupId}
                           >
-                            {generatingId === group.groupId ? "Generating..." : "Generate"}
+                            {generatingId === group.groupId
+                              ? "Generating..."
+                              : "Generate"}
                           </button>
                         ) : (
                           <>
