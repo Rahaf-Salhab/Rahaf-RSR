@@ -30,24 +30,20 @@ export default function CreateEvaluationForm() {
 
   const ensureFormCreated = async () => {
     if (savedId) return savedId;
-  
+
     const payload = {
       title: formTitle,
       assignTo,
       description,
       status: 0,
     };
-  
+
     const res = await api.post("/Coordinator/EvaluationForms", payload);
-  
-    console.log("Create Form Response:", res.data);
-  
     const id = res.data.id;
-  
-    console.log("Returned Form ID:", id);
-  
+
+    if (!id) throw new Error(res.data.message || "Failed to create form.");
+
     setSavedId(id);
-  
     return id;
   };
 
@@ -80,7 +76,9 @@ export default function CreateEvaluationForm() {
       setShowAddField(false);
     } catch (err) {
       console.error(err);
-      setFieldError("Failed to add field. Please try again.");
+      setFieldError(
+        err.response?.data?.message || err.message || "Failed to add field. Please try again."
+      );
     } finally {
       setAddingField(false);
     }
@@ -126,7 +124,7 @@ export default function CreateEvaluationForm() {
       setTimeout(() => navigate("/coordinator/evaluation-forms"), 1500);
     } catch (err) {
       console.error(err);
-      setError("Something went wrong. Please try again.");
+      setError(err.response?.data?.message || err.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -150,7 +148,7 @@ export default function CreateEvaluationForm() {
       setTimeout(() => navigate("/coordinator/evaluation-forms"), 1500);
     } catch (err) {
       console.error(err);
-      setError("Something went wrong. Please try again.");
+      setError(err.response?.data?.message || err.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
