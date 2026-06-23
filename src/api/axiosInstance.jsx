@@ -2,7 +2,7 @@ import axios from "axios";
 
 // ✅ REAL API
 const api = axios.create({
-  baseURL: "http://rsr.tryasp.net/api",
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 // 🔴 MOCK API
@@ -38,7 +38,7 @@ api.interceptors.response.use(
       original._retry = true;
       try {
         const refreshToken = localStorage.getItem("refreshToken");
-        const res = await api.post("/auth/Account/refresh-token", { refreshToken });
+        const res = await api.patch("/auth/Account/refresh-token", { refreshToken });
         const { accessToken, refreshToken: newRefresh } = res.data;
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("refreshToken", newRefresh || refreshToken);
